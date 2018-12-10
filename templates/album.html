@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{ .Title }}</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="{{ .Description }}" />
+	<meta name="keywords" content="{{ .Keywords }}" />
+	<meta name="author" content="Matthias Ihle" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <script src="https://unpkg.com/vue"></script>
+  </head>
+  <body>
+    <section class="section">
+        <div class="container" id="app">
+        <h1 class="title" v-text="message">
+            Hello World
+        </h1>
+        <p class="subtitle">
+            My first website with <strong>Bulma</strong>!
+        </p>
+        
+
+        </div>
+    </section>
+
+    
+    <table class="table">
+            <thead>
+              <tr>
+                    <th><abbr title="Position"></abbr></th>
+                    <th>Name</th>
+                    <th><abbr title="Played">Size</abbr></th>
+                    <th><abbr title="Won">Type</abbr></th>
+                    <th><abbr title="Drawn">Subtype</abbr></th>
+                    
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th><abbr title="Position"></abbr></th>
+                <th>Name</th>
+                <th><abbr title="Played">Size</abbr></th>
+                <th><abbr title="Won">Type</abbr></th>
+                <th><abbr title="Drawn">Subtype</abbr></th>
+                
+              </tr>
+            </tfoot>
+            <tbody>
+                {{range .Images}} *  
+              <tr>
+                <th><span class="icon has-text-info">
+                        <i class="fas fa-info-circle"></i>
+                      </span></th>
+                <td><a href="{{.Url}}" title="{{.Path}}">{{.Name}}</a> 
+                </td>
+                <td>{{.Info.Size}}</td>
+                <td>{{.MIME.Type}}</td>
+                <td>{{.MIME.Subtype}}</td>
+               </tr>
+              {{end}}
+            </tbody>
+          </table>
+
+  <script>
+  new Vue({
+      el: '#app',
+      data: {
+          message: 'Hello Vue.js!'
+      }
+  })
+  </script>
+</body>
+</html>
+
+
+
