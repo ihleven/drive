@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-
+	_ "github.com/denisenkom/go-mssqldb"
+    "database/sql"
+    "log"
 	"github.com/namsral/flag"
+	"context"
+	"drive/config"
 )
 
 var root_folder *string // TODO: Find a way to be cleaner !
@@ -26,6 +30,7 @@ type dirlisting struct {
 }
 
 func main() {
+	dbf()
 	// Get current working directory to get the file from it
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -61,4 +66,67 @@ func min(x int64, y int64) int64 {
 		return x
 	}
 	return y
+}
+
+
+var db *sql.DB
+
+
+//jdbc:sqlserver://127.0.0.1:1433;databaseName=webcc-local;user=webrx;password=0Q2u09KnbnawxEDEtwox
+func dbf() {
+
+	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;encrypt=disable",
+	config.Dbconn.Host, config.Dbconn.User, config.Dbconn.Password, config.Dbconn.Port, config.Dbconn.Name)
+
+var err error
+
+// Create connection pool
+db, err = sql.Open("sqlserver", connString)
+if err != nil {
+	log.Fatal("Error creating connection pool: ", err.Error())
+}
+ctx := context.Background()
+err = db.PingContext(ctx)
+if err != nil {
+	log.Fatal(err.Error())
+}
+fmt.Printf("Connected!\n")
+
+
+//ctx = context.Background()
+
+    // Check if database is alive.
+    err = db.PingContext(ctx)
+    if err != nil {
+        log.Fatal(err.Error())
+    }
+
+    tsql := fmt.Sprintf("SELECT AccommodationCode FROM [webcc-local].[rx].[Accommodations];")
+
+    // Execute query
+    rows, err := db.QueryContext(ctx, tsql)
+    if err != nil {
+        log.Fatal(err.Error())
+    }
+
+    defer rows.Close()
+
+    var count int
+
+    // Iterate through the result set.
+    for rows.Next() {
+        var code string
+        //var id int
+
+        // Get values from row.
+        err := rows.Scan(&code)
+        if err != nil {
+			log.Fatal(err.Error())
+        }
+
+        fmt.Printf("ID: %s\n", code)
+        count++
+    }
+
+    log.Fatal(err.Error())
 }
