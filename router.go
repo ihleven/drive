@@ -1,6 +1,8 @@
 package main
 
 import (
+	"drive/config"
+	"drive/models"
 	"drive/storage"
 	"fmt"
 	"net/http"
@@ -26,13 +28,12 @@ func (p *Muxer) ServeHTTP(w http.ResponseWriter, request *http.Request) {
 	route := path.Clean(request.URL.Path)
 	elements := strings.SplitN(route, "/", 4)
 
-	if valid := storage.ValidPath(route); valid {
+	if remainder := strings.TrimPrefix(route, "/serve"); len(remainder) < len(route) {
 
-		fmt.Printf(" - serving: %s", route)
-		p := fmt.Sprintf("/Users/mi/%s", route)
-		//fs := http.FileServer(http.Dir("/Users/mi/"))
-		http.ServeFile(w, request, p)
-		//fs.ServeHTTP(w, request)
+		http.ServeFile(w, request, path.Join(config.Root, route))
+
+	} else if Filer, error := models.NewFiler(config.Root, route); error == nil {
+		Filer.Render(w, request)
 
 	} else if remainder := strings.TrimPrefix(route, "/drive"); len(remainder) < len(route) {
 		storage.PathHandler(w, request, remainder)

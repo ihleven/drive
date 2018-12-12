@@ -65,7 +65,7 @@ func (a *Album) scan() error {
 
 		} else if mode.IsRegular() {
 
-			fd := &File{Info: info, Path: path.Join(a.Dirpath, info.Name()), Name: info.Name()}
+			fd := &File{Info: info, Path: path.Join(a.Dirpath, info.Name()), Name: info.Name(), Url: path.Join(a.Name, info.Name())}
 			if err := fd.Scan(); err == nil {
 				if fd.MIME.Type == "image" {
 					a.Images = append(a.Images, fd)

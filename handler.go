@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"compress/zlib"
 	"container/list"
+	"drive/config"
 	"drive/storage"
 	"fmt"
 	"html/template"
@@ -21,7 +22,7 @@ import (
 func pathRequestHandler(w http.ResponseWriter, req *http.Request) {
 
 	url := path.Clean(req.URL.Path)
-	filepath := path.Join((*root_folder), url)
+	filepath := path.Join((config.Root), url)
 
 	fileInfo, error := os.Stat(filepath)
 	if error != nil {
@@ -60,7 +61,7 @@ func pathRequestHandler(w http.ResponseWriter, req *http.Request) {
 
 func handlePath(w http.ResponseWriter, req *http.Request) {
 
-	filepath := path.Join((*root_folder), path.Clean(req.URL.Path))
+	filepath := path.Join((config.Root), path.Clean(req.URL.Path))
 
 	fmt.Printf("\"%s %s %s\" \"%s\" \"%s\"\n",
 		req.Method,

@@ -33,15 +33,15 @@
                     <td class="n"><a href="../">Parent Directory</a>/</td>
                     <td class="t">Directory</td><td class="dl"></td>
                 </tr>
-            {{range .Children_dir}}
+            {{range .Folders}}
                 <tr>
                     <td class="n"><a href="{{.}}/">{{.}}/</a></td>
                     <td class="t">Directory</td><td class="dl"></td>
                 </tr>
             {{end}}
-            {{range .Children_files}}
+            {{range .Files}}
                 <tr>
-                    <td class="n"><a href="{{.}}">{{.}}</a></td>
+                    <td class="n"><a href="{{.Path}}">{{.Name}}</a></td>
                     <td class="t">&nbsp;</td>
                     <td class="dl"><a href="{{.}}?dl">Download</a></td>
                 </tr>
