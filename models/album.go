@@ -1,4 +1,4 @@
-package storage
+package models
 
 import (
 	"drive/templates"
@@ -88,7 +88,7 @@ func (a *Album) render(w http.ResponseWriter, req *http.Request) error {
 
 		fmt.Print("template")
 		//err = tpl.Execute(w, a)
-		err := templates.Templates.ExecuteTemplate(w, "album.html", a)
+		err := templates.RenderTemplate(w, "album.html", a)
 		if err != nil {
 			fmt.Println(err)
 		}

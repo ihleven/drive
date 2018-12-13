@@ -10,13 +10,9 @@ import (
 	"sync"
 )
 
-
-
-
-
 type Router struct { // reuse ServeMux type of net/http
-	mu    sync.RWMutex
-	m     map[string]http.Handler
+	mu sync.RWMutex
+	m  map[string]http.Handler
 }
 
 func (r *Router) Register(pattern string, handler http.Handler) {
@@ -37,6 +33,7 @@ func (r *Router) Register(pattern string, handler http.Handler) {
 	}
 	r.m[pattern] = handler
 }
+
 // HandleFunc registers the handler function for the given pattern.
 func (r *Router) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
 	if handler == nil {
@@ -44,7 +41,6 @@ func (r *Router) HandleFunc(pattern string, handler func(http.ResponseWriter, *h
 	}
 	r.Register(pattern, http.HandlerFunc(handler))
 }
-
 
 var digitsRegexp = regexp.MustCompile(`foo/(?P<second>\d+)`)
 var helloRE = regexp.MustCompile(`/hello/(?P<second>\w+)`)

@@ -3,7 +3,6 @@ package main
 import (
 	"drive/config"
 	"drive/models"
-	"drive/storage"
 	"fmt"
 	"net/http"
 	"path"
@@ -28,7 +27,12 @@ func (p *Muxer) ServeHTTP(w http.ResponseWriter, request *http.Request) {
 	route := path.Clean(request.URL.Path)
 	elements := strings.SplitN(route, "/", 4)
 
-	if remainder := strings.TrimPrefix(route, "/serve"); len(remainder) < len(route) {
+	staticfs := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
+
+	if strings.HasPrefix(route, "/static") {
+
+		http.Handle("/static/", staticfs)
+	} else if remainder := strings.TrimPrefix(route, "/serve"); len(remainder) < len(route) {
 
 		http.ServeFile(w, request, path.Join(config.Root, route))
 
@@ -36,10 +40,10 @@ func (p *Muxer) ServeHTTP(w http.ResponseWriter, request *http.Request) {
 		Filer.Render(w, request)
 
 	} else if remainder := strings.TrimPrefix(route, "/drive"); len(remainder) < len(route) {
-		storage.PathHandler(w, request, remainder)
+		models.PathHandler(w, request, remainder)
 
 	} else if albumname := strings.TrimPrefix(route, "/alben"); len(albumname) < len(route) {
-		storage.HandleAlbum(w, request, albumname)
+		models.HandleAlbum(w, request, albumname)
 	} else
 	//hello/
 	if m := helloRE.FindStringSubmatch(route); m != nil {
@@ -50,10 +54,10 @@ func (p *Muxer) ServeHTTP(w http.ResponseWriter, request *http.Request) {
 	} else if request.URL.Path == "/hello" {
 		sayhelloName(w, request, "d")
 		return
-	} else if baseFile := storage.GetBaseFile(route); baseFile != nil {
+	} else if baseFile := models.GetBaseFile(route); baseFile != nil {
 		if baseFile.Info.IsDir() {
 			//return views.Directory(w, request, baseFile)
-			dir, _ := storage.NewDirectory(baseFile.Info, baseFile.Path)
+			dir, _ := models.NewDirectory(baseFile.Info, baseFile.Path)
 			dir.RenderHTML(w, request)
 		}
 		http.ServeFile(w, request, baseFile.Path)

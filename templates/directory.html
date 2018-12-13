@@ -1,8 +1,66 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Index of {{.Name}}</title>
-    <style type="text/css">
+{{ define "content" }}
+
+<section class="section">
+        <div class="container" id="app">
+        <h1 class="title" v-text="message">
+            Hello World
+        </h1>
+        <p class="subtitle">
+            My first website with <strong>Bulma</strong>!
+        </p>
+        
+
+        </div>
+    </section>
+
+    
+    <table class="table">
+            <thead>
+              <tr>
+                    <th><abbr title="Position"></abbr></th>
+                    <th>Name</th>
+                    <th><abbr title="Played">Size</abbr></th>
+                    <th><abbr title="Won">Type</abbr></th>
+                    <th><abbr title="Drawn">Subtype</abbr></th>
+                    
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th><abbr title="Position"></abbr></th>
+                <th>Name</th>
+                <th><abbr title="Played">Size</abbr></th>
+                <th><abbr title="Won">Type</abbr></th>
+                <th><abbr title="Drawn">Subtype</abbr></th>
+                
+              </tr>
+            </tfoot>
+            <tbody>
+                {{range .Files}} *  
+              <tr>
+                <th><span class="icon has-text-info">
+                        <i class="fas fa-info-circle"></i>
+                      </span></th>
+                <td><a href="{{.Path}}" title="{{.Path}}">{{.Name}}</a> 
+                </td>
+                <td>{{.MIME.Type}}</td>
+                <td>{{.MIME.Subtype}}</td>
+               </tr>
+              {{end}}
+            </tbody>
+          </table>
+
+  <script>
+  new Vue({
+      el: '#app',
+      data: {
+          message: 'Hello Vue.js!'
+      }
+  })
+  </script>
+
+
+<style type="text/css">
     a, a:active {text-decoration: none; color: blue;}
     a:visited {color: #48468F;}
     a:hover, a:focus {text-decoration: underline; color: red;}
@@ -16,8 +74,8 @@
     div.list { background-color: white; border-top: 1px solid #646464; border-bottom: 1px solid #646464; padding-top: 10px; padding-bottom: 14px;}
     div.foot { font: 90% monospace; color: #787878; padding-top: 4px;}
     </style>
-</head>
-<body>
+
+
     <h2>Index of {{.Name}}</h2>
     <div class="list">
         <table summary="Directory Listing" cellpadding="0" cellspacing="0">
@@ -49,6 +107,5 @@
             </tbody>
         </table>
     </div>
-    <div class="foot">{{.ServerUA}}</div>
-</body>
-</html>
+   
+{{end}}

@@ -5,7 +5,7 @@ import (
 	"compress/zlib"
 	"container/list"
 	"drive/config"
-	"drive/storage"
+	"drive/models"
 	"fmt"
 	"html/template"
 	"io"
@@ -30,15 +30,15 @@ func pathRequestHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var context storage.Filer
+	var context models.Filer
 
 	if fileInfo.IsDir() { // If it's a directory, open it !
-		context, _ = storage.NewDirectory(fileInfo, filepath)
+		context, _ = models.NewDirectory(fileInfo, filepath)
 	} else {
-		file, _ := storage.NewFile(fileInfo, url)
+		file, _ := models.NewFile(fileInfo, url)
 		if req.Method == "POST" {
 			body := req.FormValue("body")
-			f := &storage.File{Path: filepath, Body: []byte(body)}
+			f := &models.File{Path: filepath, Body: []byte(body)}
 			err := f.Save()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)

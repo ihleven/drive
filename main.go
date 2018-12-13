@@ -4,33 +4,24 @@ import (
 	"context"
 	"database/sql"
 	"drive/config"
+	"drive/templates"
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	_ "github.com/denisenkom/go-mssqldb"
 )
 
-//const serverUA = "Alexis/0.2"
-const fs_maxbufsize = 4096 // 4096 bits = default page size on OSX
-
-var dirlisting_tpl = "templates/directory.html"
-
-// Manages directory listings
-type dirlisting struct {
-	Name           string
-	Children_dir   []string
-	Children_files []string
-	ServerUA       string
-}
-
 func main() {
 	//dbf()
 	config.ParseFlags()
+	templates.Init()
 
 	mux := &Muxer{}
-	//mux.register("/blah", http.HandlerFunc(sayhelloName))
-	http.ListenAndServe(config.Address.String(), mux)
+	router := Router{}
+	router.register("/blah", http.HandlerFunc(sayhelloName))
+	http.ListenAndServe(config.Address.String(), router)
 	http.ListenAndServe(config.Address.String(), http.HandlerFunc(pathRequestHandler))
 }
 
@@ -41,6 +32,17 @@ func min(x int64, y int64) int64 {
 		return x
 	}
 	return y
+}
+func parseCSV(data string) []string {
+	splitted := strings.SplitN(data, ",", -1)
+
+	data_tmp := make([]string, len(splitted))
+
+	for i, val := range splitted {
+		data_tmp[i] = strings.TrimSpace(val)
+	}
+
+	return data_tmp
 }
 
 var db *sql.DB
