@@ -8,7 +8,7 @@ import (
 )
 
 //const serverUA = "Alexis/0.2"
-const fs_maxbufsize = 4096 // 4096 bits = default page size on OSX
+const Fs_maxbufsize = 4096 // 4096 bits = default page size on OSX
 
 var (
 	verbose bool

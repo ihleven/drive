@@ -17,48 +17,35 @@ import (
 	"github.com/h2non/filetype/types"
 )
 
-type FilePath struct {
-	Info     os.FileInfo
-	Abs      string // /home/ihle/alben/urlaube/Wien2013/IMG_123.jpg
-	Path     string // /alben/urlaube/Wien2013/IMG_123.jpg
-	Route    string // /alben/urlaube/Wien2013/IMG_123.jpg
-	Dirname  string // /alben/urlaube/Wien2013/
-	Filename string // IMG_123.jpg
-
-	Root string // /home/ihle
-}
-
-func GetBaseFile(url string) *BaseFile {
-
-	fp := path.Join(Root_folder, url)
-
-	info, error := os.Stat(fp)
-	if error != nil {
-		return nil
-	}
-	return &BaseFile{fp, info}
-}
-
 type File struct {
-	FilePath
+	*FilePath
 	Directory *Directory
 	MIME      types.MIME
 	Title     string
-	Body      []byte
+	Content   []byte
 }
 
-func NewFile(fileInfo os.FileInfo, url string) (*File, error) {
-	abspath := path.Join(Root_folder, url)
-	dirname, basename := filepath.Split(url)
+func NewFile(fp *FilePath) *File {
 
-	return &File{Path: abspath, Name: basename, Directory: dirname}, nil
+	f := new(File)
+	f.FilePath = fp
+	f.Scan()
+	return f
 }
 
 func (f *File) Render(w http.ResponseWriter, req *http.Request) {
 
+	if req.Method == "POST" {
+		f.Content = []byte(req.FormValue("body"))
+		err := f.Save()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
 	contentType := req.Header.Get("Content-type")
 
-	if contentType != "application/json" {
+	if contentType == "application/json" {
 		res, _ := json.Marshal(f)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(res)
@@ -73,8 +60,8 @@ func (f *File) Render(w http.ResponseWriter, req *http.Request) {
 }
 
 func (f *File) Scan() error {
-
-	file, err := os.Open(f.Path)
+	fmt.Println("-------------------------------------------------------", f.FilePath)
+	file, err := os.Open(f.FilePath.Abs)
 	if err != nil {
 		return err
 	}
@@ -130,12 +117,12 @@ func (f *File) Load() error {
 	if err != nil {
 		return err
 	}
-	f.Title = strings.TrimSuffix(f.Name, filepath.Ext(f.Name))
-	f.Body = body
+	f.Title = strings.TrimSuffix(f.Filename, filepath.Ext(f.Filename))
+	f.Content = body
 
 	return nil
 }
 
 func (f *File) Save() error {
-	return ioutil.WriteFile(f.Path, f.Body, 0600)
+	return ioutil.WriteFile(f.Path, f.Content, 0600)
 }

@@ -19,10 +19,10 @@ func main() {
 	templates.Init()
 
 	mux := &Muxer{}
-	router := Router{}
-	router.register("/blah", http.HandlerFunc(sayhelloName))
-	http.ListenAndServe(config.Address.String(), router)
-	http.ListenAndServe(config.Address.String(), http.HandlerFunc(pathRequestHandler))
+	//router := Router{}
+	//router.register("/blah", http.HandlerFunc(sayhelloName))
+	http.ListenAndServe(config.Address.String(), mux)
+	//http.ListenAndServe(config.Address.String(), http.HandlerFunc(pathRequestHandler))
 }
 
 /* Go is the first programming language with a templating engine embeddeed

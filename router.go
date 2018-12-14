@@ -37,6 +37,7 @@ func (p *Muxer) ServeHTTP(w http.ResponseWriter, request *http.Request) {
 		http.ServeFile(w, request, path.Join(config.Root, route))
 
 	} else if Filer, error := models.NewFiler(config.Root, route); error == nil {
+
 		Filer.Render(w, request)
 
 	} else if remainder := strings.TrimPrefix(route, "/drive"); len(remainder) < len(route) {
@@ -53,14 +54,6 @@ func (p *Muxer) ServeHTTP(w http.ResponseWriter, request *http.Request) {
 		return
 	} else if request.URL.Path == "/hello" {
 		sayhelloName(w, request, "d")
-		return
-	} else if baseFile := models.GetBaseFile(route); baseFile != nil {
-		if baseFile.Info.IsDir() {
-			//return views.Directory(w, request, baseFile)
-			dir, _ := models.NewDirectory(baseFile.Info, baseFile.Path)
-			dir.RenderHTML(w, request)
-		}
-		http.ServeFile(w, request, baseFile.Path)
 		return
 	} else {
 		http.NotFound(w, request)

@@ -3,6 +3,7 @@ package models
 import (
 	"drive/templates"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -16,40 +17,56 @@ type Filer interface {
 	//ContentType() string
 }
 
-func NewFiler(root, path string) (Filer, error) {
+func NewFiler(root, pathname string) (Filer, error) {
 
-	absPath := path.Join(root, route)
-	dirname, filename := path.Split(path)
-
-	fileInfo, error := os.Stat(absPath)
-	if error != nil {
-		if os.IsNotExist(error) {
-			return nil, nil
-		}
-		Fatal("NewFiler -> os.Stat Error:", error)
+	basefile := NewFilePath(root, pathname)
+	if basefile == nil {
+		return nil, errors.New("404")
 	}
-
-	basefile := BaseFile{
-		Abs:      absPath,
-		Path:     path,
-		Dirname:  dirname,
-		Filename: filename}
-
-	if fileInfo.IsDir() {
+	if (*basefile.Info).IsDir() {
 		return NewDirectory(basefile)
 	} else {
-		return NewFile(basefile)
+		return NewFile(basefile), nil
 	}
-	return nil, nil
+
+}
+
+type FilePath struct {
+	Info     *os.FileInfo
+	Abs      string // /home/ihle/alben/urlaube/Wien2013/IMG_123.jpg
+	Path     string // /alben/urlaube/Wien2013/IMG_123.jpg
+	Dirname  string // /alben/urlaube/Wien2013/
+	Filename string // IMG_123.jpg
+	Root     string // /home/ihle
+}
+
+func NewFilePath(root, pathname string) *FilePath {
+
+	fullpath := path.Join(root, pathname)
+	fmt.Println(fullpath)
+	fileInfo, error := os.Stat(fullpath)
+	if error != nil {
+		if os.IsNotExist(error) {
+			return nil
+		}
+		panic(fmt.Sprint("NewFiler -> os.Stat Error:", error))
+	}
+	dirname, filename := path.Split(fullpath)
+	return &FilePath{Root: root, Path: pathname, Abs: fullpath, Dirname: dirname, Filename: filename, Info: &fileInfo}
 }
 
 type Directory struct {
 	FilePath
-	Parent string
-
+	Parent    string
 	Folders   []string
-	Files     []File
+	Files     []*File
 	IndexFile string
+}
+
+func NewDirectory(fp *FilePath) (*Directory, error) {
+	d := &Directory{FilePath: *fp}
+	d.scan()
+	return d, nil
 }
 
 func (d *Directory) Render(w http.ResponseWriter, req *http.Request) {
@@ -63,8 +80,8 @@ func (d *Directory) Render(w http.ResponseWriter, req *http.Request) {
 }
 
 func (d *Directory) scan() error {
-	fmt.Printf(" - scanning '%s'\n", d.Route)
-	fileInfos, err := ioutil.ReadDir(d.fullpath)
+	fmt.Printf(" - scanning '%s'\n", d.Path)
+	fileInfos, err := ioutil.ReadDir(d.Abs)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -82,12 +99,13 @@ func (d *Directory) scan() error {
 			if info.Name() == "index.html" {
 				d.IndexFile = info.Name()
 			}
-			fd := File{Path: path.Join(d.fullpath, info.Name()), Name: info.Name()}
-			if err := fd.Scan(); err == nil {
-				if fd.MIME.Type == "image" {
-					d.Files = append(d.Files, fd)
+			fp := NewFilePath(d.FilePath.Root, path.Join(d.FilePath.Path, info.Name()))
+			file := NewFile(fp)
+			if err := file.Scan(); err == nil {
+				if file.MIME.Type == "image" {
+					d.Files = append(d.Files, file)
 				} else {
-					d.Files = append(d.Files, fd)
+					d.Files = append(d.Files, file)
 				}
 			}
 
