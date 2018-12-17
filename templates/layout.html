@@ -1,22 +1,26 @@
 {{ define "layout" }}
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
+    <title>Basic Template</title>
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="" />
-	<meta name="keywords" content="" />
-	<meta name="author" content="Matthias Ihle" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
-    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-    <script src="https://unpkg.com/vue"></script>
+
+    <!-- Kube CSS -->
+    <link rel="stylesheet" href="/static/kube.min.css">
+
 </head>
 <body>
     
     {{ template "content" . }}
 
+    <!-- Kube JS (optional if you are using Kube CSS only) -->
+    <script src="/static/kube.min.js"></script>
+    <script>
+        $K.init();
+    </script>
 </body>
 </html>
+
 {{ end }}

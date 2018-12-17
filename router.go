@@ -2,8 +2,8 @@ package main
 
 import (
 	"drive/config"
+	"drive/fs"
 	"drive/models"
-	"fmt"
 	"net/http"
 	"path"
 	"regexp"
@@ -25,36 +25,17 @@ var helloRE = regexp.MustCompile(`/hello/(?P<second>\w+)`)
 func (p *Muxer) ServeHTTP(w http.ResponseWriter, request *http.Request) {
 
 	route := path.Clean(request.URL.Path)
-	elements := strings.SplitN(route, "/", 4)
+	//elements := strings.SplitN(route, "/", 4)
 
-	staticfs := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
-
-	if strings.HasPrefix(route, "/static") {
-
-		http.Handle("/static/", staticfs)
-	} else if remainder := strings.TrimPrefix(route, "/serve"); len(remainder) < len(route) {
-
-		http.ServeFile(w, request, path.Join(config.Root, route))
-
-	} else if Filer, error := models.NewFiler(config.Root, route); error == nil {
+	if Filer, error := fs.NewFiler(config.Root, route); error == nil {
 
 		Filer.Render(w, request)
 
 	} else if remainder := strings.TrimPrefix(route, "/drive"); len(remainder) < len(route) {
 		models.PathHandler(w, request, remainder)
 
-	} else if albumname := strings.TrimPrefix(route, "/alben"); len(albumname) < len(route) {
-		models.HandleAlbum(w, request, albumname)
-	} else
-	//hello/
-	if m := helloRE.FindStringSubmatch(route); m != nil {
-		sayhelloName(w, request, m[1])
-	} else if code, ok := countryCode[elements[1]]; ok {
-		search(w, request, code)
-		return
-	} else if request.URL.Path == "/hello" {
-		sayhelloName(w, request, "d")
-		return
+	} else if m := helloRE.FindStringSubmatch(route); m != nil {
+		//sayhelloName(w, request, m[1])
 	} else {
 		http.NotFound(w, request)
 
@@ -69,11 +50,4 @@ var countryCode = map[string]string{
 func isCountry(token string) (bool, string) {
 	code, ok := countryCode[token]
 	return ok, code
-}
-
-func sayhelloName(w http.ResponseWriter, r *http.Request, name string) {
-	fmt.Fprintf(w, "Hello %s", name)
-}
-func search(w http.ResponseWriter, r *http.Request, country string) {
-	fmt.Fprintf(w, "Region %s!", country)
 }

@@ -1,67 +1,56 @@
 {{ define "content" }}
 
-<section class="section">
-        <div class="container" id="app">
-        <h1 class="title" v-text="message">
-            Hello World
-        </h1>
-        <p class="subtitle">
-            My first website with <strong>Bulma</strong>!
-        </p>
-        
-
-        </div>
-    </section>
-
-    
-    <table class="table">
-            <thead>
-              <tr>
-                    <th><abbr title="Position"></abbr></th>
-                    <th>Name</th>
-                    <th><abbr title="Played">Size</abbr></th>
-                    <th><abbr title="Won">Type</abbr></th>
-                    <th><abbr title="Drawn">Subtype</abbr></th>
-                    
-              </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                <th><abbr title="Position"></abbr></th>
-                <th>Name</th>
-                <th><abbr title="Played">Size</abbr></th>
-                <th><abbr title="Won">Type</abbr></th>
-                <th><abbr title="Drawn">Subtype</abbr></th>
+<style>
+.box {
+    background: #fff;
+    border-radius: 4px;
+    margin: 16px;
+    padding:1rem;
+    border: 1px solid rgba(17, 17, 19, 0.09);
+}
+header {
+    padding: 1rem;
+}
+</style>
+<div class="page">
+        <header class="header">
+            
+                <div class="is-container is-width-medium is-center alert">
+                        <nav class="breadcrumb">
+                                <a href="/">root</a>
+                                {{range .Parents}}
+                                    <a href="{{.Path}}">{{.Name}}</a>
+                                {{end}}
+                        </nav> 
+                </div>
+            
+        </header>
+        <main class="main">
+                <div class="is-width-medium is-center alert">
+                <table>
+                        <thead>
+                            <tr>
+                                <th>...</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                                {{range .Children}}
+                            <tr>
+                                <td><span class="icon-kube-search"></span></td>
+                                <td><a href="{{.Path}}" title="{{.}}">{{.Name}}</a></td>
+                                <td><small>{{.MIME.Type}}</small></td>
+                                <td><small>{{.MIME.Subtype}}</small></td>
+                                <td title="{{.Size}} Bytes"><small>{{.Size | bytes }}</small></td>
+                            </tr>{{end}}
+                        </tbody>
+                       
+                    </table>
+                </div>
                 
-              </tr>
-            </tfoot>
-            <tbody>
-                    {{range .Folders}} *  
-                    <tr>
-                      <th><span class="icon has-text-info">
-                              <i class="fas fa-info-circle"></i>
-                            </span></th>
-                      <td><a href="{{.}}" title="{{.}}">{{.}}</a> 
-                      </td>
-                      <td></td>
-                      <td></td>
-                     </tr>
-                    {{end}}
-
-                    {{range .Files}} *  
-              <tr>
-                <th><span class="icon has-text-info">
-                        <i class="fas fa-info-circle"></i>
-                      </span></th>
-                <td><a href="" title="">{{.Filename}}</a> 
-                </td>
-                <td></td>
-                <td></td>
-               </tr>
-              {{end}}
-            </tbody>
-          </table>
-
+        </main>
+        <footer class="footer">footer</footer>
+</div>
+    
   <script>
   new Vue({
       el: '#app',
@@ -72,52 +61,6 @@
   </script>
 
 
-<style type="text/css">
-    a, a:active {text-decoration: none; color: blue;}
-    a:visited {color: #48468F;}
-    a:hover, a:focus {text-decoration: underline; color: red;}
-    body {background-color: #F5F5F5;}
-    h2 {margin-bottom: 12px;}
-    table {margin-left: 12px;}
-    th, td { font: 90% monospace; text-align: left;}
-    th { font-weight: bold; padding-right: 14px; padding-bottom: 3px;}
-    td {padding-right: 14px;}
-    td.s, th.s {text-align: right;}
-    div.list { background-color: white; border-top: 1px solid #646464; border-bottom: 1px solid #646464; padding-top: 10px; padding-bottom: 14px;}
-    div.foot { font: 90% monospace; color: #787878; padding-top: 4px;}
-    </style>
 
-
-    <h2>Index of {{.Name}}</h2>
-    <div class="list">
-        <table summary="Directory Listing" cellpadding="0" cellspacing="0">
-            <thead>
-                <tr>
-                    <th class="n">Name</th>
-                    <th class="t">Type</th>
-                    <th class="dl">Options</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="n"><a href="../">Parent Directory</a>/</td>
-                    <td class="t">Directory</td><td class="dl"></td>
-                </tr>
-            {{range .Folders}}
-                <tr>
-                    <td class="n"><a href="{{.}}/">{{.}}/</a></td>
-                    <td class="t">Directory</td><td class="dl"></td>
-                </tr>
-            {{end}}
-            {{range .Files}}
-                <tr>
-                    <td class="n"><a href="{{.Path}}">{{.Name}}</a></td>
-                    <td class="t">&nbsp;</td>
-                    <td class="dl"><a href="{{.}}?dl">Download</a></td>
-                </tr>
-            {{end}}
-            </tbody>
-        </table>
-    </div>
    
 {{end}}

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"drive/fs"
 	"drive/templates"
 	"fmt"
 	_ "image/jpeg"
@@ -39,8 +40,8 @@ type Album struct {
 	Title       string
 	Description string
 	Keywords    []string
-	Files       []*File
-	Images      []*File
+	Files       []*fs.Path
+	Images      []*fs.Path
 }
 
 func (a *Album) scan() error {

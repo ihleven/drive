@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"drive/config"
 	"drive/templates"
+	"drive/views"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,11 +19,24 @@ func main() {
 	config.ParseFlags()
 	templates.Init()
 
+	http.Handle("/serve/", http.StripPrefix("/serve/", http.FileServer(http.Dir(config.Root))))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.Handle("/hello/", http.StripPrefix("/hello/", http.HandlerFunc(sayhelloName)))
+	http.HandleFunc("/hallo/", sayhelloName)
+	http.HandleFunc("/", views.PathHandler)
+
 	mux := &Muxer{}
+	http.Handle("/drive", http.StripPrefix("/drive", mux))
 	//router := Router{}
-	//router.register("/blah", http.HandlerFunc(sayhelloName))
-	http.ListenAndServe(config.Address.String(), mux)
+	//
+	http.ListenAndServe(config.Address.String(), nil)
 	//http.ListenAndServe(config.Address.String(), http.HandlerFunc(pathRequestHandler))
+}
+
+func sayhelloName(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Fprintf(w, "Hello %s", r.URL.Path)
+
 }
 
 /* Go is the first programming language with a templating engine embeddeed

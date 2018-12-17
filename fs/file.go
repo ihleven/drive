@@ -1,4 +1,4 @@
-package models
+package fs
 
 import (
 	"drive/templates"
@@ -6,34 +6,34 @@ import (
 	"fmt"
 	"image"
 	"io/ioutil"
-	"mime"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/h2non/filetype"
-	"github.com/h2non/filetype/types"
 )
 
-type File struct {
-	*FilePath
-	Directory *Directory
-	MIME      types.MIME
-	Title     string
-	Content   []byte
+func (p *Path) Textfile() *Textfile {
+	file := &Textfile{Path: p}
+	file.Load()
+	return file
 }
 
-func NewFile(fp *FilePath) *File {
+type Textfile struct {
+	*Path
+	Title   string
+	Content []byte
+}
 
-	f := new(File)
-	f.FilePath = fp
-	f.Scan()
+func NewFile(fp *Path) *Textfile {
+
+	f := &Textfile{Path: fp}
+	f.Load()
 	return f
 }
 
-func (f *File) Render(w http.ResponseWriter, req *http.Request) {
+func (f *Textfile) Render(w http.ResponseWriter, req *http.Request) {
 
 	if req.Method == "POST" {
 		f.Content = []byte(req.FormValue("body"))
@@ -59,32 +59,13 @@ func (f *File) Render(w http.ResponseWriter, req *http.Request) {
 
 }
 
-func (f *File) Scan() error {
-	fmt.Println("-------------------------------------------------------", f.FilePath)
-	file, err := os.Open(f.FilePath.Abs)
+func (f *Textfile) Image(head []byte) error {
+
+	file, err := os.Open(f.Abs)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-
-	info, _ := file.Stat()
-
-	ext := path.Ext(info.Name())
-	if ext != "" {
-
-		mime := mime.TypeByExtension(ext)
-		fmt.Println("---------------", ext, info.Name(), mime)
-		f.MIME = filetype.GetType(ext[1:]).MIME //   types.Get(ext).MIME
-	}
-
-	fmt.Printf(" - scanning '%s' - %s - %s - %s\n", f.Path, ext, f.MIME.Value)
-
-	// We only have to pass the file header = first 261 bytes
-	head := make([]byte, 261)
-	file.Read(head)
-	if t, e := filetype.Match(head); e == nil {
-		f.MIME = t.MIME
-	}
 
 	if filetype.IsImage(head) {
 		fmt.Println("File is an image")
@@ -93,9 +74,6 @@ func (f *File) Scan() error {
 			fmt.Print(f.Path, image.ColorModel, image.Height, image.Width, err)
 		}
 		fmt.Print(f.Path, image.ColorModel, image.Height, image.Width, err)
-
-		fmt.Printf("   -> %s %s\n", info.Name())
-		//d.Files = append(d.Files, val.Name())
 
 		buff := make([]byte, 512) // docs tell that it take only first 512 bytes into consideration
 		if _, err = file.Read(buff); err != nil {
@@ -111,18 +89,18 @@ func (f *File) Scan() error {
 	return nil
 }
 
-func (f *File) Load() error {
+func (f *Textfile) Load() error {
 
-	body, err := ioutil.ReadFile(f.Path)
+	body, err := ioutil.ReadFile(f.Abs)
 	if err != nil {
 		return err
 	}
-	f.Title = strings.TrimSuffix(f.Filename, filepath.Ext(f.Filename))
+	f.Title = strings.TrimSuffix(f.Name, filepath.Ext(f.Name))
 	f.Content = body
 
 	return nil
 }
 
-func (f *File) Save() error {
-	return ioutil.WriteFile(f.Path, f.Content, 0600)
+func (f *Textfile) Save() error {
+	return ioutil.WriteFile(f.Abs, f.Content, 0600)
 }

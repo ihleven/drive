@@ -13,6 +13,19 @@ var templates map[string]*template.Template
 // https://blog.questionable.services/article/approximating-html-template-inheritance/
 // https://github.com/asit-dhal/golang-template-layout
 
+func bytes(size int64) string {
+	ext := []string{"bytes", "kb", "mb", "gb"}
+	i := 0
+	for ; size > 1024; i++ {
+		size = size / 1024
+	}
+	return fmt.Sprintf("%d %s", size, ext[i])
+}
+
+var funcMap = template.FuncMap{
+	"bytes": bytes,
+}
+
 func Init() {
 	if templates == nil {
 		templates = make(map[string]*template.Template)
@@ -33,7 +46,7 @@ func Init() {
 	for _, layout := range layouts {
 		fmt.Println(filepath.Base(layout))
 		//files := append(includes, layout)
-		templates[filepath.Base(layout)] = template.Must(template.ParseFiles("templates/layout.html", layout))
+		templates[filepath.Base(layout)] = template.Must(template.New(filepath.Base(layout)).Funcs(funcMap).ParseFiles("templates/layout.html", layout))
 	}
 
 }
