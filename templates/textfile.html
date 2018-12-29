@@ -1,0 +1,45 @@
+{{ define "content" }}
+
+
+<div class="uk-section">
+
+    <div class="uk-container">
+
+        <h1>{{.Title}}</h1>
+
+        <ul uk-tab>
+            <li class="uk-active"><a href="">view</a></li>
+            <li><a href="">edit</a></li>
+            <li class="uk-disabled"><a></a></li>
+        </ul>
+
+        <!-- This is the container of the content items -->
+        <ul class="uk-switcher">
+            <li>
+
+                <pre>{{ .StringContent }}</pre>
+            </li>
+            <li>
+                <form method="post">
+                    <div class="uk-margin">
+                        <textarea class="uk-textarea" name="content">{{ .StringContent }}</textarea>
+                    </div>
+                    <div class="uk-margin">
+                        <button class="uk-button uk-button-default" type="submit">Submit</button>
+                    </div>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+
+
+
+
+
+
+</div>
+
+
+
+{{end}}

@@ -1,10 +1,8 @@
 package fs
 
 import (
+	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"mime"
 	"net/http"
 	"os"
 	"path"
@@ -15,9 +13,51 @@ import (
 	"github.com/h2non/filetype/types"
 )
 
-func NewPath(root, pathname string) (*Path, error) {
+type FileSystemStorage struct {
+	Location string // /home/ihle
+	BaseUrl  string
+	//file_permissions_mode
+	//directory_permissions_mode
+}
 
-	fullpath := path.Join(root, pathname)
+func (f *FileSystemStorage) Exists(pathname string) (bool, *File) {
+
+	fullpath := path.Join(f.Location, pathname)
+
+	fileInfo, err := os.Stat(fullpath)
+	if err != nil {
+		//if os.IsNotExist(err) {
+		//	return false, nil
+		//}
+		return false, nil
+	}
+	file := NewFile(&fileInfo)
+	file.Path = pathname
+	file.location = fullpath
+	return true, file
+}
+func (f *FileSystemStorage) GetDirectory(pathname string) (*Directory, error) {
+
+	location := path.Join(f.Location, pathname)
+
+	fileInfo, err := os.Stat(location)
+	if err != nil {
+		return nil, err
+	}
+	file := NewFile(&fileInfo)
+	file.Path = pathname
+	file.location = location
+	dir, err := NewDirectory(file)
+	dir.List()
+	return dir, err
+}
+
+type FileHandler interface {
+	Handle(http.ResponseWriter, *http.Request)
+}
+
+func (f *FileSystemStorage) GetSpecific(pathname string) (FileHandler, error) {
+	fullpath := path.Join(f.Location, pathname)
 
 	fileInfo, error := os.Stat(fullpath)
 	if error != nil {
@@ -26,19 +66,36 @@ func NewPath(root, pathname string) (*Path, error) {
 		}
 		return nil, error
 	}
-	fp := Path{
-		Abs:     fullpath,
-		Root:    &root,
-		Path:    pathname,
-		Name:    fileInfo.Name(),
-		Size:    fileInfo.Size(),
-		Mode:    fileInfo.Mode(),
-		ModTime: fileInfo.ModTime()}
+	var fd FileHandler
+	File := NewFile(&fileInfo)
+	File.Path = pathname
+	File.location = fullpath
+	switch {
+	case fileInfo.IsDir():
+		File.Type = "D"
+		fd, error = NewDirectory(File)
 
-	// , Abs: fullpath Dirname: dirname, Filename: filename}
-	fp.DetectContentType()
-	fp.CalcParents()
-	return &fp, nil
+	case fileInfo.Mode().IsRegular():
+		File.GuessMIME()
+		File.Type = "F"
+		//, error = NewFile(BaseFileInfo)
+		return File, nil
+	default:
+		fmt.Println("It's after noon")
+	}
+	return fd, errors.New("Does not exist")
+}
+
+func (f *File) Parents() []File {
+	var pa string
+	elements := strings.Split(f.Path[1:], "/")
+	list := make([]File, len(elements))
+	for index, element := range elements {
+		pa = fmt.Sprintf("%s/%s", pa, element)
+		list[index] = File{Name: element, Path: pa}
+		//fmt.Println(index, list[index].Name, list[index].Path)
+	}
+	return list
 }
 
 type Path struct {
@@ -66,15 +123,6 @@ func (p *Path) CalcParents() {
 		fmt.Println(index, list[index].Name, list[index].Path)
 	}
 	p.Parents = list
-}
-
-func (p *Path) ParseMIME() {
-
-	if ext := path.Ext(p.Name); ext != "" {
-		mimetype := mime.TypeByExtension(ext)
-		p.MIME = filetype.GetType(ext[1:]).MIME //   types.Get(ext).MIME
-		fmt.Printf(" * MIME '%s' => %s, %s, %s\n", p.Name, mimetype, p.MIME.Value, mime.TypeByExtension(ext))
-	}
 }
 
 func (f *Path) MatchMIMEType() error {
@@ -132,39 +180,3 @@ func (p *Path) Type() string {
 
 func (p *Path) IsDir() bool     { return p.Mode.IsDir() }
 func (p *Path) IsRegular() bool { return p.Mode.IsRegular() }
-
-func (p *Path) String() string {
-	return fmt.Sprintf("%s: %s", p.Type(), p.Path)
-}
-
-func (p *Path) NewChild(info os.FileInfo) Path {
-
-	return Path{
-		Abs:     path.Join(p.Abs, info.Name()),
-		Root:    p.Root,
-		Path:    path.Join(p.Path, info.Name()),
-		Name:    info.Name(),
-		Size:    info.Size(),
-		Mode:    info.Mode(),
-		ModTime: info.ModTime()}
-}
-
-func (p *Path) List() error {
-
-	fileInfos, err := ioutil.ReadDir(p.Abs)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	for _, info := range fileInfos {
-		if info.Name()[0] == '.' {
-			continue
-		}
-		child := p.NewChild(info)
-		child.ParseMIME()
-		child.MatchMIMEType()
-		child.DetectContentType()
-		p.Children = append(p.Children, child)
-	}
-	return nil
-}

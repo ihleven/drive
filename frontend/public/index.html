@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <base href="/alben/{{ .Path }}">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>{{ .Title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{ .Description }}" />
+  <meta name="keywords" content="{{ .Keywords }}" />
+  <meta name="author" content="Matthias Ihle" />
+
+
+</head>
+
+<body>
+  <div id="app"></div>
+
+
+  {{range .Images}}
+  <img src="/serve/{{.Path}}" />
+  {{end}}
+
+
+
+
+
+  <!-- built files will be auto injected -->
+</body>
+
+</html>

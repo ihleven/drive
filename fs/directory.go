@@ -1,51 +1,109 @@
 package fs
 
 import (
-	"drive/templates"
+	"drive/views"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
+	"path"
 )
 
-type Filer interface {
-	Render(w http.ResponseWriter, r *http.Request)
-	//ContentType() string
-}
-
-func NewFiler(root, pathname string) (Filer, error) {
-
-	basefile, err := NewPath(root, pathname)
-	if basefile == nil {
-		return nil, err
-	}
-	if basefile.IsDir() {
-		return nil, nil // NewDirectory(basefile)
-	} else {
-		return NewFile(basefile), nil
-	}
-
-}
-
 type Directory struct {
-	Path
-	Parent    string
-	Folders   []string
-	Files     []*Path
+	File
+	//Parent    string
+	Folders   []File
+	Files     []File
+	Children  []File
 	IndexFile string
 }
 
-func NewDirectory(fp *Path) (*Directory, error) {
-	d := &Directory{Path: *fp}
+func (d *Directory) Filetype() string {
+	return "directory"
+}
+func NewDirectory(fi *File) (*Directory, error) {
+	d := &Directory{File: *fi}
 	//d.scan()
 	return d, nil
 }
 
-func (d *Directory) Render(w http.ResponseWriter, req *http.Request) {
+func (d *Directory) NewChildFromFileInfo(info os.FileInfo) *File {
 
-	if contentType := req.Header.Get("Content-type"); contentType == "application/json" {
-		json.NewEncoder(w).Encode(d)
+	file := File{
+		location: path.Join(d.location, info.Name()),
+		Path:     path.Join(d.Path, info.Name()),
+		Name:     info.Name(),
+		Size:     info.Size(),
+		Mode:     info.Mode(),
+		ModTime:  info.ModTime()}
+	if info.IsDir() {
+		file.Type = "D"
+		d.Folders = append(d.Folders, file)
 	} else {
-		fmt.Println("asdfasdfasdf")
-		templates.RenderTemplate(w, "directory.html", d)
+		file.GuessMIME()
+		//child.ParseMIME()
+		//child.MatchMIMEType()
+		//child.DetectContentType()
+		d.Files = append(d.Files, file)
 	}
+	return &file
+}
+
+func (d *Directory) List() error {
+
+	entries, err := ioutil.ReadDir(d.location)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	for _, info := range entries {
+		if info.Name()[0] == '.' {
+			continue
+		}
+		d.NewChildFromFileInfo(info)
+
+	}
+	d.Children = append(d.Folders, d.Files...)
+	return nil
+}
+
+func (d *Directory) Handle(w http.ResponseWriter, r *http.Request) {
+
+	d.List()
+	switch r.Method {
+	case http.MethodGet:
+		d.Render(w, r)
+	case http.MethodPost:
+		fmt.Fprintln(w, "POST dir:", d.Name)
+	}
+}
+
+func (f *File) SerializeJSON(w http.ResponseWriter, fh FileHandler) {
+
+	json, err := json.Marshal(fh)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(json)
+}
+
+func (d *Directory) Render(w http.ResponseWriter, request *http.Request) {
+
+	switch request.Header.Get("Accept") {
+
+	case "application/json":
+
+		d.SerializeJSON(w, d)
+
+	default:
+
+		err := views.RenderDir(w, d)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 }

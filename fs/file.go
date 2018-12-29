@@ -1,106 +1,77 @@
 package fs
 
 import (
-	"drive/templates"
-	"encoding/json"
 	"fmt"
-	"image"
-	"io/ioutil"
+	_ "image/jpeg"
+	"mime"
 	"net/http"
 	"os"
-	"path/filepath"
-	"strings"
+	"path"
+	"time"
 
 	"github.com/h2non/filetype"
+	"github.com/h2non/filetype/types"
 )
 
-func (p *Path) Textfile() *Textfile {
-	file := &Textfile{Path: p}
-	file.Load()
-	return file
+type File struct {
+	location string
+	Path     string `json:"path"`
+	Name     string `json:"name"`
+	Size     int64  `json:"size"`
+	Mode     os.FileMode
+	ModTime  time.Time `json:"mtime"`
+	MIME     types.MIME
+	Type     string `json:"type"`
 }
 
-type Textfile struct {
-	*Path
-	Title   string
-	Content []byte
+func NewFile(fi *os.FileInfo) *File {
+
+	return &File{Name: (*fi).Name(), Size: (*fi).Size(), Mode: (*fi).Mode(), ModTime: (*fi).ModTime()}
 }
 
-func NewFile(fp *Path) *Textfile {
-
-	f := &Textfile{Path: fp}
-	f.Load()
-	return f
+func (f *File) String() string {
+	return fmt.Sprintf("%s: %s", f.Type, f.Path)
+}
+func (f *File) FormattedMTime() string {
+	return f.ModTime.Format(time.RFC822Z)
 }
 
-func (f *Textfile) Render(w http.ResponseWriter, req *http.Request) {
+func (f *File) GuessMIME() {
 
-	if req.Method == "POST" {
-		f.Content = []byte(req.FormValue("body"))
-		err := f.Save()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+	if ext := path.Ext(f.Name); ext != "" {
+		mime := mime.TypeByExtension(ext) // mime package
+		if mime != "" {
+			f.MIME = types.NewMIME(mime)
+
+		} else {
+			f.MIME = filetype.GetType(ext[1:]).MIME // h2non/filetype => types.Get(ext).MIME
+			//if f.MIME.Value != mimetype {
+			//	fmt.Printf("MIME (%s): %s != %s \n", f.Name, mimetype, f.MIME)
+			//}
+
 		}
-	}
-	contentType := req.Header.Get("Content-type")
+		if f.MIME.Value == "" {
+			file, _ := os.Open(f.location)
 
-	if contentType == "application/json" {
-		res, _ := json.Marshal(f)
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(res)
+			// We only have to pass the file header = first 261 bytes
+			head := make([]byte, 261)
+			file.Read(head)
+			t, _ := filetype.Get(head)
+			f.MIME = t.MIME
 
-	} else {
-		err := templates.RenderTemplate(w, "file.html", f)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
-
-}
-
-func (f *Textfile) Image(head []byte) error {
-
-	file, err := os.Open(f.Abs)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	if filetype.IsImage(head) {
-		fmt.Println("File is an image")
-		image, _, err := image.DecodeConfig(file)
-		if err != nil {
-			fmt.Print(f.Path, image.ColorModel, image.Height, image.Width, err)
-		}
-		fmt.Print(f.Path, image.ColorModel, image.Height, image.Width, err)
-
-		buff := make([]byte, 512) // docs tell that it take only first 512 bytes into consideration
-		if _, err = file.Read(buff); err != nil {
-			fmt.Println(err) // do something with that error
 		}
 
-	} else {
-		fmt.Println("Not an image")
+	}
+	switch f.MIME.Type {
+	case "image":
+		f.Type = "FI"
+	case "text":
+		f.Type = "FT"
+	default:
+		f.Type = "F"
 	}
 
-	//fmt.Println(http.DetectContentType(buff)) // do something based on your detection.
-
-	return nil
 }
+func (f *File) Handle(w http.ResponseWriter, r *http.Request) {
 
-func (f *Textfile) Load() error {
-
-	body, err := ioutil.ReadFile(f.Abs)
-	if err != nil {
-		return err
-	}
-	f.Title = strings.TrimSuffix(f.Name, filepath.Ext(f.Name))
-	f.Content = body
-
-	return nil
-}
-
-func (f *Textfile) Save() error {
-	return ioutil.WriteFile(f.Abs, f.Content, 0600)
 }
