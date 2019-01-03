@@ -2,7 +2,7 @@ package fs
 
 import (
 	"bufio"
-	"drive/views"
+	"drive/goapp/views"
 	"encoding/json"
 	"fmt"
 	"html/template"

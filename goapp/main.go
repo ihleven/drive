@@ -1,8 +1,8 @@
 package main
 
 import (
-	"drive/config"
-	"drive/fs"
+	"drive/goapp/config"
+	"drive/goapp/fs"
 	"fmt"
 	"log"
 	"mime"
@@ -25,8 +25,8 @@ func main() {
 	//templates.Init()
 
 	http.Handle("/serve/", http.StripPrefix("/serve/", http.FileServer(http.Dir(config.Root))))
-	http.Handle("/dist/", http.StripPrefix("/dist", http.FileServer(http.Dir("frontend/dist"))))
-	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("static"))))
+	http.Handle("/dist/", http.StripPrefix("/dist", http.FileServer(http.Dir("../vue/dist"))))
+	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("../static"))))
 	http.Handle("/hello/", http.StripPrefix("/hello/", http.HandlerFunc(sayhelloName)))
 	http.HandleFunc("/hallo/", sayhelloName)
 	//http.Handle("/alben/", models.AlbumController{})

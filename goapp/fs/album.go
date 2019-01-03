@@ -1,7 +1,7 @@
 package fs
 
 import (
-	"drive/views"
+	"drive/goapp/views"
 	"encoding/json"
 	"fmt"
 	_ "image/jpeg"
