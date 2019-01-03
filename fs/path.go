@@ -1,13 +1,10 @@
 package fs
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"path"
-	"strings"
-	"time"
 
 	"github.com/h2non/filetype"
 	"github.com/h2non/filetype/types"
@@ -16,118 +13,59 @@ import (
 type FileSystemStorage struct {
 	Location string // /home/ihle
 	BaseUrl  string
+	homes    map[string]string
 	//file_permissions_mode
 	//directory_permissions_mode
 }
 
-func (f *FileSystemStorage) Exists(pathname string) (bool, *File) {
+func (s *FileSystemStorage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	fullpath := path.Join(f.Location, pathname)
+	file, err := s.Open(path.Clean(r.URL.Path))
+	if err != nil {
+		if os.IsNotExist(err) {
+			http.NotFound(w, r)
+			return
+		}
+		http.Error(w, err.Error(), 500)
+	}
+
+	fh, err := file.Specific()
+	fh.ServeHTTP(w, r)
+}
+func (s *FileSystemStorage) Open(name string) (*File, error) {
+	fullpath := path.Join(s.Location, name)
 
 	fileInfo, err := os.Stat(fullpath)
+
 	if err != nil {
-		//if os.IsNotExist(err) {
-		//	return false, nil
-		//}
-		return false, nil
+
+		return nil, err
 	}
-	file := NewFile(&fileInfo)
-	file.Path = pathname
-	file.location = fullpath
-	return true, file
+	file := NewFile(name, fullpath, &fileInfo)
+
+	return file, nil
 }
-func (f *FileSystemStorage) GetDirectory(pathname string) (*Directory, error) {
 
-	location := path.Join(f.Location, pathname)
+func (f *FileSystemStorage) Exists(pathname string) (bool, *File) {
 
-	fileInfo, err := os.Stat(location)
+	file, err := f.Open(pathname)
+	return err == nil, file
+}
+
+func (f *FileSystemStorage) OpenDir(pathname string) (*Directory, error) {
+
+	file, err := f.Open(pathname)
 	if err != nil {
 		return nil, err
 	}
-	file := NewFile(&fileInfo)
-	file.Path = pathname
-	file.location = location
 	dir, err := NewDirectory(file)
-	dir.List()
+	//dir.List()
 	return dir, err
 }
 
-type FileHandler interface {
-	Handle(http.ResponseWriter, *http.Request)
-}
+func (f *File) MatchMIMEType() error {
 
-func (f *FileSystemStorage) GetSpecific(pathname string) (FileHandler, error) {
-	fullpath := path.Join(f.Location, pathname)
-
-	fileInfo, error := os.Stat(fullpath)
-	if error != nil {
-		if os.IsNotExist(error) {
-			return nil, nil
-		}
-		return nil, error
-	}
-	var fd FileHandler
-	File := NewFile(&fileInfo)
-	File.Path = pathname
-	File.location = fullpath
-	switch {
-	case fileInfo.IsDir():
-		File.Type = "D"
-		fd, error = NewDirectory(File)
-
-	case fileInfo.Mode().IsRegular():
-		File.GuessMIME()
-		File.Type = "F"
-		//, error = NewFile(BaseFileInfo)
-		return File, nil
-	default:
-		fmt.Println("It's after noon")
-	}
-	return fd, errors.New("Does not exist")
-}
-
-func (f *File) Parents() []File {
-	var pa string
-	elements := strings.Split(f.Path[1:], "/")
-	list := make([]File, len(elements))
-	for index, element := range elements {
-		pa = fmt.Sprintf("%s/%s", pa, element)
-		list[index] = File{Name: element, Path: pa}
-		//fmt.Println(index, list[index].Name, list[index].Path)
-	}
-	return list
-}
-
-type Path struct {
-	Root *string // /home/ihle
-	Path string  // /alben/urlaube/Wien2013/IMG_123.jpg
-	Abs  string  // /home/ihle/alben/urlaube/Wien2013/IMG_123.jpg
-	//Dirname  string // /alben/urlaube/Wien2013/
-	//Filename string // IMG_123.jpg
-	Name     string
-	Size     int64
-	Mode     os.FileMode
-	ModTime  time.Time
-	MIME     types.MIME
-	Children []Path
-	Parents  []Path
-}
-
-func (p *Path) CalcParents() {
-	var pa string
-	elements := strings.Split(p.Path[1:], "/")
-	list := make([]Path, len(elements))
-	for index, element := range elements {
-		pa = fmt.Sprintf("%s/%s", pa, element)
-		list[index] = Path{Name: element, Path: pa}
-		fmt.Println(index, list[index].Name, list[index].Path)
-	}
-	p.Parents = list
-}
-
-func (f *Path) MatchMIMEType() error {
-
-	file, err := os.Open(f.Abs)
+	file, err := os.Open(f.location)
 	if err != nil {
 		return err
 	}
@@ -144,9 +82,9 @@ func (f *Path) MatchMIMEType() error {
 
 	return nil
 }
-func (f *Path) DetectContentType() error {
+func (f *File) DetectContentType() error {
 
-	fd, err := os.Open(f.Abs)
+	fd, err := os.Open(f.location)
 	if err != nil {
 		return err
 	}
@@ -168,15 +106,3 @@ func (f *Path) DetectContentType() error {
 
 	return nil
 }
-func (p *Path) Type() string {
-	if p.IsDir() {
-		return "DIR"
-	} else if p.Mode.IsRegular() {
-		return "FILE"
-	} else {
-		return ""
-	}
-}
-
-func (p *Path) IsDir() bool     { return p.Mode.IsDir() }
-func (p *Path) IsRegular() bool { return p.Mode.IsRegular() }

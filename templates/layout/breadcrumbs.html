@@ -1,0 +1,19 @@
+{{define "breadcrumbs"}}
+
+<ul class="uk-breadcrumb">
+
+    <li>
+        <a href="/" uk-icon="icon: home; ratio: .8"></a>
+    </li>
+    {{range .}}
+    <li>
+        {{if .path }}
+        <a class="uk-text-emphasis" href=" {{.path}} ">{{.name}}</a>
+        {{else}}
+        <span class="uk-text-emphasis">{{.name}}</span>
+        {{end}}
+    </li>
+    {{end}}
+
+</ul>
+{{end}}

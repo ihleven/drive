@@ -1,6 +1,8 @@
+// Package views provides primitives for caching and rendering templates.
 package views
 
 import (
+	"encoding/json"
 	"errors"
 	"html/template"
 	"net/http"
@@ -13,14 +15,18 @@ var RenderTextFile, RenderDir func(w http.ResponseWriter, data interface{}) erro
 
 func init() {
 	viewMap = make(map[string]*View)
-	TextView = Register("textfile", FuncMap, "static/file.html", "templates/textfile.html")
-	Image = Register("image", FuncMap, "static/file.html", "templates/image.html")
+	TextView = Register("textfile", FuncMap, "frontend/dist/file.html", "templates/textfile.html", "templates/layout/breadcrumbs.html")
+	Image = Register("image", FuncMap, "frontend/dist/file.html", "templates/image.html", "templates/layout/breadcrumbs.html")
+	Register("album", FuncMap, "frontend/dist/album.html")
 
-	RenderTextFile = RegisterRenderFunc(FuncMap, "static/file.html", "templates/textfile.html")
-	RenderDir = RegisterRenderFunc(FuncMap, "static/directory.html")
+	RenderTextFile = RegisterRenderFunc(FuncMap, "frontend/dist/file.html", "templates/textfile.html")
+	RenderDir = RegisterRenderFunc(FuncMap, "frontend/dist/directory.html", "templates/layout/breadcrumbs.html")
 
 }
 
+// A View is registered on startup and holds a template under a certain name to be rendered
+// either directrly with (*view) Render or
+// indirectly with Render and the lookup viewMap
 type View struct {
 	Name     string
 	FuncMap  template.FuncMap
@@ -52,6 +58,9 @@ func Render(viewname string, w http.ResponseWriter, data interface{}) error {
 	return errors.New("not found")
 }
 
+// Fprint formats using the default formats for its operands and writes to w.
+// Spaces are added between operands when neither is a string.
+// It returns the number of bytes written and any write error encountered.
 func RegisterRenderFunc(funcMap template.FuncMap, files ...string) func(w http.ResponseWriter, data interface{}) error {
 	name := filepath.Base(files[0])
 	tmpl := template.Must(template.New(name).Funcs(funcMap).ParseFiles(files...))
@@ -64,4 +73,14 @@ func RegisterRenderFunc(funcMap template.FuncMap, files ...string) func(w http.R
 		//fmt.Println(err)
 		return err
 	}
+}
+
+func SerializeJSON(w http.ResponseWriter, fh interface{}) {
+
+	json, err := json.Marshal(fh)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(json)
 }

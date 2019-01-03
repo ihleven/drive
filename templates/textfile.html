@@ -1,35 +1,55 @@
 {{ define "content" }}
 
-
+<style>
+</style>
 <div class="uk-section">
 
     <div class="uk-container">
 
-        <h1>{{.Title}}</h1>
+        <form method="post">
 
-        <ul uk-tab>
-            <li class="uk-active"><a href="">view</a></li>
-            <li><a href="">edit</a></li>
-            <li class="uk-disabled"><a></a></li>
-        </ul>
+            <nav class="uk-navbar-container uk-margin" uk-navbar>
+                <div class="uk-navbar-left">
 
-        <!-- This is the container of the content items -->
-        <ul class="uk-switcher">
-            <li>
+                    <span class="uk-navbar-item uk-logo">{{.Title}}</span>
 
-                <pre>{{ .StringContent }}</pre>
-            </li>
-            <li>
-                <form method="post">
-                    <div class="uk-margin">
-                        <textarea class="uk-textarea" name="content">{{ .StringContent }}</textarea>
-                    </div>
-                    <div class="uk-margin">
+
+                    <div class="uk-navbar-item">
                         <button class="uk-button uk-button-default" type="submit">Submit</button>
                     </div>
-                </form>
-            </li>
-        </ul>
+
+                </div>
+                <div class="uk-navbar-right">
+                    <ul class="uk-navbar-nav">
+                        <li>
+                            <a href="#">
+                                <span class="uk-icon uk-margin-small-right" uk-icon="icon: star"></span>
+                                Features
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">Item</a>
+                            <div class="uk-navbar-dropdown">
+                                <ul class="uk-nav uk-navbar-dropdown-nav">
+                                    <li class="uk-active"><a href="#">Active</a></li>
+                                    <li><a href="#">Item</a></li>
+                                    <li class="uk-nav-header">Header</li>
+                                    <li><a href="#">Item</a></li>
+                                    <li><a href="#">Item</a></li>
+                                    <li class="uk-nav-divider"></li>
+                                    <li><a href="#">Item</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <textarea class="uk-textarea ta uk-form-blank" name="content" v-autosize>{{ .StringContent }}</textarea>
+
+
+        </form>
+
     </div>
 
 

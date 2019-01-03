@@ -47,7 +47,7 @@ func (f *Textfile) Save() error {
 }
 
 func (t *Textfile) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
+	//
 	if r.Method == http.MethodPost {
 		content := []byte(r.FormValue("content"))
 		if len(content) > 0 && !bytes.Equal(content, t.Content) {

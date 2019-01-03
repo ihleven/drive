@@ -1,79 +1,78 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
+    <title>{{.Title}}</title>
     <meta charset="utf-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>{{ .Title }}</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="{{ .Description }}" />
-	<meta name="keywords" content="{{ .Keywords }}" />
-	<meta name="author" content="Matthias Ihle" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
-    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-    <script src="https://unpkg.com/vue"></script>
-  </head>
-  <body>
-    <section class="section">
-        <div class="container" id="app">
-        <h1 class="title" v-text="message">
-            Hello World
-        </h1>
-        <p class="subtitle">
-            My first website with <strong>Bulma</strong>!
-        </p>
-        
+
+    <meta name="description" content="{{ .Description }}" />
+    <meta name="keywords" content="{{ .Keywords }}" />
+    <meta name="author" content="Matthias Ihle" />
+
+    <link rel="stylesheet" href="/static/uikit.min.css" />
+    <link rel="stylesheet" href="/static/style.css" />
+
+</head>
+
+<body>
+
+    {{ marshalJSON "data-album" . }}
+
+    <div id="vueapp">
+
+        <div class="uk-section uk-section-small uk-section-muted">
+
+            <div class="uk-container">
+
+                <nav class="uk-navbar-container" uk-navbar>
+                    <div class="uk-navbar-left">
+                        <ul class="uk-breadcrumb">
+                            <li><a href="/" uk-icon="icon: home; ratio: .8"></a></li>
+                            {{range .Parents}}
+                            <li><a class="uk-text-emphasis" href="/alben/{{.Path}} ">{{.Name}}</a></li>
+                            {{end}}
+                        </ul>
+                    </div>
+                    <div class="uk-navbar-right">
+
+                        <div class="uk-button-group">
+                            <a href="{{.Path}}" class="uk-button uk-button-default" uk-icon="icon: folder"></a>
+                        </div>
+                        <ul class="uk-iconnav">
+                            <li>
+                                <a href="{{.Path}}" class="uk-button uk-button-default" uk-icon="icon: folder"></a>
+                            </li>
+                        </ul>
+
+
+
+                    </div>
+                </nav>
+
+                <h4 class="uk-text-lead">{{.Name}}</h4>
+
+
+
+            </div>
+        </div>
+
+
+
+
+
+
+
+        <div class="uk-section">
+
+            <pswp-gallery :images="directory.Images"></pswp-gallery>
 
         </div>
-    </section>
 
-    
-    <table class="table">
-            <thead>
-              <tr>
-                    <th><abbr title="Position"></abbr></th>
-                    <th>Name</th>
-                    <th><abbr title="Played">Size</abbr></th>
-                    <th><abbr title="Won">Type</abbr></th>
-                    <th><abbr title="Drawn">Subtype</abbr></th>
-                    
-              </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                <th><abbr title="Position"></abbr></th>
-                <th>Name</th>
-                <th><abbr title="Played">Size</abbr></th>
-                <th><abbr title="Won">Type</abbr></th>
-                <th><abbr title="Drawn">Subtype</abbr></th>
-                
-              </tr>
-            </tfoot>
-            <tbody>
-                {{range .Images}} *  
-              <tr>
-                <th><span class="icon has-text-info">
-                        <i class="fas fa-info-circle"></i>
-                      </span></th>
-                <td><a href="{{.Url}}" title="{{.Path}}">{{.Name}}</a> 
-                </td>
-                <td>{{.Info.Size}}</td>
-                <td>{{.MIME.Type}}</td>
-                <td>{{.MIME.Subtype}}</td>
-               </tr>
-              {{end}}
-            </tbody>
-          </table>
+    </div>
 
-  <script>
-  new Vue({
-      el: '#app',
-      data: {
-          message: 'Hello Vue.js!'
-      }
-  })
-  </script>
+
 </body>
+
 </html>
-
-
-

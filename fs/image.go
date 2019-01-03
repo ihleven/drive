@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"image"
 	"image/color"
+	"image/jpeg"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/nfnt/resize"
 	"github.com/rwcarlsen/goexif/exif"
 )
 
@@ -48,6 +50,7 @@ func (f *File) AsImage() (*Image, error) {
 	}
 	img := &Image{f, config.ColorModel, config.Width, config.Height, format, "", "", ""}
 	img.parseMeta(img.getMetaName())
+	//img.MakeThumbnail()
 	return img, nil
 
 	// exif
@@ -175,4 +178,34 @@ func (i *Image) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 	}
+}
+
+func (i *Image) MakeThumbnail() {
+	// open "test.jpg"
+	file, err := os.Open(i.location)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// decode jpeg into image.Image
+	img, err := jpeg.Decode(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	file.Close()
+
+	// resize to width 1000 using Lanczos resampling
+	// and preserve aspect ratio
+	m := resize.Resize(100, 0, img, resize.Lanczos3)
+
+	d, f := filepath.Split(i.location)
+	fn := filepath.Join(d, "thumbs", f)
+	out, err := os.Create(fn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer out.Close()
+
+	// write new image to file
+	jpeg.Encode(out, m, nil)
 }

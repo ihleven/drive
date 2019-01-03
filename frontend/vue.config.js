@@ -1,8 +1,8 @@
 // vue.config.js
 module.exports = {
   runtimeCompiler: true,
-  baseUrl: '/static/',
-  outputDir: '../static/',
+  baseUrl: '/dist/',
+  //outputDir: './dist/',
   pages: {
     index: {
       entry: 'src/main.js',
@@ -13,17 +13,20 @@ module.exports = {
     },
     file: {
       entry: 'src/entries/file.js',
-      template: 'src/templates/file.html',
+      template: '../templates/file.html',
       filename: 'file.html',
       title: 'File Page',
       chunks: ['chunk-vendors', 'chunk-common', 'file']
     },
     directory: {
       entry: 'src/entries/directory.js',
-      template: 'src/templates/directory.html',
-      filename: 'directory.html',
-      title: 'directory Page',
-      chunks: ['chunk-vendors', 'chunk-common', 'directory']
+      template: '../templates/directory.html',
+    },
+    album: {
+      entry: 'src/entries/album.js',
+      //template: '../../templates/album.html',
+      template: '../templates/album.html',
+      //filename: 'album.html',
     }
   }
 }

@@ -1,8 +1,10 @@
 package views
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
+	"strings"
 )
 
 var templates map[string]*template.Template
@@ -12,7 +14,7 @@ var templates map[string]*template.Template
 
 var FuncMap = template.FuncMap{
 	"bytes": Bytes,
-	"icon":  Icon}
+	"icon":  Icon, "marshalJSON": marshalJSONScript}
 
 func Bytes(size int64) string {
 	if size < 1000 {
@@ -38,4 +40,22 @@ func Icon(typ string) string {
 		return icon
 	}
 	return ""
+}
+
+func join(strs ...string) string {
+	var sb strings.Builder
+	for _, str := range strs {
+		sb.WriteString(str)
+	}
+	return sb.String()
+}
+func marshalJSONScript(name string, v interface{}) template.HTML {
+
+	startTag := "<script id='" + name + "' type='application/json'>"
+	endTag := "</script>"
+	a, _ := json.Marshal(v)
+	//b := join("<script id=\"data\" type=\"application/json\">", a, "</script>")
+
+	script := startTag + string(a) + endTag
+	return template.HTML(script)
 }

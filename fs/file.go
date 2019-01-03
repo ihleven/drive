@@ -7,12 +7,16 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/h2non/filetype"
 	"github.com/h2non/filetype/types"
 )
 
+type FileHandler interface {
+	ServeHTTP(http.ResponseWriter, *http.Request)
+}
 type File struct {
 	location string
 	Path     string `json:"path"`
@@ -24,16 +28,88 @@ type File struct {
 	Type     string `json:"type"`
 }
 
-func NewFile(fi *os.FileInfo) *File {
+func NewFile(name string, fullpath string, fi *os.FileInfo) *File {
 
-	return &File{Name: (*fi).Name(), Size: (*fi).Size(), Mode: (*fi).Mode(), ModTime: (*fi).ModTime()}
+	return &File{location: fullpath, Path: name, Name: (*fi).Name(), Size: (*fi).Size(), Mode: (*fi).Mode(), ModTime: (*fi).ModTime()}
+}
+func (f *File) Breadcrumbs() []map[string]string {
+
+	elements := strings.Split(strings.Trim(f.Path[1:], "/"), "/")
+	breadcrumbs, currentPath := make([]map[string]string, len(elements)), ""
+	for index, element := range elements {
+		currentPath = currentPath + "/" + element
+		breadcrumbs[index] = map[string]string{"name": element, "path": currentPath} // "/" + strings.Join(elements[:index+1], "/")}
+	}
+	breadcrumbs[len(elements)-1]["path"] = ""
+	return breadcrumbs
+}
+
+func (f *File) Parents() []File {
+
+	var path string
+	elements := strings.Split(f.Path[1:], "/")
+	list := make([]File, len(elements))
+	for index, element := range elements {
+		path = fmt.Sprintf("%s/%s", path, element)
+		list[index] = File{Name: element, Path: path}
+	}
+
+	return list
 }
 
 func (f *File) String() string {
+
 	return fmt.Sprintf("%s: %s", f.Type, f.Path)
 }
+
 func (f *File) FormattedMTime() string {
+
 	return f.ModTime.Format(time.RFC822Z)
+}
+
+// func (f *File) GetTypeUnused() string {
+// 	if f.IsDir() {
+// 		return "DIR"
+// 	} else if f.Mode.IsRegular() {
+// 		return "FILE"
+// 	} else {
+// 		return ""
+// 	}
+// }
+
+func (f *File) IsDir() bool {
+
+	return (*f).Mode.IsDir()
+}
+func (f *File) IsRegular() bool { return f.Mode.IsRegular() }
+
+func (f *File) Specific() (fh FileHandler, err error) {
+
+	if f.IsDir() {
+		fh, err = NewDirectory(f)
+		return
+	}
+
+	if f.IsRegular() {
+		f.Type = "F"
+		f.GuessMIME()
+		switch f.MIME.Type {
+		case "image":
+			fh, err = f.AsImage()
+			//image.ServeHTTP(w, r)
+
+		case "text":
+
+			fh, err = f.AsTextfile()
+			// textfile.ServeHTTP(w, r)
+
+		default:
+			fmt.Println("No specific file type found")
+			fh, err = f, nil
+		}
+
+	}
+	return
 }
 
 func (f *File) GuessMIME() {
@@ -72,6 +148,6 @@ func (f *File) GuessMIME() {
 	}
 
 }
-func (f *File) Handle(w http.ResponseWriter, r *http.Request) {
+func (f *File) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 }

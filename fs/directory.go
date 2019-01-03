@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 )
 
 type Directory struct {
@@ -23,10 +24,29 @@ type Directory struct {
 func (d *Directory) Filetype() string {
 	return "directory"
 }
-func NewDirectory(fi *File) (*Directory, error) {
-	d := &Directory{File: *fi}
-	//d.scan()
-	return d, nil
+func NewDirectory(file *File) (*Directory, error) {
+	file.Type = "D"
+	dir := &Directory{File: *file}
+	dir.List()
+	return dir, nil
+}
+
+func (d *Directory) List() error {
+	fmt.Println("LIST")
+	entries, err := ioutil.ReadDir(d.location)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	for _, info := range entries {
+		if info.Name()[0] == '.' {
+			continue
+		}
+		d.NewChildFromFileInfo(info)
+
+	}
+	d.Children = append(d.Folders, d.Files...)
+	return nil
 }
 
 func (d *Directory) NewChildFromFileInfo(info os.FileInfo) *File {
@@ -51,43 +71,41 @@ func (d *Directory) NewChildFromFileInfo(info os.FileInfo) *File {
 	return &file
 }
 
-func (d *Directory) List() error {
+func (d *Directory) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	entries, err := ioutil.ReadDir(d.location)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	for _, info := range entries {
-		if info.Name()[0] == '.' {
-			continue
-		}
-		d.NewChildFromFileInfo(info)
-
-	}
-	d.Children = append(d.Folders, d.Files...)
-	return nil
-}
-
-func (d *Directory) Handle(w http.ResponseWriter, r *http.Request) {
-
-	d.List()
 	switch r.Method {
-	case http.MethodGet:
-		d.Render(w, r)
 	case http.MethodPost:
-		fmt.Fprintln(w, "POST dir:", d.Name)
-	}
-}
+		decoder := json.NewDecoder(r.Body)
+		var options struct {
+			CreateThumbnails bool
+		}
+		err := decoder.Decode(&options)
+		if err != nil {
+			http.Error(w, "Bad Request", 400)
+			return
+		}
+		if options.CreateThumbnails {
+			fmt.Println(filepath.Join(d.location, "thumbs"))
+			os.MkdirAll(filepath.Join(d.location, "thumbs"), os.ModePerm)
 
-func (f *File) SerializeJSON(w http.ResponseWriter, fh FileHandler) {
+			for i := 0; i < len(d.Files); i++ {
+				file := d.Files[i]
 
-	json, err := json.Marshal(fh)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+				if file.MIME.Type == "image" {
+					img, err := file.AsImage()
+					if err != nil {
+						fmt.Println(" - ERROR '%s'\n\n\n", err)
+						continue
+					}
+					img.MakeThumbnail()
+				}
+
+			}
+
+		}
+
 	}
-	w.Write(json)
+	d.Render(w, r)
 }
 
 func (d *Directory) Render(w http.ResponseWriter, request *http.Request) {
@@ -96,7 +114,7 @@ func (d *Directory) Render(w http.ResponseWriter, request *http.Request) {
 
 	case "application/json":
 
-		d.SerializeJSON(w, d)
+		views.SerializeJSON(w, d)
 
 	default:
 

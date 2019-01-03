@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <title>
+        <%= htmlWebpackPlugin.options.title %>
+    </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/static/uikit.min.css" />
+    <link rel="stylesheet" href="/static/style.css" />
+
+</head>
+
+<body>
+    <script id="data" type="application/json">
+        {
+            "org": 10,
+            "items": ["one", "two"]
+        }
+    </script>
+    <div id="vueapp">
+
+        <div class="uk-section uk-section-small uk-section-muted">
+
+
+            <div class="uk-container">
+
+                <nav class="uk-navbar-container" uk-navbar>
+                    <div class="uk-navbar-left">
+
+                        {{template "breadcrumbs" .Breadcrumbs}}
+                    </div>
+                </nav>
+
+                <h4 class="uk-text-lead">{{.Name}}</h4>
+
+                <div class="uk-flex uk-flex-between">
+                    <span class="uk-text-meta uk-text-uppercase">{{.MIME.Value}}</span>
+                    <span class="uk-text-meta uk-text-uppercase">{{.Size | bytes}}</span>
+                    <span class="uk-text-meta uk-text-uppercase">{{.ModTime}}</span>
+                    <span class="uk-text-meta uk-text-uppercase">{{.Mode}}</span>
+                </div>
+
+
+            </div>
+        </div>
+
+        {{ template "content" . }}
+
+    </div>
+
+</body>
+
+</html>
