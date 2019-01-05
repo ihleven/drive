@@ -7,14 +7,13 @@ import (
 	"strings"
 )
 
-var templates map[string]*template.Template
-
 // https://blog.questionable.services/article/approximating-html-template-inheritance/
 // https://github.com/asit-dhal/golang-template-layout
 
 var FuncMap = template.FuncMap{
-	"bytes": Bytes,
-	"icon":  Icon, "marshalJSON": marshalJSONScript}
+	"bytes":       Bytes,
+	"icon":        Icon,
+	"marshalJSON": marshalJSONScript}
 
 func Bytes(size int64) string {
 	if size < 1000 {
@@ -49,13 +48,15 @@ func join(strs ...string) string {
 	}
 	return sb.String()
 }
+
 func marshalJSONScript(name string, v interface{}) template.HTML {
 
 	startTag := "<script id='" + name + "' type='application/json'>"
 	endTag := "</script>"
-	a, _ := json.Marshal(v)
-	//b := join("<script id=\"data\" type=\"application/json\">", a, "</script>")
-
-	script := startTag + string(a) + endTag
+	json, err := json.Marshal(v)
+	if err != nil {
+		return template.HTML("Error marschalling JSON: " + err.Error())
+	}
+	script := startTag + string(json) + endTag
 	return template.HTML(script)
 }

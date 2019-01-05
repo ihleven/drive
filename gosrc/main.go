@@ -1,12 +1,13 @@
 package main
 
 import (
-	"drive/goapp/config"
-	"drive/goapp/fs"
+	"drive/gosrc/config"
+	"drive/gosrc/fs"
 	"fmt"
 	"log"
 	"mime"
 	"net/http"
+	"os"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -20,6 +21,7 @@ func main() {
 	mime.AddExtensionType(".json", "text/json")
 	mime.AddExtensionType(".js", "text/javascript")
 	mime.AddExtensionType(".ts", "text/typescript")
+	mime.AddExtensionType(".dia", "text/diary")
 	//dbf()
 	config.ParseFlags()
 	//templates.Init()
@@ -80,10 +82,26 @@ func AlbumHandler(w http.ResponseWriter, r *http.Request) {
 	path, _ := filepath.Rel("/alben", path.Clean(r.URL.Path))
 	fmt.Printf(" - scanning '%s'\n", "/"+path)
 
-	dir, err := storage.OpenDir("/" + path)
+	file, err := storage.Open("/" + path)
 	if err != nil {
+		if os.IsNotExist(err) {
+			http.NotFound(w, r)
+			return
+		}
 		http.Error(w, err.Error(), 500)
 	}
-	album, _ := fs.NewAlbum(dir)
-	album.Render(w, r)
+
+	if file.IsDir() {
+		dir, _ := fs.NewDirectory(file)
+		album, _ := fs.NewAlbum(dir)
+		album.Render(w, r)
+		return
+	}
+	if file.IsRegular() {
+
+		diary, _ := fs.NewDiary(file, storage)
+		fmt.Println("DIARY", diary)
+		diary.ServeHTTP(w, r)
+	}
+
 }

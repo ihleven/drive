@@ -1,7 +1,7 @@
 package fs
 
 import (
-	"drive/goapp/views"
+	"drive/gosrc/views"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"

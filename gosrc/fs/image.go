@@ -2,7 +2,7 @@ package fs
 
 import (
 	"bufio"
-	"drive/goapp/views"
+	"drive/gosrc/views"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -33,6 +33,10 @@ type Image struct {
 	// https://jerz.setonhill.edu/blog/2014/10/09/writing-a-cutline-three-examples/
 
 	// Caption als allgemeingültige "standalone" Bildunterschrift und Cutline als Verbindung zum Album (ausgewählte Bilder in Reihe?)
+}
+
+func NewImage(root, path string) (*Image, error) {
+	return nil, nil
 }
 
 func (f *File) AsImage() (*Image, error) {
@@ -170,10 +174,9 @@ func (i *Image) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Header.Get("Content-type") {
 	case "application/json":
-		json, _ := json.Marshal(i)
-		w.Write(json)
+		views.SerializeJSON(w, i)
 	default:
-		err := views.Image.Render(w, i)
+		err := views.Render("image", w, i)
 		if err != nil {
 			panic(err)
 		}

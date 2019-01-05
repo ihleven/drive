@@ -27,6 +27,10 @@ module.exports = {
       //template: '../../templates/album.html',
       template: '../templates/album.html',
       //filename: 'album.html',
+    },
+    diary: {
+      entry: 'src/entries/diary.js',
+      template: '../templates/diary.html',
     }
   }
 }

@@ -2,7 +2,7 @@ package fs
 
 import (
 	"bytes"
-	"drive/goapp/views"
+	"drive/gosrc/views"
 	"encoding/json"
 	"errors"
 	"fmt"

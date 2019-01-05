@@ -99,9 +99,16 @@ func (f *File) Specific() (fh FileHandler, err error) {
 			//image.ServeHTTP(w, r)
 
 		case "text":
-
-			fh, err = f.AsTextfile()
-			// textfile.ServeHTTP(w, r)
+			switch f.MIME.Subtype {
+			case "diary; charset=utf-8":
+				//fh, err = NewDiary(f)
+				fh, err = f.AsTextfile()
+				fmt.Println("DIARY", fh)
+			default:
+				fh, err = f.AsTextfile()
+				fmt.Println("TESTFILE", fh, f.MIME.Subtype)
+				// textfile.ServeHTTP(w, r)
+			}
 
 		default:
 			fmt.Println("No specific file type found")
@@ -126,18 +133,12 @@ func (f *File) GuessMIME() {
 			//}
 
 		}
-		if f.MIME.Value == "" {
-			file, _ := os.Open(f.location)
-
-			// We only have to pass the file header = first 261 bytes
-			head := make([]byte, 261)
-			file.Read(head)
-			t, _ := filetype.Get(head)
-			f.MIME = t.MIME
-
-		}
-
 	}
+
+	if f.MIME.Value == "" {
+		f.h2nonMatchMIME261()
+	}
+
 	switch f.MIME.Type {
 	case "image":
 		f.Type = "FI"
@@ -148,6 +149,51 @@ func (f *File) GuessMIME() {
 	}
 
 }
+func (f *File) h2nonMatchMIME261() error {
+
+	file, err := os.Open(f.location)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// https://github.com/h2non/filetype
+	// We only have to pass the file header = first 261 bytes
+	head := make([]byte, 261)
+	file.Read(head)
+	if t, e := filetype.Match(head); e == nil {
+		f.MIME = t.MIME
+	}
+	fmt.Printf(" * MIME2 '%s' => %s, %s, %s\n", f.Name, f.MIME.Value, f.MIME.Type, f.MIME.Subtype)
+
+	return nil
+}
+
+func (f *File) DetectContentType() error {
+
+	fd, err := os.Open(f.location)
+	if err != nil {
+		return err
+	}
+	defer fd.Close()
+
+	// Only the first 512 bytes are used to sniff the content type.
+	buffer := make([]byte, 512)
+
+	_, err = fd.Read(buffer)
+	if err != nil {
+		return err
+	}
+
+	// Use the net/http package's handy DectectContentType function. Always returns a valid
+	// content-type by returning "application/octet-stream" if no others seemed to match.
+	contentType := http.DetectContentType(buffer)
+	f.MIME = types.NewMIME(contentType)
+	fmt.Printf(" * http '%s' => %s\n", f.Name, f.MIME.Type)
+
+	return nil
+}
+
 func (f *File) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 }

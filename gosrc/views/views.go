@@ -15,9 +15,10 @@ var RenderTextFile, RenderDir func(w http.ResponseWriter, data interface{}) erro
 
 func init() {
 	viewMap = make(map[string]*View)
-	TextView = Register("textfile", FuncMap, "../vue/dist/file.html", "../templates/textfile.html", "../templates/layout/breadcrumbs.html")
-	Image = Register("image", FuncMap, "../vue/dist/file.html", "../templates/image.html", "../templates/layout/breadcrumbs.html")
+	Register("textfile", FuncMap, "../vue/dist/file.html", "../templates/textfile.html", "../templates/layout/breadcrumbs.html")
+	Register("image", FuncMap, "../vue/dist/file.html", "../templates/image.html", "../templates/layout/breadcrumbs.html")
 	Register("album", FuncMap, "../vue/dist/album.html")
+	Register("diary", FuncMap, "../vue/dist/diary.html")
 
 	RenderTextFile = RegisterRenderFunc(FuncMap, "../vue/dist/file.html", "../templates/textfile.html")
 	RenderDir = RegisterRenderFunc(FuncMap, "../vue/dist/directory.html", "../templates/layout/breadcrumbs.html")
