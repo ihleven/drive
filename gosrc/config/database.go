@@ -6,35 +6,36 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/denisenkom/go-mssqldb"
 )
 
-type DatabaseConnection struct {
+type DatabaseConfiguration struct {
+	Driver string
 	Name     string
-	Host     string
-	Port     int
 	User     string
 	Password string
+	Host     string
+	Port     int
 }
 
-var Dbconn = &DatabaseConnection{Name: "webcc-local", Host: "127.0.0.1", Port: 1433, User: "webrx", Password: "0Q2u09KnbnawxEDEtwox"}
+var databases = map[string]DatabaseConfiguration{
+	"mssql": DatabaseConfiguration{Driver: "sqlserver", Name: "webcc-local", Host: "127.0.0.1", Port: 1433, User: "webrx", Password: "0Q2u09KnbnawxEDEtwox"}}
+ 
 
 var db *sql.DB
 
-func dbf() {
+func GetDatabaseConfiguration(key string) DatabaseConfiguration {
 
-	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;encrypt=disable",
-		Dbconn.Host, Dbconn.User, Dbconn.Password, Dbconn.Port, Dbconn.Name)
-
-	var err error
-
-	// Create connection pool
-	db, err = sql.Open("sqlserver", connString)
-	if err != nil {
-		log.Fatal("Error creating connection pool: ", err.Error())
+	conf, ok := databases[key]
+	if  !ok {
+		panic(fmt.Sprintf("configuration not found: %s", key))
 	}
+	return conf
+}
+
+func asdf() {
+	//alt
 	ctx := context.Background()
-	err = db.PingContext(ctx)
+	err := db.PingContext(ctx)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
