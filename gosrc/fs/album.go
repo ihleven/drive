@@ -38,7 +38,6 @@ func NewAlbum(dir *Directory) (*Album, error) {
 
 	for i := 0; i < len(dir.Files); i++ {
 		file := dir.Files[i]
-		fmt.Println(file.Name, file.MIME)
 		switch {
 		case file.Name == "album.html":
 			album.AlbumFile = file.Name
@@ -105,7 +104,7 @@ func (a *Album) Render(w http.ResponseWriter, req *http.Request) error {
 		// json, _ := json.Marshal(a)
 		// w.Write(json)
 	} else {
-
+		fmt.Println("RENDER")
 		err := views.Render("album", w, a)
 		if err != nil {
 			fmt.Println("ERROR:", err)

@@ -16,6 +16,7 @@ import (
 var storage = &fs.FileSystemStorage{}
 
 func main() {
+
 	mime.AddExtensionType(".py", "text/python")
 	mime.AddExtensionType(".go", "text/golang")
 	mime.AddExtensionType(".json", "text/json")
@@ -27,7 +28,7 @@ func main() {
 	//templates.Init()
 
 	http.Handle("/serve/", http.StripPrefix("/serve/", http.FileServer(http.Dir(config.Root))))
-	http.Handle("/dist/", http.StripPrefix("/dist", http.FileServer(http.Dir("../vue/dist"))))
+	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("../vue/dist/assets"))))
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("../static"))))
 	http.Handle("/hello/", http.StripPrefix("/hello/", http.HandlerFunc(sayhelloName)))
 	http.HandleFunc("/hallo/", sayhelloName)
@@ -36,7 +37,8 @@ func main() {
 	storage.Location = config.Root
 	http.HandleFunc("/alben/", AlbumHandler)
 	//http.HandleFunc("/", storageContorller) //http.StripPrefix("/drive", mux))
-	http.Handle("/", storage) //http.StripPrefix("/drive", mux))
+	http.Handle("/files/", http.StripPrefix("/files", storage)) //http.StripPrefix("/drive", mux))
+	http.Handle("/", storage)                                   //http.StripPrefix("/drive", mux))
 	//router := Router{}
 	//
 	http.ListenAndServe(config.Address.String(), nil)

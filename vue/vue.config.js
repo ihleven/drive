@@ -1,20 +1,22 @@
 // vue.config.js
 module.exports = {
   runtimeCompiler: true,
-  baseUrl: '/dist/',
+  baseUrl: '/',
   //outputDir: './dist/',
+  indexPath: 'index.html',
+  assetsDir: 'assets/',
   pages: {
     index: {
       entry: 'src/main.js',
       template: 'public/index.html',
-      filename: 'index.html',
+      //filename: 'index.html',
       title: 'Index Page',
       chunks: ['chunk-vendors', 'chunk-common', 'index']
     },
     file: {
       entry: 'src/entries/file.js',
       template: '../templates/file.html',
-      filename: 'file.html',
+      //filename: 'file.html',
       title: 'File Page',
       chunks: ['chunk-vendors', 'chunk-common', 'file']
     },
@@ -26,11 +28,19 @@ module.exports = {
       entry: 'src/entries/album.js',
       //template: '../../templates/album.html',
       template: '../templates/album.html',
-      //filename: 'album.html',
+      //filename: '../album.html',
     },
     diary: {
       entry: 'src/entries/diary.js',
       template: '../templates/diary.html',
+    }
+  },
+  devServer: {
+    proxy: {
+      "/": {
+        target: "http://localhost:3000",
+        secure: false
+      }
     }
   }
 }

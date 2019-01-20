@@ -54,6 +54,7 @@ func (f *File) AsImage() (*Image, error) {
 	}
 	img := &Image{f, config.ColorModel, config.Width, config.Height, format, "", "", ""}
 	img.parseMeta(img.getMetaName())
+	fmt.Println("path:", img.Path)
 	//img.MakeThumbnail()
 	return img, nil
 
@@ -172,7 +173,8 @@ func (i *Image) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		json, _ := json.Marshal(i)
 		w.Write(json)
 	}
-	switch r.Header.Get("Content-type") {
+	fmt.Println(r.Header.Get("Accept"))
+	switch r.Header.Get("Accept") {
 	case "application/json":
 		views.SerializeJSON(w, i)
 	default:

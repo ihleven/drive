@@ -83,6 +83,10 @@ func (f *File) IsDir() bool {
 }
 func (f *File) IsRegular() bool { return f.Mode.IsRegular() }
 
+func (f *File) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func (f *File) Specific() (fh FileHandler, err error) {
 
 	if f.IsDir() {
@@ -192,8 +196,4 @@ func (f *File) DetectContentType() error {
 	fmt.Printf(" * http '%s' => %s\n", f.Name, f.MIME.Type)
 
 	return nil
-}
-
-func (f *File) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
 }

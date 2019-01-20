@@ -62,7 +62,25 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{range .Children}}
+                        {{range .Folders}}
+                        <tr>
+                            <td>
+                                <span uk-icon="icon: {{ .Type | icon }}"></span>
+                            </td>
+                            <td>
+                                <a href="{{.Path}}" title="{{.}}">{{.Name}}</a>
+                            </td>
+                            <td colspan="3">
+
+                            </td>
+                            <td>
+                                {{.FormattedMTime }}
+                            </td>
+                        </tr>
+                        {{end}}
+
+
+                        {{range .Files}}
                         <tr>
                             <td>
                                 <span uk-icon="icon: {{ .Type | icon }}"></span>

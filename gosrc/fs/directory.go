@@ -17,7 +17,6 @@ type Directory struct {
 	//Parent    string
 	Folders   []File
 	Files     []File
-	Children  []File
 	IndexFile string
 }
 
@@ -32,7 +31,7 @@ func NewDirectory(file *File) (*Directory, error) {
 }
 
 func (d *Directory) List() error {
-	fmt.Println("LIST")
+
 	entries, err := ioutil.ReadDir(d.location)
 	if err != nil {
 		log.Fatal(err)
@@ -45,7 +44,7 @@ func (d *Directory) List() error {
 		d.NewChildFromFileInfo(info)
 
 	}
-	d.Children = append(d.Folders, d.Files...)
+	//d.Children = append(d.Folders, d.Files...)
 	return nil
 }
 
@@ -58,6 +57,7 @@ func (d *Directory) NewChildFromFileInfo(info os.FileInfo) *File {
 		Size:     info.Size(),
 		Mode:     info.Mode(),
 		ModTime:  info.ModTime()}
+
 	if info.IsDir() {
 		file.Type = "D"
 		d.Folders = append(d.Folders, file)

@@ -1,5 +1,6 @@
 import Vue from 'vue'
-import router from "../router";
+import Router from "vue-router";
+import Home from "../views/Home.vue";
 
 import PhotoSwipePlugin from '../PhotoSwipePlugin'
 
@@ -14,8 +15,35 @@ UIkit.use(Icons)
 Vue.config.productionTip = false
 Vue.use(PhotoSwipePlugin)
 
+
+Vue.use(Router);
+
+console.log("router", process.env.BASE_URL)
+
+export default new Router({
+    mode: "history",
+    base: process.env.BASE_URL,
+    routes: [{
+            path: "/",
+            name: "home",
+            component: Home
+        },
+        {
+            path: "/about",
+            name: "about",
+            // route level code-splitting
+            // this generates a separate chunk (about.[hash].js) for this route
+            // which is lazy-loaded when the route is visited.
+            component: () =>
+                import( /* webpackChunkName: "about" */ "../views/About.vue")
+        }
+    ]
+});
+
+
 new Vue({
     router,
+
     el: '#vueapp',
     components: {
         PswpGallery
