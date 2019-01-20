@@ -15,6 +15,7 @@ import (
 
 var storage = &fs.FileSystemStorage{}
 
+
 func main() {
 
 	mime.AddExtensionType(".py", "text/python")
@@ -25,7 +26,9 @@ func main() {
 	mime.AddExtensionType(".dia", "text/diary")
 	//dbf()
 	config.ParseFlags()
-	//templates.Init()
+	dbConf := config.GetDatabaseConfiguration("mssql")
+	InitStore(dbConf)
+	
 
 	http.Handle("/serve/", http.StripPrefix("/serve/", http.FileServer(http.Dir(config.Root))))
 	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("../vue/dist/assets"))))
@@ -41,6 +44,10 @@ func main() {
 	http.Handle("/", storage)                                   //http.StripPrefix("/drive", mux))
 	//router := Router{}
 	//
+
+	http.HandleFunc("/api/accommodations", GetAccommodationsHandler)
+
+
 	http.ListenAndServe(config.Address.String(), nil)
 	//http.ListenAndServe(config.Address.String(), http.HandlerFunc(pathRequestHandler))
 }
