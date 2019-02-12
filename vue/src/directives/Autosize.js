@@ -21,7 +21,6 @@ export default {
             autosize.update(el)
         }
     },
-
     unbind: function (el) {
         autosize.destroy(el)
     }

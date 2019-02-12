@@ -5,7 +5,6 @@ import (
 	"drive/gosrc/fs"
 	"fmt"
 	"log"
-	"mime"
 	"net/http"
 	"os"
 	"path"
@@ -13,22 +12,12 @@ import (
 	"regexp"
 )
 
-var storage = &fs.FileSystemStorage{}
-
-
 func main() {
 
-	mime.AddExtensionType(".py", "text/python")
-	mime.AddExtensionType(".go", "text/golang")
-	mime.AddExtensionType(".json", "text/json")
-	mime.AddExtensionType(".js", "text/javascript")
-	mime.AddExtensionType(".ts", "text/typescript")
-	mime.AddExtensionType(".dia", "text/diary")
 	//dbf()
 	config.ParseFlags()
-	dbConf := config.GetDatabaseConfiguration("mssql")
-	InitStore(dbConf)
-	
+	//dbConf := config.GetDatabaseConfiguration("mssql")
+	//InitStore(dbConf)
 
 	http.Handle("/serve/", http.StripPrefix("/serve/", http.FileServer(http.Dir(config.Root))))
 	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("../vue/dist/assets"))))
@@ -46,7 +35,6 @@ func main() {
 	//
 
 	http.HandleFunc("/api/accommodations", GetAccommodationsHandler)
-
 
 	http.ListenAndServe(config.Address.String(), nil)
 	//http.ListenAndServe(config.Address.String(), http.HandlerFunc(pathRequestHandler))

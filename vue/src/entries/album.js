@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from "vue-router";
-import Home from "../views/Home.vue";
+import Home from "../routes/Home.vue";
 
 import PhotoSwipePlugin from '../PhotoSwipePlugin'
 
@@ -35,14 +35,14 @@ export default new Router({
             // this generates a separate chunk (about.[hash].js) for this route
             // which is lazy-loaded when the route is visited.
             component: () =>
-                import( /* webpackChunkName: "about" */ "../views/About.vue")
+                import( /* webpackChunkName: "about" */ "../routes/About.vue")
         }
     ]
 });
 
 
 new Vue({
-    router,
+
 
     el: '#vueapp',
     components: {

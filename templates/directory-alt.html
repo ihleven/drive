@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>asdf</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/static/uikit-core.css" />
+
+</head>
+
+<body>
+
+    {{ marshalJSON "data-directory" . }}
+
+    <div id="vueapp">
+
+        <div class="uk-section uk-section-small uk-section-muted">
+
+            <div class="uk-container">
+
+                <nav class="uk-navbar-container" uk-navbar>
+                    <div class="uk-navbar-left">
+                        {{template "breadcrumbs" .Breadcrumbs}}
+                    </div>
+                    <div class="uk-navbar-right">
+                        <div class="uk-button-group">
+                            <button class="uk-button uk-button-default" uk-icon="icon: thumbnails" @click="createThumbnails('{{.Path}}')"></button>
+                            <a href="/alben/{{.Path}}" class="uk-button uk-button-default" uk-icon="icon: album"></a>
+                        </div>
+                    </div>
+
+                </nav>
+
+                <h4 class="uk-text-lead">{{.Name}}</h4>
+
+                <div class="uk-flex uk-flex-between">
+                    <span class="uk-text-meta uk-text-uppercase">{{.MIME.Value}}</span>
+                    <span class="uk-text-meta uk-text-uppercase">{{.Size | bytes}}</span>
+                    <span class="uk-text-meta uk-text-uppercase">{{.ModTime}}</span>
+                    <span class="uk-text-meta uk-text-uppercase">{{.Mode}}</span>
+                </div>
+
+
+            </div>
+        </div>
+
+
+
+
+        <div class="uk-section">
+            <div class="uk-container">
+                <table class="uk-table uk-table-divider uk-table-striped uk-table-hover uk-table-small uk-table-justify">
+                    <caption> </caption>
+                    <thead>
+                        <tr>
+                            <th class="uk-table-shrink">Icon</th>
+                            <th class="uk-table-expand">Name</th>
+                            <th class="uk-table-shrink">MIMEType</th>
+                            <th>Subtype</th>
+                            <th>Size</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Folders}}
+                        <tr>
+                            <td>
+                                <span uk-icon="icon: {{ .Type | icon }}"></span>
+                            </td>
+                            <td>
+                                <a href="{{.Path}}" title="{{.}}">{{.Name}}</a>
+                            </td>
+                            <td colspan="3">
+
+                            </td>
+                            <td>
+                                {{.FormattedMTime }}
+                            </td>
+                        </tr>
+                        {{end}}
+
+
+                        {{range .Files}}
+                        <tr>
+                            <td>
+                                <span uk-icon="icon: {{ .Type | icon }}"></span>
+                            </td>
+                            <td>
+                                <a href="{{.Path}}" title="{{.}}">{{.Name}}</a>
+                            </td>
+                            <td class="uk-table-shrink">
+                                {{.MIME.Type}}
+                            </td>
+                            <td> {{if .MIME.Subtype}} {{.MIME.Subtype}} {{end}}
+                            </td>
+                            <td title="{{.Size}} Bytes">
+                                {{.Size | bytes }}
+                            </td>
+                            <td>
+                                {{.FormattedMTime }}
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+
+                </table>
+            </div>
+
+
+
+
+
+        </div>
+
+
+
+    </div>
+</body>
+
+</html>
