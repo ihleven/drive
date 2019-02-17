@@ -77,13 +77,13 @@ func (f *File) Parents() []File {
 	elements := strings.Split(f.Path[1:], "/")
 	fmt.Println("elements", elements)
 	list := make([]File, len(elements))
-	fmt.Println("list", list)
+	//fmt.Println("list", list)
 	for index, element := range elements {
 		path = fmt.Sprintf("%s/%s", path, element)
 		list[index] = File{Name: element, Path: path}
-		fmt.Println(" - ", index, element)
+		//fmt.Println(" - ", index, element)
 	}
-	fmt.Println("list", list)
+	//fmt.Println("list", list)
 	return list
 }
 

@@ -5,39 +5,12 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{.Name}}</title>
+    <title>{{.file.Name}}</title>
     <link rel="stylesheet" href="/dist/css/app.css">
 </head>
 
 <body>
-    <section class="hero is-medium is-primary">
-        <div class="hero-body">
-            <div class="container">
-                <div class="columns">
-                    <div class="column is-8-desktop is-offset-2-desktop">
-                        <h1 class="title is-2 is-spaced">
-                            {{.Name}}
-                        </h1>
-                        <h2 class="subtitle is-4">
-                            {{.MIME.Value}}
-                        </h2>
-                        <nav class="breadcrumb" aria-label="breadcrumbs">
-                            <ul>
-                                <li><a href="/">Home</a></li>
-                                {{range .Parents}}
-                                <li {{if .Name}} class="is-active" {{end}}><a href="{{.Path}}">{{.Name}}</a></li>
-                                {{end}}
-                            </ul>
-                        </nav>
-
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
+    {{template "hero" .}}
 
     <section class="section">
         <div class="container">
@@ -54,16 +27,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{range .Folders}}
+                    {{range .dir.Folders}}
                     <tr>
                         <td>
                         </td>
                         <td>
-                            <a href="{{.Path}}" title="{{.}}">{{.Name}}</a>
+                            <a href="{{.Path}}" title="{{.Path}}">{{.Name}}</a>
                         </td>
-                        <td>{{.User.Username }}
+                        <td>{{.User }}
                         </td>
-                        <td>{{.Group.Name }}
+                        <td>{{.Group }}
                         </td>
                         <td>
                         </td>
@@ -74,19 +47,19 @@
                         </td>
                     </tr>
                     {{end}}
-                    {{range .Files}}
+                    {{range .dir.Files}}
                     <tr>
                         <td>
                         </td>
                         <td>
                             <a href="{{.Path}}" title="{{.}}">{{.Name}}</a>
                         </td>
-                        <td>{{.User.Username }}
+                        <td>{{.User }}
                         </td>
-                        <td>{{.Group.Name }}
+                        <td>{{.Group }}
                         </td>
                         <td>
-                            {{.MIME.Value}}
+                            {{.MIME}}
                         </td>
 
                         <td title="{{.Size}} Bytes">
@@ -294,14 +267,14 @@
                     </p>
                     <p style="margin-top: 1rem;">
                         <a href="http://bulma.io">
-                            <img src="made-with-bulma.png" alt="Made with Bulma" width="128" height="24">
+                            <img src="/static/made-with-bulma.png" alt="Made with Bulma" width="128" height="24">
                         </a>
                     </p>
                 </div>
             </div>
         </div>
     </footer>
-    <script type="text/javascript" src="lib/main.js"></script>
+    +
 </body>
 
 </html>

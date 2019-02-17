@@ -9,6 +9,7 @@ $pink: #FA7C91;
 $brown: #757763;
 $beige-light: #D0D1CD;
 $beige-lighter: #EFF0EB;
+$color: #000000;
 
 // Update Bulma's global variables
 $family-sans-serif: "Nunito",
@@ -19,11 +20,15 @@ $primary: $purple;
 $link: $pink;
 
 // Update some of Bulma's component variables
-$control-border-width: 2px;
+$control-border-width: 1px;
 $input-background-color: $beige-lighter;
 $input-border-color: transparent;
 $input-shadow: none;
 
+$navbar-height : 2rem;
+$navbar-breakpoint: 300px;
+
 $fa-font-path: "~font-awesome/fonts";
+
 
 @import '../../node_modules/bulma/bulma.sass';

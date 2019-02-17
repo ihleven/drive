@@ -11,7 +11,7 @@ import (
 
 var viewMap map[string]*View
 var Image, TextView *View
-var RenderTextFile, RenderDir func(w http.ResponseWriter, data interface{}) error
+var RenderTextFile, RenderDir, RenderFile func(w http.ResponseWriter, data interface{}) error
 
 func init() {
 	viewMap = make(map[string]*View)
@@ -22,7 +22,8 @@ func init() {
 
 	//RenderTextFile = RegisterRenderFunc(FuncMap, "./vue/dist/file.html", "./templates/textfile.html")
 	//RenderDir = RegisterRenderFunc(FuncMap, "./vue/dist/directory.html", "./templates/layout/breadcrumbs.html")
-	RenderDir = RegisterRenderFunc(FuncMap, "./templates/directory.html", "./templates/layout/breadcrumbs.html")
+	RenderDir = RegisterRenderFunc(FuncMap, "./templates/directory.html", "./templates/hero.html", "./templates/layout/breadcrumbs.html")
+	RenderFile = RegisterRenderFunc(FuncMap, "./templates/file.html", "./templates/hero.html")
 
 }
 
@@ -60,9 +61,6 @@ func Render(viewname string, w http.ResponseWriter, data interface{}) error {
 	return errors.New("not found")
 }
 
-// Fprint formats using the default formats for its operands and writes to w.
-// Spaces are added between operands when neither is a string.
-// It returns the number of bytes written and any write error encountered.
 func RegisterRenderFunc(funcMap template.FuncMap, files ...string) func(w http.ResponseWriter, data interface{}) error {
 	name := filepath.Base(files[0])
 	tmpl := template.Must(template.New(name).Funcs(funcMap).ParseFiles(files...))

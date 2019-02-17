@@ -2,10 +2,8 @@ package fs
 
 import (
 	"bytes"
-	"drive/views"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
@@ -77,23 +75,23 @@ func (t *Textfile) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (t *Textfile) Render(w http.ResponseWriter, request *http.Request) {
 
-	switch request.Header.Get("Content-type") {
+	//switch request.Header.Get("Content-type") {
 
-	case "application/json":
+	//case "application/json":
 
-		json, err := json.Marshal(t)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Write(json)
-
-	default:
-
-		err := views.Render("textfile", w, t)
-		if err != nil {
-			fmt.Println("ERROR:", err)
-		}
+	json, err := json.Marshal(t)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+	w.Write(json)
+
+	//default:
+
+	//	err := views.Render("textfile", w, t)
+	//	if err != nil {
+	//		fmt.Println("ERROR:", err)
+	//	}
+	//}
 
 }
