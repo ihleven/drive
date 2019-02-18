@@ -14,46 +14,69 @@ import (
 )
 
 type File struct {
-	// location   string
-	// Path       string `json:"path"`
-	//Name string `json:"name"`
-	// Size       int64  `json:"size"`
-	//Mode os.FileMode
-	//Modtime time.Time `json:"mtime"`
-	// AccessTime time.Time
-	// ChangeTime time.Time
-	// MIME       types.MIME
-	// Type       string `json:"type"`
-	// User       *user.User
-	// Group      *user.Group
-	// Uid        int
-	// Gid        int
 	*Info
-	location string
-	Path     string `json:"path"`
-	Name     string `json:"name"`
-	Size     int64  `json:"size"`
-	Mode     os.FileMode
-	ModTime  time.Time `json:"mtime"`
-	MIME     types.MIME
-	Type     string `json:"type"`
-	User     *user.User
-	Group    *user.Group
+	location    string
+	Path        string `json:"path"`
+	Name        string `json:"name"`
+	Size        int64  `json:"size"`
+	Mode        os.FileMode
+	ModTime     time.Time `json:"mtime"`
+	AccessTime  time.Time
+	ChangeTime  time.Time
+	MIME        types.MIME
+	Type        string `json:"type"`
+	Owner       *user.User
+	Group       *user.Group
+	Permissions struct{ Read, Write bool }
 }
 
 func NewFile(path string, usr *auth.User) (*File, error) {
-
-	info, err := storage.GetFile(path)
+	fmt.Println("NewFile", path, usr)
+	info, err := storage.Open(path, 0, 0, 0)
 	if err != nil {
 		return nil, err
 	}
 
+	f, err := FileFromInfo(info)
+	r, w, _ := f.GetPermissions(usr.Uid, usr.Gid)
+	f.Permissions = struct{ Read, Write bool }{Read: r, Write: w}
+
+	return f, nil
+}
+
+func FileFromInfo(info *Info) (*File, error) {
+	fmt.Println("info.Stat.Uid", info.Stat.Uid)
+	owner, err := user.LookupId(fmt.Sprintf("%d", info.Stat.Uid))
+	if err != nil {
+		fmt.Println("err", err)
+		switch err.(type) {
+		case user.UnknownUserIdError:
+			owner = &user.User{Username: "unknown"}
+		default:
+			owner = &user.User{Username: "unknown"}
+		}
+	}
+	group, err := user.LookupGroupId(fmt.Sprintf("%d", info.Stat.Gid))
+	if err != nil {
+		switch err.(type) {
+		case user.UnknownGroupIdError:
+			group = &user.Group{Name: "unknown"}
+		default:
+			group = &user.Group{Name: "unknown"}
+		}
+	}
+
 	f := &File{
 		Info: info,
-		Path: path,
-		Mode: info.Mode(),
-		Name: info.Name(),
-		Size: info.Size(),
+		//Path:       path,
+		ModTime:    info.ModTime(),
+		AccessTime: statAtime(info.Stat),
+		ChangeTime: statCtime(info.Stat),
+		Mode:       info.Mode(),
+		Name:       info.Name(),
+		Size:       info.Size(),
+		Owner:      owner,
+		Group:      group,
 	}
 
 	return f, nil

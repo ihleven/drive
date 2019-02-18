@@ -2,10 +2,10 @@ package main
 
 import (
 	"drive/auth"
+	"drive/controller"
 	"drive/file"
 	"drive/fs"
 	"drive/session"
-	"drive/views"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -53,6 +53,8 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", 302)
 }
 
+var storage = &file.FileSystemStorage{Root: "/Users/mi/go"}
+
 func Serve(w http.ResponseWriter, r *http.Request) {
 
 	authuser, err := session.AuthUser(r, w)
@@ -61,22 +63,17 @@ func Serve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	storage := &file.FileSystemStorage{Root: "/Users/mi/go"}
-	filename := strings.TrimPrefix(path.Clean(r.URL.Path), "/serve/")
+	path := strings.TrimPrefix(path.Clean(r.URL.Path), "/serve/")
 
-	file, err := storage.GetFile(filename)
+	file, err := storage.Open(path, os.O_RDONLY, authuser.Uid, authuser.Gid)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
 	defer file.Close()
 
-	if r, _, _ := file.Permissions(authuser.Uid, authuser.Gid); !r {
-		http.Error(w, fmt.Sprintf("HTTP 403 Forbidden: user '%s' does not have permission to access '%s'", authuser.Username, filename), 403)
-		return
-	}
 	if file.IsDir() {
-		r.URL.Path = fmt.Sprintf("/serve/%s/index.html", filename)
+		r.URL.Path = fmt.Sprintf("/serve/%s/index.html", path)
 		Serve(w, r)
 		return
 	}
@@ -87,76 +84,33 @@ func PathHandler(w http.ResponseWriter, r *http.Request) {
 
 	usr, err := session.GetSessionUser(r, w)
 
-	f, err := file.NewFile(path.Clean(r.URL.Path), usr)
+	storage := &file.FileSystemStorage{Root: "/Users/mi/go"}
+	f, err := storage.Open(path.Clean(r.URL.Path), os.O_RDONLY, usr.Uid, usr.Gid)
 	if err != nil {
 		msg, code := toHTTPError(err)
 		http.Error(w, msg, code)
+
 		return
 	}
-	defer f.Close()
+	file := &file.File{Info: f, Path: path.Clean(r.URL.Path)}
+	defer file.Close()
 
-	mode := f.Mode
+	mode := f.Mode()
 	switch {
 	case mode.IsRegular():
-		fmt.Println("regular file")
-		controller := FileController{f, usr}
+
+		controller := controller.FileController{file, usr}
 		controller.Render(w, r)
 
 	case mode.IsDir():
-		fmt.Println("directory")
-		controller := DirController{f, usr}
+
+		controller := controller.DirController{file, usr}
 		controller.Render(w, r)
-		//folder, _ := file.NewDirectory(f)
-		//Dir(w, r, folder, usr)
+
 	case mode&os.ModeSymlink != 0:
 		fmt.Println("symbolic link")
 	case mode&os.ModeNamedPipe != 0:
 		fmt.Println("named pipe")
-	}
-
-}
-
-type FileController struct {
-	File *file.File
-	User *auth.User
-}
-
-func (c FileController) Render(w http.ResponseWriter, r *http.Request) {
-	content, err := c.File.GetTextContent()
-	m := map[string]interface{}{"user": c.User, "file": c.File, "content": content}
-	err = views.RenderFile(w, m)
-	if err != nil {
-		panic(err)
-	}
-}
-
-type DirController struct {
-	File *file.File
-	User *auth.User
-}
-
-func (c DirController) Render(w http.ResponseWriter, r *http.Request) {
-
-	folder, _ := file.NewDirectory(c.File)
-
-	switch r.Method {
-	case http.MethodPost:
-
-		fmt.Fprintf(w, "POST")
-	}
-	// d.Render(w, r)
-	switch r.Header.Get("Accept") {
-
-	case "application/json":
-
-		views.SerializeJSON(w, folder)
-
-	default:
-		m := map[string]interface{}{"user": c.User, "file": c.File, "dir": folder}
-		err := views.RenderDir(w, m)
-		if err != nil {
-			panic(err)
-		}
 	}
 
 }

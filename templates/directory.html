@@ -34,11 +34,11 @@
                         <td>
                             <a href="{{.Path}}" title="{{.Path}}">{{.Name}}</a>
                         </td>
-                        <td>{{.User }}
+                        <td>{{.Owner.Username }}
                         </td>
-                        <td>{{.Group }}
+                        <td>{{.Group.Name }}
                         </td>
-                        <td>
+                        <td>{{.Mode}}
                         </td>
                         <td>
                         </td>
@@ -54,14 +54,19 @@
                         <td>
                             <a href="{{.Path}}" title="{{.}}">{{.Name}}</a>
                         </td>
-                        <td>{{.User }}
+                        <td>{{.Owner.Username }}
                         </td>
-                        <td>{{.Group }}
+                        <td>{{.Group.Name }}
                         </td>
                         <td>
-                            {{.MIME}}
+                            {{.MIME}} {{.Mode}}
                         </td>
-
+                        <td>
+                            {{.Permissions.Read}}
+                        </td>
+                        <td>
+                            {{.Permissions.Write}}
+                        </td>
                         <td title="{{.Size}} Bytes">
                             {{.Size | bytes }}
                         </td>

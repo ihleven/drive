@@ -1,26 +1,29 @@
 package file
 
 import (
+	"drive/auth"
+	"fmt"
 	"os"
 	"path"
+	"syscall"
 )
 
 type Folder struct {
 	File
 	//Parent    string
-	Folders   []File
-	Files     []File
+	Folders   []*File
+	Files     []*File
 	IndexFile string
 }
 
-func NewDirectory(file *File) (*Folder, error) {
+func NewDirectory(file *File, usr *auth.User) (*Folder, error) {
 	file.Type = "D"
 	dir := &Folder{File: *file}
-	dir.List()
+	dir.List(usr)
 	return dir, nil
 }
 
-func (d *Folder) List() error {
+func (d *Folder) List(usr *auth.User) error {
 
 	entries, err := d.ReadDir()
 	if err != nil {
@@ -30,27 +33,22 @@ func (d *Folder) List() error {
 		if info.Name()[0] == '.' {
 			continue
 		}
-		d.NewChildFromFileInfo(info)
+		file := d.NewChildFromFileInfo(info)
+		r, w, _ := file.GetPermissions(usr.Uid, usr.Gid)
+		file.Permissions = struct{ Read, Write bool }{Read: r, Write: w}
 
 	}
 	//d.Children = append(d.Folders, d.Files...)
 	return nil
 }
 func (d *Folder) NewChildFromFileInfo(fileInfo os.FileInfo) *File {
+	stat, _ := fileInfo.Sys().(*syscall.Stat_t) // _ ist ok und kein error
 
-	info := &Info{FileInfo: fileInfo}
+	info := &Info{FileInfo: fileInfo, Stat: stat}
+	file, err := FileFromInfo(info)
 
-	file := File{
-		Info:     info,
-		location: path.Join(d.location, info.Name()),
-		Path:     path.Join(d.Path, info.Name()),
-		Name:     info.Name(),
-		Size:     info.Size(),
-		Mode:     info.Mode(),
-		ModTime:  info.ModTime(),
-	}
-
-	//file.GetPerm(&info)
+	fmt.Println("NewChildFromFileInfo", err)
+	file.Path = path.Join(d.Path, info.Name())
 	if info.IsDir() {
 		file.Type = "D"
 		d.Folders = append(d.Folders, file)
@@ -61,5 +59,5 @@ func (d *Folder) NewChildFromFileInfo(fileInfo os.FileInfo) *File {
 		//child.DetectContentType()
 		d.Files = append(d.Files, file)
 	}
-	return &file
+	return file
 }
