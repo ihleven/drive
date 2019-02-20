@@ -45,10 +45,10 @@ func NewFileLöschen(path string, usr *auth.User) (*File, error) {
 }
 
 func FileFromInfo(info *Info) (*File, error) {
-	fmt.Println("info.Stat.Uid", info.Stat.Uid)
+
 	owner, err := user.LookupId(fmt.Sprintf("%d", info.Stat.Uid))
 	if err != nil {
-		fmt.Println("err", err)
+
 		switch err.(type) {
 		case user.UnknownUserIdError:
 			owner = &user.User{Username: "unknown"}
@@ -78,7 +78,6 @@ func FileFromInfo(info *Info) (*File, error) {
 		Owner:      owner,
 		Group:      group,
 	}
-	fmt.Println("size", f.Size)
 	return f, nil
 }
 

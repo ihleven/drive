@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"syscall"
-	"time"
 )
 
 const (
@@ -46,7 +45,7 @@ type Storage interface {
 	GetFile(name string) (*File, error)
 }
 
-var storage = &FileSystemStorage{Root: "/Users/mi"}
+var storage = &FileSystemStorage{Root: "/home/ihle/filebox"}
 
 type FileSystemStorage struct {
 	Root string
@@ -77,22 +76,26 @@ func Open(path string, flag int, uid, gid uint32) (*Info, error) {
 	}
 
 	var mode = stat.Mode
-	var shift uint32
+	var r,w,x bool
 
 	switch {
 	case stat.Uid == uid:
-		shift = 6
+		r, w, x = (mode & (OS_READ << 6)) != 0, (mode & (OS_WRITE << 6)) != 0, (mode & (OS_EX << 6)) != 0
+		fmt.Println(r,w,x)
+		fallthrough
 	case stat.Gid == gid:
-		shift = 3
+		r, w, x = r || ((mode & (OS_READ << 3)) != 0), w || ((mode & (OS_WRITE << 3)) != 0), x || ((mode & (OS_EX << 3)) != 0)
+		fmt.Println(r,w,x)
+		fallthrough
 	default:
-		shift = 0
+		r, w, x = r || ((mode & (OS_READ << 0)) != 0), w || ((mode & (OS_WRITE << 0)) != 0), x || ((mode & (OS_EX << 0)) != 0)
+		fmt.Println(r,w,x)
 	}
-	var r, w, x = mode & (OS_READ << shift), mode & (OS_WRITE << shift), mode & (OS_EX << shift)
 
-	if (flag == os.O_RDONLY && r == 0) || (flag == os.O_WRONLY && w == 0) {
+	if (flag == os.O_RDONLY && !r) || (flag == os.O_WRONLY && !w) {
 		return nil, os.ErrPermission
 	}
-	fmt.Printf("RWX: %d     %t %t %t \n", shift, r != 0, w != 0, x != 0)
+	fmt.Printf("RWX:     %t %t %t \n", r, w, x)
 
 	return &Info{
 		FileInfo:   info,
@@ -138,15 +141,30 @@ func (f *Info) GetPermissions(uid, gid uint32) (r, w, x bool) {
 	if f.Stat == nil {
 		return false, false, false
 	}
-
+    
 	switch {
 	case f.Stat.Uid == uid:
-		return f.UserPermissions()
+		ur, uw, ux := f.UserPermissions()
+		r = r || ur
+		w = w || uw
+		x = x || ux
+		fmt.Println(r, w, x, ur, uw, ux)
+		fallthrough
 	case f.Stat.Gid == gid:
-		return f.GroupPermissions()
+		gr, gw, gx := f.GroupPermissions()
+		r = r || gr
+		w = w || gw
+		x = x || gx
+		fmt.Println(r, w, x, gr, gw, gx)
+		fallthrough
 	default:
-		return f.OthersPermissions()
+		or, ow, ox := f.OthersPermissions()
+		r = r || or
+		w = w || ow
+		x = x || ox
+		fmt.Println(r, w, x, or, ow, ox)
 	}
+	return r, w, x
 }
 func (f *Info) UserPermissions() (r, w, x bool) {
 	rwx := f.Mode().String()
@@ -161,12 +179,6 @@ func (f *Info) OthersPermissions() (r, w, x bool) {
 	return rwx[7] == 'r', rwx[8] == 'w', rwx[9] == 'x'
 }
 
-func statAtime(st *syscall.Stat_t) time.Time {
-	return time.Unix(st.Atimespec.Unix())
-}
-func statCtime(st *syscall.Stat_t) time.Time {
-	return time.Unix(st.Ctimespec.Unix())
-}
 
 // ReadDir reads the directory named by dirname and returns
 // a list of directory entries sorted by filename.

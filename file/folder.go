@@ -2,7 +2,6 @@ package file
 
 import (
 	"drive/auth"
-	"fmt"
 	"os"
 	"path"
 	"syscall"
@@ -42,9 +41,8 @@ func (d *Folder) NewChildFromFileInfo(fileInfo os.FileInfo, usr *auth.User) *Fil
 	stat, _ := fileInfo.Sys().(*syscall.Stat_t) // _ ist ok und kein error
 
 	info := &Info{FileInfo: fileInfo, Stat: stat}
-	file, err := FileFromInfo(info)
+	file, _ := FileFromInfo(info)
 
-	fmt.Println("NewChildFromFileInfo", err)
 	file.Path = path.Join(d.Path, info.Name())
 	if info.IsDir() {
 		file.Type = "D"

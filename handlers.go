@@ -24,14 +24,14 @@ func login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		session.SetSessionUser(r, w, user)
-		fmt.Println(user)
+		fmt.Println("=>", user, r.PostFormValue("username"), r.PostFormValue("password"))
 
 		if err != nil {
 			fmt.Println("saving error", err)
 		}
 		//store.Save(req,res,sessionNew)
 
-		http.Redirect(w, r, "/src/drive", 302)
+		http.Redirect(w, r, "/", 302)
 
 	}
 	t, _ := template.ParseFiles("templates/login.html")
@@ -72,11 +72,15 @@ func Serve(w http.ResponseWriter, r *http.Request) {
 }
 
 func PathHandler(w http.ResponseWriter, r *http.Request) {
+    
 
 	usr, err := session.GetSessionUser(r, w)
+    fmt.Println("PAthhandler", usr)
 
 	f, err := file.Open(path.Clean(r.URL.Path), os.O_RDONLY, usr.Uid, usr.Gid)
 	if err != nil {
+    	    	    fmt.Println("err", err)
+
 		msg, code := toHTTPError(err)
 		http.Error(w, msg, code)
 		return

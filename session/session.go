@@ -24,11 +24,11 @@ func init() {
 	//	[]byte("hhfjhtdzjtfkhgkjfkufkztfjztfkuztfkztdhtesrgesdjg"),
 	//)
 	store.Options = &sessions.Options{
-		Domain:   "localhost",
+		//Domain:   "localhost",
 		Path:     "/",
 		MaxAge:   3600 * 8, // 8 hours
 		HttpOnly: true,
-		Secure:   true,
+		//Secure:   false,
 	}
 	gob.Register(auth.User{})
 }

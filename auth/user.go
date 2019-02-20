@@ -1,5 +1,7 @@
 package auth
 
+import "fmt"
+
 type User struct {
 	Uid, Gid      uint32
 	Username      string
@@ -18,6 +20,9 @@ func Authenticate(username, password string) (*User, error) {
 	switch username {
 	case "mi":
 		user = &User{501, 20, "mi", true}
+	case "ihle":
+		user = &User{1406, 1407, "ihle", true}
+		fmt.Println("user:", user)
 	default:
 		user = &User{0, 0, "anonymous", false}
 	}
