@@ -7,13 +7,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{.file.Name}}</title>
     <link rel="stylesheet" href="/dist/css/app.css">
+    <link rel="stylesheet" href="/static/entypo-icons.svg">
+    <link rel="stylesheet" href="/static/feather-icons.svg">
 </head>
 
 <body>
     {{template "hero" .}}
 
     <section class="section">
+
         <div class="container">
+
             <table class="table is-striped is-narrow is-hoverable is-fullwidth">
                 <thead>
                     <tr>
@@ -22,45 +26,46 @@
                         <th>Owner</th>
                         <th>Group</th>
                         <th>MIME</th>
+                        <th>Permissions</th>
+                        <th>R</th>
+                        <th>Write</th>
                         <th>Size</th>
                         <th>ModTime</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {{range .dir.Folders}}
+                    {{ range .dir.Entries }}
                     <tr>
                         <td>
+                            <span class="icon is-small">
+                                {{ if (ne .Type "D") }}
+                                <svg style="width:100%;height:100%">
+                                    <use xlink:href="/static/entypo-icons.svg#icon-text-document"></use>
+                                </svg>
+                                {{else}}
+                                <svg style="width:100%;height:100%">
+                                    <use xlink:href="/static/entypo-icons.svg#icon-folder"></use>
+                                </svg>
+
+                                {{end}}
+                            </span>
                         </td>
                         <td>
                             <a href="{{.Path}}" title="{{.Path}}">{{.Name}}</a>
                         </td>
-                        <td>{{.Owner.Username }}
-                        </td>
-                        <td>{{.Group.Name }}
-                        </td>
-                        <td>{{.Mode}}
+                        <td>
+                            {{.Owner.Username }}
                         </td>
                         <td>
+                            {{.Group.Name }}
                         </td>
                         <td>
-                            {{.FormattedMTime }}
-                        </td>
-                    </tr>
-                    {{end}}
-                    {{range .dir.Files}}
-                    <tr>
-                        <td>
+                            {{.MIME.Value}}
                         </td>
                         <td>
-                            <a href="{{.Path}}" title="{{.}}">{{.Name}}</a>
+                            {{.Mode}}
                         </td>
-                        <td>{{.Owner.Username }}
-                        </td>
-                        <td>{{.Group.Name }}
-                        </td>
-                        <td>
-                            {{.MIME}} {{.Mode}}
-                        </td>
+
                         <td>
                             {{.Permissions.Read}}
                         </td>
@@ -68,7 +73,9 @@
                             {{.Permissions.Write}}
                         </td>
                         <td title="{{.Size}} Bytes">
+                            {{ if (ne .Type "D") }}
                             {{.Size | bytes }}
+                            {{end}}
                         </td>
                         <td>
                             {{.FormattedMTime }}
@@ -272,14 +279,13 @@
                     </p>
                     <p style="margin-top: 1rem;">
                         <a href="http://bulma.io">
-                            <img src="/static/made-with-bulma.png" alt="Made with Bulma" width="128" height="24">
                         </a>
                     </p>
                 </div>
             </div>
         </div>
     </footer>
-    +
+
 </body>
 
 </html>

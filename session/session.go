@@ -28,7 +28,7 @@ func init() {
 		Path:     "/",
 		MaxAge:   3600 * 8, // 8 hours
 		HttpOnly: true,
-		//Secure: false,
+		Secure:   true,
 	}
 	gob.Register(auth.User{})
 }

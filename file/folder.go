@@ -13,35 +13,32 @@ type Folder struct {
 	//Parent    string
 	Folders   []*File
 	Files     []*File
+	Entries   []*File
 	IndexFile string
 }
 
 func NewDirectory(file *File, usr *auth.User) (*Folder, error) {
+
 	file.Type = "D"
+
 	dir := &Folder{File: *file}
-	dir.List(usr)
-	return dir, nil
-}
 
-func (d *Folder) List(usr *auth.User) error {
-
-	entries, err := d.ReadDir()
+	entries, err := dir.ReadDir()
 	if err != nil {
-		return err
+		return nil, err
 	}
+
 	for _, info := range entries {
 		if info.Name()[0] == '.' {
 			continue
 		}
-		file := d.NewChildFromFileInfo(info)
-		r, w, _ := file.GetPermissions(usr.Uid, usr.Gid)
-		file.Permissions = struct{ Read, Write bool }{Read: r, Write: w}
-
+		file := dir.NewChildFromFileInfo(info, usr)
+		dir.Entries = append(dir.Entries, file)
 	}
-	//d.Children = append(d.Folders, d.Files...)
-	return nil
+	return dir, nil
+
 }
-func (d *Folder) NewChildFromFileInfo(fileInfo os.FileInfo) *File {
+func (d *Folder) NewChildFromFileInfo(fileInfo os.FileInfo, usr *auth.User) *File {
 	stat, _ := fileInfo.Sys().(*syscall.Stat_t) // _ ist ok und kein error
 
 	info := &Info{FileInfo: fileInfo, Stat: stat}
@@ -53,11 +50,13 @@ func (d *Folder) NewChildFromFileInfo(fileInfo os.FileInfo) *File {
 		file.Type = "D"
 		d.Folders = append(d.Folders, file)
 	} else {
-		//	file.GuessMIME()
+		file.GuessMIME()
 		//child.ParseMIME()
 		//child.MatchMIMEType()
 		//child.DetectContentType()
 		d.Files = append(d.Files, file)
 	}
+	r, w, _ := file.GetPermissions(usr.Uid, usr.Gid)
+	file.Permissions = struct{ Read, Write bool }{Read: r, Write: w}
 	return file
 }

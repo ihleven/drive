@@ -4,7 +4,6 @@ import (
 	"drive/auth"
 	"drive/controller"
 	"drive/file"
-	"drive/fs"
 	"drive/session"
 	"fmt"
 	"html/template"
@@ -13,12 +12,6 @@ import (
 	"path"
 	"strings"
 )
-
-// Authorization Key
-//var authKey = []byte("somesecret")
-
-// Encryption Key
-//var encKey = []byte("someothersecret")
 
 func login(w http.ResponseWriter, r *http.Request) {
 
@@ -53,8 +46,6 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", 302)
 }
 
-var storage = &file.FileSystemStorage{Root: "/Users/mi/go"}
-
 func Serve(w http.ResponseWriter, r *http.Request) {
 
 	authuser, err := session.AuthUser(r, w)
@@ -65,7 +56,7 @@ func Serve(w http.ResponseWriter, r *http.Request) {
 
 	path := strings.TrimPrefix(path.Clean(r.URL.Path), "/serve/")
 
-	file, err := storage.Open(path, os.O_RDONLY, authuser.Uid, authuser.Gid)
+	file, err := file.Open(path, os.O_RDONLY, authuser.Uid, authuser.Gid)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
@@ -84,17 +75,17 @@ func PathHandler(w http.ResponseWriter, r *http.Request) {
 
 	usr, err := session.GetSessionUser(r, w)
 
-	storage := &file.FileSystemStorage{Root: "/Users/mi/go"}
-	f, err := storage.Open(path.Clean(r.URL.Path), os.O_RDONLY, usr.Uid, usr.Gid)
+	f, err := file.Open(path.Clean(r.URL.Path), os.O_RDONLY, usr.Uid, usr.Gid)
 	if err != nil {
 		msg, code := toHTTPError(err)
 		http.Error(w, msg, code)
-
 		return
 	}
-	file := &file.File{Info: f, Path: path.Clean(r.URL.Path)}
-	defer file.Close()
 
+	file, err := file.FileFromInfo(f)
+	defer file.Close()
+	file.Path = path.Clean(r.URL.Path)
+	fmt.Println("symbolic link", file.Size, file.Path)
 	mode := f.Mode()
 	switch {
 	case mode.IsRegular():
@@ -104,7 +95,7 @@ func PathHandler(w http.ResponseWriter, r *http.Request) {
 
 	case mode.IsDir():
 
-		controller := controller.DirController{file, usr}
+		controller := controller.DirController{File: file, User: usr}
 		controller.Render(w, r)
 
 	case mode&os.ModeSymlink != 0:
@@ -127,24 +118,4 @@ func toHTTPError(err error) (msg string, httpStatus int) {
 	}
 	// Default:
 	return "500 Internal Server Error", http.StatusInternalServerError
-}
-
-func Index(w http.ResponseWriter, r *http.Request) {
-	auth := make(map[int]int) //session.Get(r, "authenticated")
-	fmt.Println(auth)
-	if auth == nil {
-		http.Redirect(w, r, "/login", 301)
-
-		return
-	}
-	fmt.Println("Index")
-
-	//	username := session.Get(r, "username").(string)
-	//	storage := fs.GetStorage(username, path)
-	//	file := storage.GetFile(path)
-
-	//	views.Render(file, username)
-
-	var storage = &fs.FileSystemStorage{Location: "/Users/mi/go"}
-	storage.ServeHTTP(w, r)
 }

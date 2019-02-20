@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 	"syscall"
 	"time"
 )
@@ -47,7 +46,7 @@ type Storage interface {
 	GetFile(name string) (*File, error)
 }
 
-var storage = &FileSystemStorage{Root: "/Users/mi/go"}
+var storage = &FileSystemStorage{Root: "/Users/mi"}
 
 type FileSystemStorage struct {
 	Root string
@@ -57,9 +56,9 @@ type FileSystemStorage struct {
 	//directory_permissions_mode
 }
 
-func (s *FileSystemStorage) Open(path string, flag int, uid, gid uint32) (*Info, error) {
+func Open(path string, flag int, uid, gid uint32) (*Info, error) {
 
-	fullpath := filepath.Join(s.Root, path)
+	fullpath := filepath.Join(storage.Root, path)
 
 	fd, err := os.OpenFile(fullpath, flag, 0)
 	if err != nil {
@@ -119,6 +118,12 @@ func (s *FileSystemStorage) GetFile(path string) (*Info, error) {
 	return file, nil
 }
 
+func Mkdir(path string) {
+	fullpath := filepath.Join(storage.Root, path)
+	os.MkdirAll(fullpath, os.ModePerm)
+
+}
+
 type Info struct {
 	os.FileInfo
 	Descriptor *os.File
@@ -165,13 +170,14 @@ func statCtime(st *syscall.Stat_t) time.Time {
 
 // ReadDir reads the directory named by dirname and returns
 // a list of directory entries sorted by filename.
+// from os.File.Readdir
 func (i *Info) ReadDir() ([]os.FileInfo, error) {
 
 	list, err := i.Descriptor.Readdir(-1)
 	if err != nil {
 		return nil, err
 	}
-	sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
+	//sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
 	return list, nil
 }
 

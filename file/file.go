@@ -30,9 +30,9 @@ type File struct {
 	Permissions struct{ Read, Write bool }
 }
 
-func NewFile(path string, usr *auth.User) (*File, error) {
+func NewFileLöschen(path string, usr *auth.User) (*File, error) {
 	fmt.Println("NewFile", path, usr)
-	info, err := storage.Open(path, 0, 0, 0)
+	info, err := Open(path, 0, 0, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func FileFromInfo(info *Info) (*File, error) {
 		Owner:      owner,
 		Group:      group,
 	}
-
+	fmt.Println("size", f.Size)
 	return f, nil
 }
 
@@ -96,14 +96,21 @@ func (f *File) GetContent() ([]byte, error) { //offset, limit int) (e error) {
 	return buffer, nil
 }
 
-func (f *File) GetTextContent() (string, error) { //offset, limit int) (e error) {
+func (f *File) StringContent() string {
+	c, _ := f.GetContent()
+	return string(c)
+}
 
-	var body = make([]byte, f.Size)
+func (f *File) GetTextContent() (string, error) { //offset, limit int) (e error) {
+	var body = make([]byte, f.Info.Size())
+	fmt.Println("GetTextContent", f.Info.Size())
+
 	len, err := f.Descriptor.Read(body)
 	if err != nil {
 		return "", err
 	}
 	if int64(len) != f.Size {
+		fmt.Println("GetTextContent", len, f.Info.Size())
 		return "", errors.New(fmt.Sprintf("read only %d of %d bytes", len, f.Size))
 	}
 	if utf8.Valid(body) {
@@ -112,6 +119,11 @@ func (f *File) GetTextContent() (string, error) { //offset, limit int) (e error)
 		return "", errors.New("Invalid UTF-8")
 	}
 
+}
+
+func (f *File) Save() error {
+	//return ioutil.WriteFile(f.location, f.Content, 0600)
+	return nil
 }
 
 func (f *File) SetContent(content string) error { //offset, limit int) (e error) {
@@ -144,6 +156,18 @@ func (f *File) Breadcrumbs() []map[string]string {
 	return breadcrumbs
 }
 
+func (f *File) BreadcrumbsAlt() []map[string]string {
+
+	elements := strings.Split(strings.Trim(f.Path[1:], "/"), "/")
+	breadcrumbs, currentPath := make([]map[string]string, len(elements)), ""
+	for index, element := range elements {
+		currentPath = currentPath + "/" + element
+		breadcrumbs[index] = map[string]string{"name": element, "path": currentPath} // "/" + strings.Join(elements[:index+1], "/")}
+	}
+	breadcrumbs[len(elements)-1]["path"] = ""
+	return breadcrumbs
+}
+
 func (f *File) Parents() []struct{ Name, Path string } {
 
 	var path string
@@ -155,7 +179,27 @@ func (f *File) Parents() []struct{ Name, Path string } {
 	}
 	return list
 }
+func (f *File) ParentsAlt() []File {
+	fmt.Println("path", f.Path)
+	var path string
+	elements := strings.Split(f.Path[1:], "/")
+	fmt.Println("elements", elements)
+	list := make([]File, len(elements))
+	//fmt.Println("list", list)
+	for index, element := range elements {
+		path = fmt.Sprintf("%s/%s", path, element)
+		list[index] = File{Name: element, Path: path}
+		//fmt.Println(" - ", index, element)
+	}
+	//fmt.Println("list", list)
+	return list
+}
+
 func (f *File) FormattedMTime() string {
 
 	return f.ModTime.Format(time.RFC822Z)
+}
+func (f *File) String() string {
+
+	return fmt.Sprintf("%s: %s", f.Type, f.Path)
 }
