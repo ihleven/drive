@@ -1,29 +1,29 @@
-package fs
+package models
 
 import (
 	"bufio"
-	"drive/views"
+	"drive/file"
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"image"
 	"image/color"
 	"image/jpeg"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/nfnt/resize"
 	"github.com/rwcarlsen/goexif/exif"
 )
 
 type Image struct {
-	*File
+	File          *file.File
 	ColorModel    color.Model
 	Width, Height int
+	Ratio         float64
 	Format        string
 	Title         string
 	Caption       string // a “caption” is more like a title, while the “cutline” first describes what is happening in the picture, and then explains the significance of the event depicted.
@@ -33,75 +33,95 @@ type Image struct {
 	// https://jerz.setonhill.edu/blog/2014/10/09/writing-a-cutline-three-examples/
 
 	// Caption als allgemeingültige "standalone" Bildunterschrift und Cutline als Verbindung zum Album (ausgewählte Bilder in Reihe?)
+	Exif *Exif
+}
+type Exif struct {
+	Orientation int
+	Taken       time.Time
+	Lat,
+	Lng float64
+	Model string
 }
 
-func NewImage(root, path string) (*Image, error) {
-	return nil, nil
-}
-
-func (f *File) AsImage() (*Image, error) {
-
-	reader, error := os.Open(f.location)
-	if error != nil {
-		return nil, error
-	}
-	defer reader.Close()
-
-	config, format, err := image.DecodeConfig(reader)
+func NewImage(file *file.File) (*Image, error) {
+	config, format, err := image.DecodeConfig(file.Descriptor)
 	if err != nil {
-		log.Fatal(f.Path, config.ColorModel, config.Height, config.Width, err)
+		log.Fatal(file.Path, config.ColorModel, config.Height, config.Width, err)
 		return nil, err
 	}
-	img := &Image{f, config.ColorModel, config.Width, config.Height, format, "", "", ""}
-	img.parseMeta(img.getMetaName())
-	fmt.Println("path:", img.Path)
+	image := &Image{file,
+		config.ColorModel, config.Width, config.Height, float64(config.Height) / float64(config.Width) * 100,
+		format, "Ich bin's", "", "", nil,
+	}
+	image.parseMeta()
 	//img.MakeThumbnail()
-	return img, nil
 
-	// exif
+	if err = image.GoexifDecode(); err != nil {
+		fmt.Println("Error Decoding Exif with Goexif =>", err)
+	}
+
+	return image, nil
+
+}
+
+func (i *Image) GoexifDecode() error {
+	// https://github.com/rwcarlsen/goexif
+
+	// Optionally register camera makenote data parsing - currently Nikon and
+	// Canon are supported.
 	//exif.RegisterParsers(mknote.All...)
 
-	reader.Seek(0, 0)
-	x, err := exif.Decode(reader)
+	e := &Exif{}
+	i.Exif = e
+
+	i.File.Descriptor.Seek(0, 0)
+	x, err := exif.Decode(i.File.Descriptor)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	camModel, _ := x.Get(exif.Model) // normally, don't ignore errors!
-	fmt.Println(camModel.StringVal())
+	model, _ := camModel.StringVal()
+	e.Model = model
+
+	orientation, _ := x.Get(exif.Orientation)
+	o, err := orientation.Int(0)
+	e.Orientation = o
 
 	focal, _ := x.Get(exif.FocalLength)
 	numer, denom, _ := focal.Rat2(0) // retrieve first (only) rat. value
-	fmt.Printf("%v/%v", numer, denom)
+	fmt.Printf("%v/%v %s\n", numer, denom, focal.String())
 
 	// Two convenience functions exist for date/time taken and GPS coords:
 	tm, _ := x.DateTime()
-	fmt.Println("Taken: ", tm)
+	e.Taken = tm
 
 	lat, long, _ := x.LatLong()
-	fmt.Println("lat, long: ", lat, ", ", long)
-	j := x.String()
-	fmt.Printf("json: %s", j)
-	return img, nil
+	e.Lat = lat
+	e.Lng = long
 
+	//j := x.String()
+	//fmt.Printf("json: %s", j)
+
+	return nil
 }
 
-func (i Image) getMetaName() string {
-	base := strings.TrimSuffix(i.location, filepath.Ext(i.location))
-	return fmt.Sprintf("%s.txt", base)
+func (i Image) getMetaFile() *file.Info {
+	base := strings.TrimSuffix(i.File.Path, filepath.Ext(i.File.Path))
+	f, _ := file.Open(fmt.Sprintf("%s.txt", base), 0, 0, 0)
+	return f
 }
 
-func (i *Image) parseMeta(filename string) error {
+func (i *Image) parseMeta() error {
+	fmt.Println("parseMeta")
+	meta := i.getMetaFile()
+	defer meta.Close()
 
-	fd, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer fd.Close()
 	s := make([]string, 0)
 	r := make(map[string][]string)
 	field := "Title"
-	input := bufio.NewScanner(fd)
+	fmt.Println("title")
+	input := bufio.NewScanner(meta.Descriptor)
 	for input.Scan() {
 		line := strings.TrimSpace(input.Text())
 		if line == "" {
@@ -124,12 +144,12 @@ func (i *Image) parseMeta(filename string) error {
 	i.Title = r["Title"][0]
 	i.Caption = r["Caption"][0]
 	i.Cutline = strings.Join(r["Cutline"], "\n")
-
-	return err
+	fmt.Println(i.Title, i.Caption, i.Cutline)
+	return nil
 }
 
 func (i *Image) WriteMeta() {
-	f, err := os.Create(i.getMetaName())
+	f, err := os.Create(i.getMetaFile().Name())
 	if err != nil {
 		panic(err)
 	}
@@ -165,29 +185,9 @@ func (i *Image) update(requestBody []byte) {
 	i.WriteMeta()
 }
 
-func (i *Image) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method == http.MethodPut {
-		body, _ := ioutil.ReadAll(r.Body)
-		i.update(body)
-		json, _ := json.Marshal(i)
-		w.Write(json)
-	}
-	fmt.Println(r.Header.Get("Accept"))
-	switch r.Header.Get("Accept") {
-	case "application/json":
-		views.SerializeJSON(w, i)
-	default:
-		err := views.Render("image", w, i)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
 func (i *Image) MakeThumbnail() {
 	// open "test.jpg"
-	file, err := os.Open(i.location)
+	file, err := os.Open(i.File.Path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -203,7 +203,7 @@ func (i *Image) MakeThumbnail() {
 	// and preserve aspect ratio
 	m := resize.Resize(100, 0, img, resize.Lanczos3)
 
-	d, f := filepath.Split(i.location)
+	d, f := filepath.Split(i.File.Path)
 	fn := filepath.Join(d, "thumbs", f)
 	out, err := os.Create(fn)
 	if err != nil {

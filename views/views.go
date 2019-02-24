@@ -16,7 +16,7 @@ var RenderTextFile, RenderDir, RenderFile func(w http.ResponseWriter, data inter
 func init() {
 	viewMap = make(map[string]*View)
 	Register("textfile", FuncMap, "./templates/textfile.html")
-	//Register("image", FuncMap, "./vue/dist/file.html", "./templates/image.html", "./templates/layout/breadcrumbs.html")
+	Register("image", FuncMap, "./templates/image.html", "./templates/hero.html")
 	//Register("album", FuncMap, "./vue/dist/album.html")
 	//Register("diary", FuncMap, "./vue/dist/diary.html")
 

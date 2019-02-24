@@ -20,6 +20,7 @@ func init() {
 	mime.AddExtensionType(".js", "text/javascript")
 	mime.AddExtensionType(".ts", "text/typescript")
 	mime.AddExtensionType(".dia", "text/diary")
+	mime.AddExtensionType(".md", "text/markdown")
 
 }
 
@@ -76,7 +77,6 @@ func (f *File) GuessMIME() {
 		f.MIME.Subtype = f.MIME.Subtype[:len(f.MIME.Subtype)-15]
 		f.MIME.Value = f.MIME.Value[:len(f.MIME.Value)-15]
 	}
-	fmt.Println(f.MIME)
 	switch f.MIME.Type {
 	case "image":
 		f.Type = "FI"

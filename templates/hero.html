@@ -3,8 +3,13 @@
 <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
     <div class="container">
         <div class="navbar-brand">
-            <a class="navbar-item" href="https://bulma.io">
-                <img src="https://bulma.io/images/bulma-logo.png" width="112" height="28">
+            <a class="navbar-item title is-4" href="https://ihle.cloud">
+                <span class="">ihle.</span>
+                <svg class="feather feather-cloud sc-dnqmqq jxshSx" xmlns="http://www.w3.org/2000/svg" width="24"
+                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true" data-reactid="351">
+                    <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                </svg>
             </a>
         </div>
         <div class="navbar-menu">
@@ -59,21 +64,21 @@
                     <div class="navbar-dropdown is-right is-boxed">
 
                         <div class="dropdown-item">
-                            <p><strong>Matthias Ihle</strong> with {{.user}}</p>
+                            <strong>Matthias Ihle</strong>
                         </div>
+
                         <hr class="dropdown-divider">
                         <a href="#" class="dropdown-item">
-                            Dropdown item
+                            Username: {{.user.Username}}
                         </a>
                         <a class="dropdown-item">
-                            Other dropdown item
+                            Uid: {{.user.Uid}}
                         </a>
-                        <a href="#" class="dropdown-item is-active">
-                            Active dropdown item
-                        </a>
-                        <a href="#" class="dropdown-item">
-                            Other dropdown item
-                        </a>
+                        <hr class="dropdown-divider">
+                        <div class="dropdown-item">
+                            <strong>Groups</strong>
+                            <div>{{.user.Uid}}</div>
+                        </div>
                         <hr class="dropdown-divider">
                         <a href="/logout" class="dropdown-item">
                             Logout
@@ -97,7 +102,7 @@
                         {{.file.Name}}
                     </h1>
                     <h2 class="subtitle is-4">
-                        {{.file.MIME.Value}}
+                        {{.file.MIME}}
                     </h2>
                     <nav class="breadcrumb" aria-label="breadcrumbs">
                         <ul>

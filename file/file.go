@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"os/user"
+	"path"
+	"path/filepath"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -30,43 +32,23 @@ type File struct {
 	Permissions struct{ Read, Write bool }
 }
 
-func NewFileLöschen(path string, usr *auth.User) (*File, error) {
+func NewFileLöschen(path string, usr *auth.Account) (*File, error) {
 	fmt.Println("NewFile", path, usr)
 	info, err := Open(path, 0, 0, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	f, err := FileFromInfo(info)
+	f := FileFromInfo(info)
 	r, w, _ := f.GetPermissions(usr.Uid, usr.Gid)
 	f.Permissions = struct{ Read, Write bool }{Read: r, Write: w}
 
 	return f, nil
 }
 
-func FileFromInfo(info *Info) (*File, error) {
+func FileFromInfo(info *Info) *File {
 
-	owner, err := user.LookupId(fmt.Sprintf("%d", info.Stat.Uid))
-	if err != nil {
-
-		switch err.(type) {
-		case user.UnknownUserIdError:
-			owner = &user.User{Username: "unknown"}
-		default:
-			owner = &user.User{Username: "unknown"}
-		}
-	}
-	group, err := user.LookupGroupId(fmt.Sprintf("%d", info.Stat.Gid))
-	if err != nil {
-		switch err.(type) {
-		case user.UnknownGroupIdError:
-			group = &user.Group{Name: "unknown"}
-		default:
-			group = &user.Group{Name: "unknown"}
-		}
-	}
-
-	f := &File{
+	file := &File{
 		Info: info,
 		//Path:       path,
 		ModTime:    info.ModTime(),
@@ -75,10 +57,11 @@ func FileFromInfo(info *Info) (*File, error) {
 		Mode:       info.Mode(),
 		Name:       info.Name(),
 		Size:       info.Size(),
-		Owner:      owner,
-		Group:      group,
+		Owner:      auth.GetUserByID(fmt.Sprintf("%d", info.Stat.Uid)),
+		Group:      auth.GetGroupByID(fmt.Sprintf("%d", info.Stat.Gid)),
 	}
-	return f, nil
+	file.GuessMIME()
+	return file
 }
 
 func (f *File) GetContent() ([]byte, error) { //offset, limit int) (e error) {
@@ -95,27 +78,17 @@ func (f *File) GetContent() ([]byte, error) { //offset, limit int) (e error) {
 	return buffer, nil
 }
 
-func (f *File) StringContent() string {
-	c, _ := f.GetContent()
-	return string(c)
-}
+func (f *File) GetUTF8Content() (string, error) { //offset, limit int) (e error) {
 
-func (f *File) GetTextContent() (string, error) { //offset, limit int) (e error) {
-	var body = make([]byte, f.Info.Size())
-	fmt.Println("GetTextContent", f.Info.Size())
-
-	len, err := f.Descriptor.Read(body)
+	body, err := f.GetContent()
 	if err != nil {
-		return "", err
+		return string(body), err
 	}
-	if int64(len) != f.Size {
-		fmt.Println("GetTextContent", len, f.Info.Size())
-		return "", errors.New(fmt.Sprintf("read only %d of %d bytes", len, f.Size))
-	}
+
 	if utf8.Valid(body) {
 		return string(body), nil
 	} else {
-		return "", errors.New("Invalid UTF-8")
+		return string(body), errors.New("Invalid UTF-8")
 	}
 
 }
@@ -201,4 +174,56 @@ func (f *File) FormattedMTime() string {
 func (f *File) String() string {
 
 	return fmt.Sprintf("%s: %s", f.Type, f.Path)
+}
+
+func (f *File) ParentPath() string {
+	parent := path.Dir(f.Path)
+	if parent == "." {
+		return ""
+	}
+	return parent
+}
+
+type Siblings struct {
+	Count, CurrentIndex int
+	First,
+	Last,
+	Prev,
+	Current,
+	Next string
+	All []string
+}
+
+func (f *File) Siblings() (*Siblings, error) {
+	var currentIndex int
+	siblings := &Siblings{}
+	parentPath := f.ParentPath()
+	infos, err := ReadDir(parentPath)
+	if err != nil {
+		return nil, err
+	}
+	for _, info := range infos {
+
+		if info.Name()[0] == '.' || info.IsDir() || filepath.Ext(info.Name()) != ".jpg" {
+			continue
+		}
+		currentIndex++
+		if info.Name() == f.Name {
+			siblings.Current = path.Join(parentPath, info.Name())
+			siblings.CurrentIndex = currentIndex
+		}
+		siblings.All = append(siblings.All, path.Join(parentPath, info.Name()))
+	}
+
+	siblings.Count = len(siblings.All)
+	siblings.First = siblings.All[0]
+	siblings.Last = siblings.All[siblings.Count-1]
+	if siblings.CurrentIndex > 1 {
+		siblings.Prev = siblings.All[siblings.CurrentIndex-2]
+	}
+	if siblings.CurrentIndex < siblings.Count {
+		siblings.Next = siblings.All[siblings.CurrentIndex]
+	}
+
+	return siblings, nil
 }

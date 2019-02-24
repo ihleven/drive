@@ -23,7 +23,7 @@ func NewTextfileController(file *File) (*TextfileController, error) {
 func (c *TextfileController) Post(w http.ResponseWriter, r *http.Request) {
 
 	content := r.FormValue("content")
-	oldcontent, _ := c.File.GetTextContent()
+	oldcontent, _ := c.File.GetUTF8Content()
 	if len(content) > 0 && !(content == oldcontent) {
 		if !utf8.Valid([]byte(content)) {
 			http.Error(w, "Invalid UTF-8", http.StatusBadRequest)

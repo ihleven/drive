@@ -1,18 +1,14 @@
-package fs
+package models
 
 import (
-	"bufio"
+	"drive/file"
 	"drive/views"
 	"encoding/json"
 	"fmt"
 	_ "image/jpeg"
 	_ "image/png"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -22,7 +18,7 @@ import (
 //
 // Metadaten in Datei meta.json => wird von struct AlbumMeta geparst.
 type Album struct {
-	*Directory `json:"-"`
+	*file.Folder `json:"-"`
 	// Datei in der die folgenden Felder als JSON gespeichert werden.
 	AlbumFile   string `json:"metafile,omitempty"`
 	Title       string
@@ -32,9 +28,9 @@ type Album struct {
 	Images []Image
 }
 
-func NewAlbum(dir *Directory) (*Album, error) {
+func NewAlbum(dir *file.Folder) (*Album, error) {
 
-	album := Album{Directory: dir}
+	album := Album{Folder: dir}
 
 	for i := 0; i < len(dir.Files); i++ {
 		file := dir.Files[i]
@@ -50,7 +46,7 @@ func NewAlbum(dir *Directory) (*Album, error) {
 		}
 
 		if file.MIME.Type == "image" {
-			img, err := file.AsImage()
+			img, err := NewImage(file)
 			if err != nil {
 				fmt.Println(" - ERROR '%s'\n\n\n", err)
 			} else {
@@ -66,11 +62,11 @@ func NewAlbum(dir *Directory) (*Album, error) {
 
 func (a *Album) parseMeta() error {
 
-	content, err := ioutil.ReadFile(filepath.Join(a.location, "output.json"))
+	//content, err := ioutil.ReadFile(filepath.Join(a.location, "output.json"))
 
-	json.Unmarshal(content, a)
+	//json.Unmarshal(content, a)
 
-	return err
+	return nil
 }
 
 func (a *Album) parseDiary(name string) (*Diary, error) {
@@ -79,15 +75,15 @@ func (a *Album) parseDiary(name string) (*Diary, error) {
 }
 
 func (a *Album) Dump() error {
-	data, err := json.MarshalIndent(a, "", "    ")
+	_, err := json.MarshalIndent(a, "", "    ")
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filepath.Join(a.location, "output.json"), data, 0644)
-	if err != nil {
-		fmt.Println("ERROR dumping:", err)
-		return err
-	}
+	//err = ioutil.WriteFile(filepath.Join(a.location, "output.json"), data, 0644)
+	//if err != nil {
+	//	fmt.Println("ERROR dumping:", err)
+	//	return err
+	//}
 	return nil
 }
 
@@ -126,13 +122,10 @@ type Diary struct {
 	Images     []Image
 }
 
-func NewDiary(file *File, storage *FileSystemStorage) (*Diary, error) {
-	fd, err := os.Open(file.location)
-	if err != nil {
-		return nil, err
-	}
-	defer fd.Close()
-	input := bufio.NewScanner(fd)
+/*
+func NewDiary(fd *File) (*Diary, error) {
+
+	input := bufio.NewScanner(fd.Descriptor)
 	diary := &Diary{}
 	currentParagraph := Paragraph{}
 	for no := 1; input.Scan(); no++ {
@@ -146,9 +139,9 @@ func NewDiary(file *File, storage *FileSystemStorage) (*Diary, error) {
 				fmt.Println(t)
 			}
 		case strings.HasPrefix(line, "I:"):
-			dir := filepath.Dir(file.Path)
+			dir := filepath.Dir(fd.Path)
 			img := filepath.Join(dir, strings.TrimSpace(line[2:]))
-			file, err := storage.Open(img)
+			file, err := file.Open(img)
 			//			root, e := filepath.Rel(file.location, file.Path)
 
 			image, err := file.AsImage()
@@ -167,7 +160,7 @@ func NewDiary(file *File, storage *FileSystemStorage) (*Diary, error) {
 	}
 	return diary, nil
 }
-
+*/
 func (d *Diary) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	err := views.Render("diary", w, d)
 	if err != nil {

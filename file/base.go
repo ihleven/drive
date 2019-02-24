@@ -1,9 +1,11 @@
 package file
 
 import (
+	"drive/config"
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"syscall"
 )
 
@@ -43,12 +45,13 @@ const (
 type Storage interface {
 	Open(name string) (os.File, error)
 	GetFile(name string) (*File, error)
+	ReadDir(name string) ([]os.FileInfo, error)
 }
 
-var storage = &FileSystemStorage{Root: "/home/ihle/filebox"}
+var storage = &FileSystemStorage{Root: &config.Root}
 
 type FileSystemStorage struct {
-	Root string
+	Root *string
 	//BaseUrl  string
 	//homes    map[string]string
 	//file_permissions_mode
@@ -57,8 +60,8 @@ type FileSystemStorage struct {
 
 func Open(path string, flag int, uid, gid uint32) (*Info, error) {
 
-	fullpath := filepath.Join(storage.Root, path)
-
+	fullpath := filepath.Join(*storage.Root, path)
+	fmt.Println(fullpath, flag)
 	fd, err := os.OpenFile(fullpath, flag, 0)
 	if err != nil {
 		return nil, err
@@ -76,26 +79,26 @@ func Open(path string, flag int, uid, gid uint32) (*Info, error) {
 	}
 
 	var mode = stat.Mode
-	var r,w,x bool
+	var r, w, x bool
 
 	switch {
 	case stat.Uid == uid:
-		r, w, x = (mode & (OS_READ << 6)) != 0, (mode & (OS_WRITE << 6)) != 0, (mode & (OS_EX << 6)) != 0
-		fmt.Println(r,w,x)
+		r, w, x = (mode&(OS_READ<<6)) != 0, (mode&(OS_WRITE<<6)) != 0, (mode&(OS_EX<<6)) != 0
+		//fmt.Println(r, w, x)
 		fallthrough
 	case stat.Gid == gid:
-		r, w, x = r || ((mode & (OS_READ << 3)) != 0), w || ((mode & (OS_WRITE << 3)) != 0), x || ((mode & (OS_EX << 3)) != 0)
-		fmt.Println(r,w,x)
+		r, w, x = r || ((mode&(OS_READ<<3)) != 0), w || ((mode&(OS_WRITE<<3)) != 0), x || ((mode&(OS_EX<<3)) != 0)
+		//fmt.Println(r, w, x)
 		fallthrough
 	default:
-		r, w, x = r || ((mode & (OS_READ << 0)) != 0), w || ((mode & (OS_WRITE << 0)) != 0), x || ((mode & (OS_EX << 0)) != 0)
-		fmt.Println(r,w,x)
+		r, w, x = r || ((mode&(OS_READ<<0)) != 0), w || ((mode&(OS_WRITE<<0)) != 0), x || ((mode&(OS_EX<<0)) != 0)
+		///fmt.Println(r, w, x)
 	}
 
 	if (flag == os.O_RDONLY && !r) || (flag == os.O_WRONLY && !w) {
 		return nil, os.ErrPermission
 	}
-	fmt.Printf("RWX:     %t %t %t \n", r, w, x)
+	//fmt.Printf("RWX:     %t %t %t \n", r, w, x)
 
 	return &Info{
 		FileInfo:   info,
@@ -105,7 +108,7 @@ func Open(path string, flag int, uid, gid uint32) (*Info, error) {
 }
 func (s *FileSystemStorage) GetFile(path string) (*Info, error) {
 
-	fullpath := filepath.Join(s.Root, path)
+	fullpath := filepath.Join(*s.Root, path)
 
 	fd, err := os.Open(fullpath)
 	if err != nil {
@@ -121,8 +124,23 @@ func (s *FileSystemStorage) GetFile(path string) (*Info, error) {
 	return file, nil
 }
 
+func ReadDir(path string) ([]os.FileInfo, error) {
+
+	f, err := os.Open(filepath.Join(*storage.Root, path))
+	if err != nil {
+		return nil, err
+	}
+	list, err := f.Readdir(-1)
+	f.Close()
+	if err != nil {
+		return nil, err
+	}
+	sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
+	return list, nil
+}
+
 func Mkdir(path string) {
-	fullpath := filepath.Join(storage.Root, path)
+	fullpath := filepath.Join(*storage.Root, path)
 	os.MkdirAll(fullpath, os.ModePerm)
 
 }
@@ -135,34 +153,34 @@ type Info struct {
 
 func (f *Info) GetPermissions(uid, gid uint32) (r, w, x bool) {
 
-	fmt.Println(uid, gid)
+	//fmt.Println(uid, gid)
 	// f.Stat = f.Sys().(*syscall.Stat_t)
 
 	if f.Stat == nil {
 		return false, false, false
 	}
-    
+
 	switch {
 	case f.Stat.Uid == uid:
 		ur, uw, ux := f.UserPermissions()
 		r = r || ur
 		w = w || uw
 		x = x || ux
-		fmt.Println(r, w, x, ur, uw, ux)
+		//fmt.Println(r, w, x, ur, uw, ux)
 		fallthrough
 	case f.Stat.Gid == gid:
 		gr, gw, gx := f.GroupPermissions()
 		r = r || gr
 		w = w || gw
 		x = x || gx
-		fmt.Println(r, w, x, gr, gw, gx)
+		//fmt.Println(r, w, x, gr, gw, gx)
 		fallthrough
 	default:
 		or, ow, ox := f.OthersPermissions()
 		r = r || or
 		w = w || ow
 		x = x || ox
-		fmt.Println(r, w, x, or, ow, ox)
+		//fmt.Println(r, w, x, or, ow, ox)
 	}
 	return r, w, x
 }
@@ -178,7 +196,6 @@ func (f *Info) OthersPermissions() (r, w, x bool) {
 	rwx := f.Mode().String()
 	return rwx[7] == 'r', rwx[8] == 'w', rwx[9] == 'x'
 }
-
 
 // ReadDir reads the directory named by dirname and returns
 // a list of directory entries sorted by filename.

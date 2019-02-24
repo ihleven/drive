@@ -30,7 +30,7 @@ func init() {
 		HttpOnly: true,
 		//Secure:   false,
 	}
-	gob.Register(auth.User{})
+	gob.Register(auth.Account{})
 }
 
 type Session struct {
@@ -124,22 +124,22 @@ func Set(r *http.Request, key, value interface{}) error {
 	return nil
 }
 
-func GetSessionUser(r *http.Request, w http.ResponseWriter) (*auth.User, error) {
+func GetSessionUser(r *http.Request, w http.ResponseWriter) (*auth.Account, error) {
 	sess, err := GetSession(r, w)
 	if err != nil {
 		return nil, err
 	}
 
 	val := sess.Get("user")
-	var user = auth.User{}
-	user, ok := val.(auth.User)
+	var user = auth.Account{}
+	user, ok := val.(auth.Account)
 	if !ok {
-		return &auth.User{Authenticated: false}, nil
+		return &auth.Account{Authenticated: false}, nil
 	}
 	return &user, nil
 }
 
-func SetSessionUser(r *http.Request, w http.ResponseWriter, user *auth.User) (err error) {
+func SetSessionUser(r *http.Request, w http.ResponseWriter, user *auth.Account) (err error) {
 	sess, err := GetSession(r, w)
 	if err != nil {
 		fmt.Println("SetSessoinUser GetSession Error: ", err)
@@ -151,17 +151,17 @@ func SetSessionUser(r *http.Request, w http.ResponseWriter, user *auth.User) (er
 	return
 }
 
-func AuthUser(r *http.Request, w http.ResponseWriter) (*auth.User, error) {
+func AuthUser(r *http.Request, w http.ResponseWriter) (*auth.Account, error) {
 	sess, err := GetSession(r, w)
 	if err != nil {
 		return nil, err
 	}
 
 	val := sess.Get("user")
-	var user = auth.User{}
-	user, ok := val.(auth.User)
+	var user = auth.Account{}
+	user, ok := val.(auth.Account)
 	if !ok {
-		return &auth.User{Authenticated: false}, nil
+		return &auth.Account{Authenticated: false}, nil
 	}
 	return &user, nil
 }

@@ -1,11 +1,6 @@
 package models
 
-import (
-	"os"
-	"time"
-
-	"github.com/h2non/filetype/types"
-)
+import "drive/file"
 
 /*
 Files:
@@ -25,19 +20,8 @@ https://ihle.fm/home/weihnachtsfeier2018/IMG_5673.jpg
 
 */
 
-type File struct {
-	location string
-	Path     string `json:"path"`
-	Name     string `json:"name"`
-	Size     int64  `json:"size"`
-	Mode     os.FileMode
-	ModTime  time.Time `json:"mtime"`
-	MIME     types.MIME
-	Type     string `json:"type"`
-}
-
 type FS interface {
-	GetFileLikeObject(filesystemName, username, path string) (*File, error)
+	GetFileLikeObject(filesystemName, username, path string) (*file.File, error)
 }
 
 type Filesystem struct {
@@ -46,6 +30,6 @@ type Filesystem struct {
 	User string // Angemeldeter User, dem die die Dateien gehören
 }
 
-func (fs *Filesystem) Open(path string) (*File, error) {
-	return fs.GetFileLikeObject()
+func (fs *Filesystem) Open(path string) (*file.File, error) {
+	return nil, nil
 }

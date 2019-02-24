@@ -16,7 +16,7 @@ type Folder struct {
 	IndexFile string
 }
 
-func NewDirectory(file *File, usr *auth.User) (*Folder, error) {
+func NewDirectory(file *File, usr *auth.Account) (*Folder, error) {
 
 	file.Type = "D"
 
@@ -37,23 +37,14 @@ func NewDirectory(file *File, usr *auth.User) (*Folder, error) {
 	return dir, nil
 
 }
-func (d *Folder) NewChildFromFileInfo(fileInfo os.FileInfo, usr *auth.User) *File {
+func (d *Folder) NewChildFromFileInfo(fileInfo os.FileInfo, usr *auth.Account) *File {
 	stat, _ := fileInfo.Sys().(*syscall.Stat_t) // _ ist ok und kein error
 
 	info := &Info{FileInfo: fileInfo, Stat: stat}
-	file, _ := FileFromInfo(info)
+	file := FileFromInfo(info)
 
 	file.Path = path.Join(d.Path, info.Name())
-	if info.IsDir() {
-		file.Type = "D"
-		d.Folders = append(d.Folders, file)
-	} else {
-		file.GuessMIME()
-		//child.ParseMIME()
-		//child.MatchMIMEType()
-		//child.DetectContentType()
-		d.Files = append(d.Files, file)
-	}
+
 	r, w, _ := file.GetPermissions(usr.Uid, usr.Gid)
 	file.Permissions = struct{ Read, Write bool }{Read: r, Write: w}
 	return file

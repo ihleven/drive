@@ -1,13 +1,15 @@
 package main
 
 import (
+	"drive/app"
+	"drive/config"
 	"path"
 	"strings"
 )
 
 func main() {
-
-	CreateServer()
+	config.ParseFlags()
+	app.CreateServer()
 }
 
 // ShiftPath splits off the first component of p, which will be cleaned of
