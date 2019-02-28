@@ -11,7 +11,7 @@ type Storage interface {
 	//ReadDir(name string) ([]os.FileInfo, error)
 }
 
-var DefaultStorage = &FileSystemStorage{Root: "/Users/mi"}
+var DefaultStorage *FileSystemStorage
 
 type FileSystemStorage struct {
 	Root string
@@ -19,6 +19,11 @@ type FileSystemStorage struct {
 	//homes    map[string]string
 	//file_permissions_mode
 	//directory_permissions_mode
+}
+
+func SetDefaultStorage(root string) {
+	DefaultStorage = &FileSystemStorage{Root: root}
+
 }
 
 func (st *FileSystemStorage) Open(name string) (*FileHandle, error) {

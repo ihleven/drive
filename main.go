@@ -3,12 +3,14 @@ package main
 import (
 	"drive/app"
 	"drive/config"
+	"drive/file/storage"
 	"path"
 	"strings"
 )
 
 func main() {
 	config.ParseFlags()
+	storage.SetDefaultStorage(config.Root)
 	app.CreateServer()
 }
 
