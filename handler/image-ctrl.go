@@ -34,6 +34,9 @@ func (i ImageController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		json, _ := json.Marshal(body)
 		w.Write(json)
 	}
+	if r.Method == http.MethodPost {
+		i.Post(w, r)
+	}
 
 	switch r.Header.Get("Accept") {
 	case "application/json":
@@ -46,4 +49,20 @@ func (i ImageController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 		}
 	}
+}
+func (i ImageController) Post(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	i.Image.Title = r.FormValue("title")
+	i.Image.Caption = r.FormValue("caption")
+	i.Image.Cutline = r.FormValue("cutline")
+	if err := i.Image.WriteMeta(i.User); err != nil {
+		fmt.Println("POST:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("POST: no error")
+	http.Redirect(w, r, i.File.Path, http.StatusFound)
+
 }

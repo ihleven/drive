@@ -7,6 +7,8 @@ module.exports = {
   //assetsDir: 'assets/'
   // disable hashes in filenames
   filenameHashing: false,
+  runtimeCompiler: true
+
 }
 
 var pages = {
@@ -24,9 +26,9 @@ var pages = {
     title: 'File Page',
     chunks: ['chunk-vendors', 'chunk-common', 'file']
   },
-  directory: {
-    entry: 'src/entries/directory.js',
-    template: '../templates/directory.html',
+  textfile: {
+    entry: 'src/entries/textfile.js',
+    template: '../templates/file.html',
   },
   album: {
     entry: 'src/entries/album.js',

@@ -27,7 +27,7 @@ func CreateServer() {
 
 	r.HandleFunc("/login", handler.Login)
 	r.HandleFunc("/logout", handler.Logout)
-	r.PathPrefix("/serve").HandlerFunc(handler.Serve)
+	r.PathPrefix("/serve").HandlerFunc(handler.Raw)
 	r.PathPrefix("/").Handler(pathRouter) //PathHandler)
 
 	//r.PathPrefix("/").HandlerFunc(Index)

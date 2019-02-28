@@ -1,8 +1,9 @@
 package models
 
 import (
-	"bufio"
+	"drive/auth"
 	"drive/file"
+	"drive/file/storage"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -12,6 +13,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -51,15 +53,16 @@ func NewImage(file *file.File) (*Image, error) {
 	}
 	image := &Image{file,
 		config.ColorModel, config.Width, config.Height, float64(config.Height) / float64(config.Width) * 100,
-		format, "Ich bin's", "", "", nil,
+		format, "", "", "", nil,
 	}
-	image.parseMeta()
+	if err = image.parseMeta(); err != nil {
+		fmt.Println("Error parsing meta =>", err)
+	}
 	//img.MakeThumbnail()
-
 	if err = image.GoexifDecode(); err != nil {
 		fmt.Println("Error Decoding Exif with Goexif =>", err)
 	}
-
+	fmt.Println("asdf3")
 	return image, nil
 
 }
@@ -77,26 +80,48 @@ func (i *Image) GoexifDecode() error {
 	i.File.Descriptor.Seek(0, 0)
 	x, err := exif.Decode(i.File.Descriptor)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	camModel, _ := x.Get(exif.Model) // normally, don't ignore errors!
-	model, _ := camModel.StringVal()
+	camModel, err := x.Get(exif.Model) // normally, don't ignore errors!
+	if err != nil {
+		return err
+	}
+	model, err := camModel.StringVal()
+	if err != nil {
+		return err
+	}
 	e.Model = model
 
-	orientation, _ := x.Get(exif.Orientation)
+	orientation, err := x.Get(exif.Orientation)
+	if err != nil {
+		return err
+	}
 	o, err := orientation.Int(0)
+
+	if err != nil {
+		return err
+	}
 	e.Orientation = o
 
 	focal, _ := x.Get(exif.FocalLength)
-	numer, denom, _ := focal.Rat2(0) // retrieve first (only) rat. value
+	numer, denom, err := focal.Rat2(0) // retrieve first (only) rat. value
+	if err != nil {
+		return err
+	}
 	fmt.Printf("%v/%v %s\n", numer, denom, focal.String())
 
 	// Two convenience functions exist for date/time taken and GPS coords:
-	tm, _ := x.DateTime()
+	tm, err := x.DateTime()
+	if err != nil {
+		return err
+	}
 	e.Taken = tm
 
-	lat, long, _ := x.LatLong()
+	lat, long, err := x.LatLong()
+	if err != nil {
+		return err
+	}
 	e.Lat = lat
 	e.Lng = long
 
@@ -108,60 +133,74 @@ func (i *Image) GoexifDecode() error {
 
 func (i Image) getMetaFile() *file.Info {
 	base := strings.TrimSuffix(i.File.Path, filepath.Ext(i.File.Path))
-	f, _ := file.Open(fmt.Sprintf("%s.txt", base), 0, 0, 0)
+	f, err := file.Open(fmt.Sprintf("%s.txt", base), 0, 0, 0)
+	if err != nil {
+		fmt.Println("error opening meta file", err)
+		return nil
+	}
 	return f
 }
 
 func (i *Image) parseMeta() error {
-	fmt.Println("parseMeta")
-	meta := i.getMetaFile()
-	defer meta.Close()
 
-	s := make([]string, 0)
-	r := make(map[string][]string)
-	field := "Title"
-	fmt.Println("title")
-	input := bufio.NewScanner(meta.Descriptor)
-	for input.Scan() {
-		line := strings.TrimSpace(input.Text())
-		if line == "" {
-			continue
-		} else if strings.Trim(line, "=") == "" {
-			field = "Caption"
-			continue
-		} else if strings.Trim(line, "-") == "" {
-			if field == "Caption" {
-				field = "Cutline"
-			} else {
-				field = "NExt"
-			}
-			continue
+	re := regexp.MustCompile(`(?s)(?P<Title>.*?)=+(?P<Caption>.*?)---+(?P<Cutline>.*?)---+`)
+
+	f, err := storage.DefaultStorage.OpenFile(i.getMetaFilename(), os.O_RDONLY, 0)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
 		}
-		s = append(s, line)
-		r[field] = append(r[field], line)
-		fmt.Println(field, line)
+		return err
 	}
-	i.Title = r["Title"][0]
-	i.Caption = r["Caption"][0]
-	i.Cutline = strings.Join(r["Cutline"], "\n")
-	fmt.Println(i.Title, i.Caption, i.Cutline)
+	content, err := f.GetContent()
+	if err != nil {
+		return err
+	}
+
+	match := re.FindSubmatch(content)
+	paramsMap := make(map[string]string)
+
+	for i, name := range re.SubexpNames() {
+		if i > 0 && i <= len(match) {
+			paramsMap[name] = strings.TrimSpace(string(match[i]))
+		}
+	}
+	if title, ok := paramsMap["Title"]; ok {
+		i.Title = title
+	}
+	if caption, ok := paramsMap["Caption"]; ok {
+		i.Caption = caption
+	}
+	if cutline, ok := paramsMap["Cutline"]; ok {
+		i.Cutline = cutline
+	}
 	return nil
 }
 
-func (i *Image) WriteMeta() {
-	f, err := os.Create(i.getMetaFile().Name())
+func (i Image) getMetaFilename() string {
+	base := strings.TrimSuffix(i.File.Path, filepath.Ext(i.File.Path))
+	filename := fmt.Sprintf("%s.txt", base)
+	return filename
+}
+
+func (i *Image) WriteMeta(usr *auth.Account) error {
+	filename := i.getMetaFilename()
+	fmt.Println("storage.DefaultStorage.OpenFile", filename)
+
+	f, err := storage.DefaultStorage.OpenFile(filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	tmpl, err := template.New("txt").Parse("{{.Title}}\n=====\n{{.Caption}}\n-----\n{{.Cutline}}\n------\n")
 	if err != nil {
-		panic(err)
+		return err
 	}
-	err = tmpl.Execute(f, i)
+	err = tmpl.Execute(f.File, i)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	f.Close()
+	return nil
 }
 
 func (i *Image) update(requestBody []byte) {
@@ -182,7 +221,7 @@ func (i *Image) update(requestBody []byte) {
 		fmt.Printf(" - update Cutline => '%s'\n", cutline)
 	}
 
-	i.WriteMeta()
+	i.WriteMeta(nil)
 }
 
 func (i *Image) MakeThumbnail() {

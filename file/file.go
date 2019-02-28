@@ -4,6 +4,7 @@ import (
 	"drive/auth"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"path"
@@ -67,6 +68,7 @@ func FileFromInfo(info *Info) *File {
 func (f *File) GetContent() ([]byte, error) { //offset, limit int) (e error) {
 
 	var buffer = make([]byte, f.Size)
+	f.Descriptor.Seek(0, 0)
 	len, err := f.Descriptor.Read(buffer)
 	if err != nil {
 		return nil, err
@@ -98,15 +100,21 @@ func (f *File) Save() error {
 	return nil
 }
 
-func (f *File) SetContent(content string) error { //offset, limit int) (e error) {
+func (f *File) SetContent(content []byte) error { //offset, limit int) (e error) {
 
-	//body, e := ioutil.ReadFile(f.location)
-	//if utf8.Valid(body) {
-	//	f.Content = body
-	//} else {
-	//	e = errors.New("Invalid UTF-8")
-	//}
-	return nil
+	return ioutil.WriteFile(f.Descriptor.Name(), content, 0600)
+
+	name := f.Descriptor.Name()
+	fd, err := os.OpenFile(name, os.O_RDWR, 0)
+	if err != nil {
+		return err
+	}
+
+	n_bytes, err := fd.WriteString(strings.Replace(string(content), "\r\n", "\n", -1))
+	if err != nil {
+		fmt.Println("error writing file:", err, n_bytes, f.Descriptor)
+	}
+	return err
 }
 
 func (f *File) Breadcrumbs() []map[string]string {
@@ -185,7 +193,7 @@ func (f *File) ParentPath() string {
 }
 
 type Siblings struct {
-	Count, CurrentIndex int
+	Count, CurrentIndex, PrevIndex, NextIndex int
 	First,
 	Last,
 	Prev,
@@ -216,14 +224,18 @@ func (f *File) Siblings() (*Siblings, error) {
 	}
 
 	siblings.Count = len(siblings.All)
-	siblings.First = siblings.All[0]
-	siblings.Last = siblings.All[siblings.Count-1]
-	if siblings.CurrentIndex > 1 {
-		siblings.Prev = siblings.All[siblings.CurrentIndex-2]
-	}
-	if siblings.CurrentIndex < siblings.Count {
-		siblings.Next = siblings.All[siblings.CurrentIndex]
-	}
+	if siblings.Count > 0 {
+		siblings.First = siblings.All[0]
+		siblings.Last = siblings.All[siblings.Count-1]
+		if siblings.CurrentIndex > 1 {
+			siblings.Prev = siblings.All[siblings.CurrentIndex-2]
+			siblings.PrevIndex = siblings.CurrentIndex - 1
+		}
+		if siblings.CurrentIndex < siblings.Count {
+			siblings.Next = siblings.All[siblings.CurrentIndex]
+			siblings.NextIndex = siblings.CurrentIndex + 1
+		}
 
+	}
 	return siblings, nil
 }

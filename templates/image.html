@@ -16,22 +16,29 @@
             background-attachment: fixed;
             background-size: contain;
             background-color: #999;
+            height: {{.Image.Ratio}}vw!important;
+            max-height: 100vh!important;
         }
+        .navbar.is-transparent {
+            background-color: transparent;
+        background-image: none;
+        }
+        @media screen and (max-width: 1087px)
+            .hero.is-dark .navbar-menu {
+                background-color: transparent;
+            }
     </style>
 </head>
 
 <body>
 
     <div>
-        <section class="hero is-primary is-fullheight header-image">
+        <section class="hero is-dark header-image">
             <!-- Hero header: will stick at the top -->
             <div class="hero-head">
-                <header class="navbar">
+                <!-- 
+                <header class="navbar is-transparent">
                     <div class="navbar-brand">
-                        <!--<a class="navbar-item" href="http://bulma.io">
-                            <img src="http://bulma.io/images/bulma-logo.png" alt="Bulma: a modern CSS framework based on Flexbox"
-                                width="112" height="28">
-                        </a>-->
 
                         <div class="navbar-burger" v-on:click="showNav = !showNav" v-bind:class="{ 'is-active' : showNav }">
                             <span></span>
@@ -40,14 +47,13 @@
                         </div>
                     </div>
                     <div class="navbar-menu" v-bind:class="{ 'is-active' : showNav }">
-                        <!-- navbar start, navbar end -->
                         <div class="navbar-end">
                             <a class="navbar-item" href="/about">About</a>
                             <a class="navbar-item" href="/path">Path</a>
                             <a class="navbar-item" href="/blog">Blog</a>
                         </div>
                     </div>
-                </header>
+                </header> -->
             </div>
 
 
@@ -64,13 +70,26 @@
             </div>
             <!-- Hero footer: will stick at the bottom -->
             <div class="hero-foot">
-                <nav class="tabs is-boxed">
-                    <div class="container">
-                        <ul>
-                            <li class="is-active-no"><a>{{.Image.Title}}</a></li>
-                        </ul>
-                    </div>
+                <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+                    <a class="pagination-previous" href="{{.Siblings.Prev}}">Previous</a>
+                    <a class="pagination-next" href="{{.Siblings.Next}}">Next page</a>
+                    <ul class="pagination-list">
+                        <li><a class="pagination-link" aria-label="Goto page 1" href="{{.Siblings.First}}">1</a></li>
+                        <li><span class="pagination-ellipsis">&hellip;</span></li>
+                        <li><a class="pagination-link" aria-label="Goto page 45" href="{{.Siblings.Prev}}">
+                                {{.Siblings.PrevIndex}}
+                            </a></li>
+                        <li><a class="pagination-link is-current" aria-label="Page 46" aria-current="page">{{.Siblings.CurrentIndex}}</a></li>
+                        <li><a class="pagination-link" aria-label="Goto page 47" href="{{.Siblings.Next}}">
+                                {{.Siblings.NextIndex }}</a></li>
+                        <li><span class="pagination-ellipsis">&hellip;</span></li>
+                        <li><a class="pagination-link" aria-label="Goto page 86" href="{{.Siblings.Last}}">
+                                {{.Siblings.Count}}
+                            </a></li>
+                    </ul>
                 </nav>
+
+
             </div>
         </section>
     </div>
@@ -78,50 +97,31 @@
 
     <section class="section">
         <a id="main"></a>
-        <nav class="pagination is-centered" role="navigation" aria-label="pagination">
-            <a class="pagination-previous" href="{{.Siblings.Prev}}#main">Previous</a>
-            <a class="pagination-next" href="{{.Siblings.Next}}#main">Next page</a>
-            <ul class="pagination-list">
-                <li><a class="pagination-link" aria-label="Goto page 1" href="{{.Siblings.First}}#main">1</a></li>
-                <li><span class="pagination-ellipsis">&hellip;</span></li>
-                <li><a class="pagination-link" aria-label="Goto page 45" href="{{.Siblings.Prev}}#main">
-                        {{.Siblings.CurrentIndex}}
-                    </a></li>
-                <li><a class="pagination-link is-current" aria-label="Page 46" aria-current="page">{{.Siblings.CurrentIndex}}</a></li>
-                <li><a class="pagination-link" aria-label="Goto page 47" href="{{.Siblings.Next}}#main">
-                        {{.Siblings.CurrentIndex }}</a></li>
-                <li><span class="pagination-ellipsis">&hellip;</span></li>
-                <li><a class="pagination-link" aria-label="Goto page 86" href="{{.Siblings.Last}}#main">
-                        {{.Siblings.Count}}
-                    </a></li>
-            </ul>
-        </nav>
-
 
 
 
         <div class="">
             <div class="columns">
                 <div class="column">
-                    <form>
+                    <form method="POST">
                         <div class="field">
                             <label class="label">Title</label>
                             <div class="control">
-                                <input class="input" type="text" placeholder="Text input" value="{{.Image.Title}}">
+                                <input class="input" type="text" placeholder="Text input" name="title" value="{{.Image.Title}}">
                             </div>
                         </div>
 
                         <div class="field">
                             <label class="label">Caption</label>
                             <div class="control">
-                                <textarea class="textarea" placeholder="Normal textarea">{{.Image.Caption}}</textarea>
+                                <textarea class="textarea" placeholder="Normal textarea" name="caption">{{.Image.Caption}}</textarea>
                             </div>
                             <p class="help">This is a help text</p>
                         </div>
                         <div class="field">
                             <label class="label">Cutline</label>
                             <div class="control">
-                                <textarea class="textarea" placeholder="Normal textarea">{{.Image.Cutline}}</textarea>
+                                <textarea class="textarea" placeholder="Normal textarea" name="cutline">{{.Image.Cutline}}</textarea>
                             </div>
                         </div>
                     </form>
