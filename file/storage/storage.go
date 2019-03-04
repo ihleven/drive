@@ -3,7 +3,6 @@ package storage
 import (
 	"os"
 	"path/filepath"
-	"syscall"
 )
 
 type Storage interface {
@@ -42,11 +41,6 @@ func (st *FileSystemStorage) Open(name string) (*FileHandle, error) {
 		return nil, err
 	}
 
-	var stat syscall.Stat_t
-	if err := syscall.Stat(path, &stat); err != nil {
-		return nil, err
-	}
-
 	return &FileHandle{
 		FileInfo: info,
 		File:     fd,
@@ -66,11 +60,6 @@ func (st *FileSystemStorage) OpenFile(name string, flag int, perm os.FileMode) (
 
 	info, err := f.Stat()
 	if err != nil {
-		return nil, err
-	}
-
-	var stat syscall.Stat_t
-	if err := syscall.Stat(path, &stat); err != nil {
 		return nil, err
 	}
 

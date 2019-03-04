@@ -1,17 +1,15 @@
 package main
 
 import (
-	"drive/app"
 	"drive/config"
-	"drive/file/storage"
 	"path"
 	"strings"
 )
 
 func main() {
 	config.ParseFlags()
-	storage.SetDefaultStorage(config.Root)
-	app.CreateServer()
+	//storage.SetDefaultStorage(config.Root)
+	//app.CreateServer()
 }
 
 // ShiftPath splits off the first component of p, which will be cleaned of

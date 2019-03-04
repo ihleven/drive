@@ -4,7 +4,6 @@ import (
 	"drive/auth"
 	"os"
 	"path"
-	"syscall"
 )
 
 type Folder struct {
@@ -38,9 +37,8 @@ func NewDirectory(file *File, usr *auth.Account) (*Folder, error) {
 
 }
 func (d *Folder) NewChildFromFileInfo(fileInfo os.FileInfo, usr *auth.Account) *File {
-	stat, _ := fileInfo.Sys().(*syscall.Stat_t) // _ ist ok und kein error
 
-	info := &Info{FileInfo: fileInfo, Stat: stat}
+	info := &Info{FileInfo: fileInfo}
 	file := FileFromInfo(info)
 
 	file.Path = path.Join(d.Path, info.Name())

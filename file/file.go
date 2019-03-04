@@ -52,14 +52,11 @@ func FileFromInfo(info *Info) *File {
 	file := &File{
 		Info: info,
 		//Path:       path,
-		ModTime:    info.ModTime(),
-		AccessTime: statAtime(info.Stat),
-		ChangeTime: statCtime(info.Stat),
-		Mode:       info.Mode(),
-		Name:       info.Name(),
-		Size:       info.Size(),
-		Owner:      auth.GetUserByID(fmt.Sprintf("%d", info.Stat.Uid)),
-		Group:      auth.GetGroupByID(fmt.Sprintf("%d", info.Stat.Gid)),
+		ModTime: info.ModTime(),
+
+		Mode: info.Mode(),
+		Name: info.Name(),
+		Size: info.Size(),
 	}
 	file.GuessMIME()
 	return file
