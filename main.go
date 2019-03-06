@@ -2,6 +2,7 @@ package main
 
 import (
 	"drive/config"
+	"drive/domain/web"
 	"path"
 	"strings"
 )
@@ -9,7 +10,7 @@ import (
 func main() {
 	config.ParseFlags()
 	//storage.SetDefaultStorage(config.Root)
-	//app.CreateServer()
+	web.CreateServer()
 }
 
 // ShiftPath splits off the first component of p, which will be cleaned of

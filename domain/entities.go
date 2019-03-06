@@ -27,16 +27,36 @@ type Group struct {
 	Gid  string // group ID
 	Name string // group name
 }
+type Mimetype struct {
+	Type    string // group ID
+	Subtype string // group name
+	Charset string
+}
+
+type Storage interface {
+	Open(string) (Handle, error)
+}
+
+type Handle interface {
+	os.FileInfo
+	GuessMIME() types.MIME
+	Close() error
+	GetFile() *os.File
+}
 
 type File struct {
+	Handle
 	Path string `json:"path"`
 
 	Name        string `json:"name"`
 	Size        int64  `json:"size"`
 	Mode        os.FileMode
-	MTime       time.Time `json:"mtime"`
-	ATime       time.Time
 	CTime       time.Time
+	ATime       time.Time
+	MTime       time.Time `json:"mtime"`
+	Created     time.Time
+	Modified    time.Time
+	Accessed    time.Time
 	MIME        types.MIME
 	Owner       *User
 	Group       *Group

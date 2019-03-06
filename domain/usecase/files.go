@@ -2,18 +2,36 @@ package usecase
 
 import (
 	"drive/domain"
+	"drive/domain/storage"
 )
 
-func GetFile(storage, path string) (*domain.File, error) {
+func GetHandle(path string) (domain.Handle, error) {
 
-	file := storage.Open()
+	st := storage.Get("public")
+	file, err := st.Open(path)
+	return file, err
 }
 
-func GetFileForServing(storage, path string) (*domain.File, error) {
+func GetFile(prefix, path string) (*domain.File, error) {
 
-	file := Storage.Open()
+	st := storage.Get(prefix)
+	handle, err := st.Open(path)
+	file := &domain.File{
+		Handle: handle,
+		Path:   path,
+
+		Name:  handle.Name(),
+		Size:  handle.Size(),
+		Mode:  handle.Mode(),
+		MTime: handle.ModTime(),
+		MIME:  handle.GuessMIME(),
+	}
+	return file, err
 }
 
-type Storage interface {
-	Open(name string) (*domain.File, error)
+func GetServeContentHandle(prefix, path string, uid, gid uint32) (domain.Handle, error) {
+
+	st := storage.Get(prefix)
+	file, err := st.PermOpen(path, 0, uid, gid)
+	return file, err
 }

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bytes"
-	"drive/auth"
 	"drive/file"
 	"drive/views"
 	"encoding/json"
@@ -16,9 +15,26 @@ import (
 	"github.com/gomarkdown/markdown"
 )
 
+type FileController struct {
+	File *file.File
+	//User    *auth.Account
+	Content []byte
+}
+
+func (c FileController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	content, err := c.File.GetContent()
+	fmt.Println("GetTextContent", content, err)
+
+	m := map[string]interface{}{"user": c.User, "file": c.File, "content": content}
+	err = views.RenderFile(w, m)
+	if err != nil {
+		panic(err)
+	}
+}
+
 type TextFileController struct {
-	File          *file.File
-	User          *auth.Account
+	File *file.File
+	//User          *auth.Account
 	Title         string
 	Content       []byte
 	StringContent string
