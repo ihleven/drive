@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"syscall"
 )
 
 type FileSystemStorage struct {
@@ -17,7 +16,7 @@ type FileSystemStorage struct {
 
 var storages = map[string]*FileSystemStorage{
 	"home":   &FileSystemStorage{Root: "/Users/mi"},
-	"public": &FileSystemStorage{Root: "/Users/mi/tmp/14"},
+	"public": &FileSystemStorage{Root: "C:/Users/ih/projects"},
 }
 
 func Register(root, prefix string) {
@@ -59,10 +58,10 @@ func (st *FileSystemStorage) OpenFile(name string, flag int, mode os.FileMode) (
 		return nil, err
 	}
 
-	var stat syscall.Stat_t
-	if err := syscall.Stat(path, &stat); err != nil {
-		return nil, err
-	}
+	//var stat syscall.Stat_t
+	//if err := syscall.Stat(path, &stat); err != nil {
+	//	return nil, err
+	//}
 
 	return &FileHandle{
 		FileInfo: info,
@@ -72,7 +71,7 @@ func (st *FileSystemStorage) OpenFile(name string, flag int, mode os.FileMode) (
 	}, nil
 }
 
-func (st *FileSystemStorage) ReadDir(path string) ([]os.FileInfo, error) {
+func (st *FileSystemStorage) ReadDir(path string) ([]domain.Handle, error) {
 
 	f, err := os.Open(filepath.Join(st.Root, path))
 	if err != nil {
@@ -84,10 +83,15 @@ func (st *FileSystemStorage) ReadDir(path string) ([]os.FileInfo, error) {
 		return nil, err
 	}
 	sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
-	return list, nil
+
+	entries := make([]domain.Handle, len(list))
+	for index, info := range list {
+		entries[index] = NewHandle(info)
+	}
+	return entries, nil
 }
 
-func (st *FileSystemStorage) ReadDir(path string) ([]FileHandle, error) { // => storage
+func (st *FileSystemStorage) ReadDir2(path string) ([]FileHandle, error) { // => storage
 
 	f, err := os.Open(filepath.Join(st.Root, path))
 	if err != nil {
@@ -108,8 +112,8 @@ func (st *FileSystemStorage) ReadDir(path string) ([]FileHandle, error) { // => 
 			continue
 		}
 		handles[index] = FileHandle{FileInfo: entry}
-		stat, _ := entry.Sys().(*syscall.Stat_t) // _ ist ok und kein error
-		fmt.Println(stat)
+		//stat, _ := entry.Sys().(*syscall.Stat_t) // _ ist ok und kein error
+		//fmt.Println(stat)
 	}
 	return handles, nil
 }

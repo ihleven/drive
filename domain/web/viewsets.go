@@ -4,10 +4,8 @@ import (
 	"drive/domain"
 	"drive/views"
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"net/http"
-	"path/filepath"
 
 	"github.com/thedevsaddam/renderer"
 )
@@ -47,33 +45,20 @@ func (h FileHandler) Post(w http.ResponseWriter, r *http.Request) {
 type DirHandler struct {
 	File    *domain.File
 	User    *domain.Account
-	Entries []*file.File
-	Folder  *models.Folder
+	Entries []*domain.File
+	Folder  *domain.Folder
 }
 
-func (c DirController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	folder, _ := file.NewDirectory(c.File, c.User)
-	c.Directory = folder
-	switch r.Method {
-	case http.MethodPost:
-
-		fmt.Fprintf(w, "POST")
-	}
-	c.Render(w, r)
-
-}
-
-func (c DirController) Render(w http.ResponseWriter, r *http.Request) {
+func (h DirHandler) Render(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Header.Get("Accept") {
 
 	case "application/json":
 
-		views.SerializeJSON(w, c.Directory)
+		views.SerializeJSON(w, h.Folder)
 
 	default:
-		m := map[string]interface{}{"user": c.User, "file": c.File, "dir": c.Directory}
+		m := map[string]interface{}{"user": h.User, "file": h.File, "entries": h.Entries}
 		err := views.RenderDir(w, m)
 		if err != nil {
 			panic(err)
@@ -82,7 +67,7 @@ func (c DirController) Render(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (d *DirController) Action(w http.ResponseWriter, r *http.Request) {
+func (h DirHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodPost:
@@ -97,21 +82,21 @@ func (d *DirController) Action(w http.ResponseWriter, r *http.Request) {
 		}
 		if options.CreateThumbnails {
 
-			file.Mkdir(filepath.Join(d.File.Path, "thumbs"))
+			// file.Mkdir(filepath.Join(d.File.Path, "thumbs"))
 
-			for i := 0; i < len(d.Directory.Entries); i++ {
-				file := d.Directory.Entries[i]
+			// for i := 0; i < len(d.Directory.Entries); i++ {
+			// 	file := d.Directory.Entries[i]
 
-				if file.MIME.Type == "image" {
-					//img, err := file.AsImage()
+			// 	if file.MIME.Type == "image" {
+			// 		//img, err := file.AsImage()
 
-					//img.MakeThumbnail()
-				}
+			// 		//img.MakeThumbnail()
+			// 	}
 
-			}
+			// }
 
 		}
 
 	}
-	d.Render(w, r)
+
 }

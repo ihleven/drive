@@ -12,7 +12,7 @@ var dirTmpl, fileTmpl, errorTmpl *template.Template
 
 func init() {
 
-	dirTmpl = template.Must(template.New("dir").Funcs(funcMap).ParseFiles("./templates/directory.html", "./templates/hero.html", "./templates/layout/breadcrumbs.html"))
+	dirTmpl = template.Must(template.New("dir").Funcs(funcMap).ParseFiles("./templates/directory.html", "./templates/hero.html", "./templates/breadcrumbs.html"))
 	fileTmpl = template.Must(template.New("file").Funcs(funcMap).ParseFiles("./templates/file.html", "./templates/hero.html"))
 	errorTmpl = template.Must(template.New("error").Funcs(funcMap).ParseFiles("./templates/file.html"))
 }

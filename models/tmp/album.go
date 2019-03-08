@@ -1,7 +1,6 @@
 package models
 
 import (
-	"drive/file"
 	"drive/views"
 	"encoding/json"
 	"fmt"
@@ -9,6 +8,9 @@ import (
 	_ "image/png"
 	"log"
 	"net/http"
+	"os"
+	"path"
+	"path/filepath"
 	"time"
 )
 
@@ -170,4 +172,33 @@ func (d *Diary) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("ERROR:", err)
 		//			panic(err)
 	}
+}
+
+func AlbumHandler(w http.ResponseWriter, r *http.Request) {
+
+	path, _ := filepath.Rel("/alben", path.Clean(r.URL.Path))
+	fmt.Printf(" - scanning '%s'\n", "/"+path)
+
+	file, err := storage.Open("/" + path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			http.NotFound(w, r)
+			return
+		}
+		http.Error(w, err.Error(), 500)
+	}
+
+	if file.IsDir() {
+		dir, _ := fs.NewDirectory(file)
+		album, _ := fs.NewAlbum(dir)
+		album.Render(w, r)
+		return
+	}
+	if file.IsRegular() {
+
+		diary, _ := fs.NewDiary(file, storage)
+		fmt.Println("DIARY", diary)
+		diary.ServeHTTP(w, r)
+	}
+
 }

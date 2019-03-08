@@ -1,10 +1,11 @@
 package domain
 
 import (
+	"fmt"
 	"os"
+	"strings"
 	"time"
 
-	"github.com/eminetto/clean-architecture-go/pkg/entity"
 	"github.com/h2non/filetype/types"
 )
 
@@ -83,6 +84,18 @@ func NewFile(handle Handle) *File {
 	return file
 }
 
+func (f *File) Parents() []struct{ Name, Path string } {
+
+	var path string
+	elements := strings.Split(f.Path[1:], "/")
+	list := make([]struct{ Name, Path string }, len(elements))
+	for index, element := range elements {
+		path = fmt.Sprintf("%s/%s", path, element)
+		list[index] = struct{ Name, Path string }{Name: element, Path: path}
+	}
+	return list
+}
+
 type Folder struct {
 	*File
 	//Parent    string
@@ -124,9 +137,10 @@ func NewChildFromHandle(handle Handle, usr *Account) *File {
 }
 
 type Album struct {
-	ID   entity.ID `json:"id" bson:"_id,omitempty"`
-	Name string    `json:"name" bson:"name,omitempty"`
-	Path string    `json:"path" bson:"path"`
+	// 	"github.com/eminetto/clean-architecture-go/pkg/entity"
+	//ID   entity.ID `json:"id" bson:"_id,omitempty"`
+	Name string `json:"name" bson:"name,omitempty"`
+	Path string `json:"path" bson:"path"`
 }
 
 type Repository interface {

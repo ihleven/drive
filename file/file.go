@@ -44,17 +44,6 @@ func (f *File) BreadcrumbsAlt() []map[string]string {
 	return breadcrumbs
 }
 
-func (f *File) Parents() []struct{ Name, Path string } {
-
-	var path string
-	elements := strings.Split(f.Path[1:], "/")
-	list := make([]struct{ Name, Path string }, len(elements))
-	for index, element := range elements {
-		path = fmt.Sprintf("%s/%s", path, element)
-		list[index] = struct{ Name, Path string }{Name: element, Path: path}
-	}
-	return list
-}
 func (f *File) ParentsAlt() []File {
 	fmt.Println("path", f.Path)
 	var path string

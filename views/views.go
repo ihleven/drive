@@ -22,7 +22,7 @@ func init() {
 
 	//RenderTextFile = RegisterRenderFunc(FuncMap, "./vue/dist/file.html", "./templates/textfile.html")
 	//RenderDir = RegisterRenderFunc(FuncMap, "./vue/dist/directory.html", "./templates/layout/breadcrumbs.html")
-	RenderDir = RegisterRenderFunc(FuncMap, "./templates/directory.html", "./templates/hero.html", "./templates/layout/breadcrumbs.html")
+	RenderDir = RegisterRenderFunc(FuncMap, "./templates/directory.html", "./templates/hero.html", "./templates/breadcrumbs.html")
 	RenderFile = RegisterRenderFunc(FuncMap, "./templates/file.html", "./templates/hero.html")
 
 }

@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-	"syscall"
 	"time"
 	"unicode/utf8"
 )
@@ -17,6 +16,11 @@ type FileHandle struct {
 	File *os.File
 	//Stat    *syscall.Stat_t
 	storage domain.Storage
+}
+
+func NewHandle(info os.FileInfo) domain.Handle { // https://stackoverflow.com/questions/40823315/x-does-not-implement-y-method-has-a-pointer-receiver
+	h := FileHandle{FileInfo: info}
+	return &h
 }
 
 func (fh *FileHandle) GetFile() *os.File {
@@ -109,14 +113,15 @@ func (fh *FileHandle) ReadDirHandle() ([]domain.Handle, error) {
 	}
 	//sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
 
-	var handles = make([]*FileHandle, len(entries))
+	var handles = make([]domain.Handle, len(entries))
 	for index, entry := range entries {
 		if entry.Name()[0] == '.' {
 			// ignore all files starting with '.'
 			continue
 		}
 		handles[index] = &FileHandle{FileInfo: entry}
-		stat, _ := entry.Sys().(*syscall.Stat_t) // _ ist ok und kein error
+		//stat := entry.Sys()
+		//.(*syscall.Stat_t) // _ ist ok und kein error
 	}
 	return handles, nil
 
@@ -131,32 +136,39 @@ func (fh *FileHandle) ReadDirHandle() ([]domain.Handle, error) {
 func (f *FileHandle) GetPermissions(uid, gid uint32) (r, w, x bool) { // => handle
 
 	//fmt.Println(uid, gid)
-	Stat := f.Sys().(*syscall.Stat_t)
+	//Stat := f.Sys().(*syscall.Stat_t)
 
-	if Stat == nil {
-		return false, false, false
-	}
+	//if Stat == nil {
+	//	return false, false, false
+	//}
+
+	var fileUid uint32 //= -1 //Stat.Uid
+	var fileGid uint32 //= -1 //Stat.Uid
+
+	rwx := f.Mode().String()
 
 	switch {
-	case Stat.Uid == uid:
-		ur, uw, ux := f.UserPermissions()
-		r = r || ur
-		w = w || uw
-		x = x || ux
+	case fileUid == uid:
+		r, w, x = rwx[1] == 'r', rwx[2] == 'w', rwx[3] == 'x'
+		// ur, uw, ux := f.UserPermissions()
+		//r = r || ur
+		//w = w || uw
+		//x = x || ux
 		//fmt.Println(r, w, x, ur, uw, ux)
 		fallthrough
-	case Stat.Gid == gid:
-		gr, gw, gx := f.GroupPermissions()
-		r = r || gr
-		w = w || gw
-		x = x || gx
+	case fileGid == gid:
+		//gr, gw, gx := f.GroupPermissions()
+
+		r = r || rwx[4] == 'r'
+		w = w || rwx[5] == 'w'
+		x = x || rwx[6] == 'x'
 		//fmt.Println(r, w, x, gr, gw, gx)
 		fallthrough
 	default:
-		or, ow, ox := f.OthersPermissions()
-		r = r || or
-		w = w || ow
-		x = x || ox
+		//or, ow, ox := f.OthersPermissions()
+		r = r || rwx[7] == 'r'
+		w = w || rwx[8] == 'w'
+		x = x || rwx[9] == 'x'
 		//fmt.Println(r, w, x, or, ow, ox)
 	}
 	return r, w, x
