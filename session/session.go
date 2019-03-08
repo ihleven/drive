@@ -1,7 +1,7 @@
 package session
 
 import (
-	"drive/auth"
+	"drive/domain"
 	"encoding/gob"
 	"fmt"
 	"net/http"
@@ -30,7 +30,7 @@ func init() {
 		HttpOnly: true,
 		//Secure:   false,
 	}
-	gob.Register(auth.Account{})
+	gob.Register(domain.Account{})
 }
 
 type Session struct {
@@ -124,22 +124,22 @@ func Set(r *http.Request, key, value interface{}) error {
 	return nil
 }
 
-func GetSessionUser(r *http.Request, w http.ResponseWriter) (*auth.Account, error) {
+func GetSessionUser(r *http.Request, w http.ResponseWriter) (*domain.Account, error) {
 	sess, err := GetSession(r, w)
 	if err != nil {
 		return nil, err
 	}
 
 	val := sess.Get("user")
-	var user = auth.Account{}
-	user, ok := val.(auth.Account)
+	var user = domain.Account{}
+	user, ok := val.(domain.Account)
 	if !ok {
-		return &auth.Account{Authenticated: false}, nil
+		return &domain.Account{Authenticated: false}, nil
 	}
 	return &user, nil
 }
 
-func SetSessionUser(r *http.Request, w http.ResponseWriter, user *auth.Account) (err error) {
+func SetSessionUser(r *http.Request, w http.ResponseWriter, user *domain.Account) (err error) {
 	sess, err := GetSession(r, w)
 	if err != nil {
 		fmt.Println("SetSessoinUser GetSession Error: ", err)
@@ -151,17 +151,17 @@ func SetSessionUser(r *http.Request, w http.ResponseWriter, user *auth.Account) 
 	return
 }
 
-func AuthUser(r *http.Request, w http.ResponseWriter) (*auth.Account, error) {
+func AuthUser(r *http.Request, w http.ResponseWriter) (*domain.Account, error) {
 	sess, err := GetSession(r, w)
 	if err != nil {
 		return nil, err
 	}
 
 	val := sess.Get("user")
-	var user = auth.Account{}
-	user, ok := val.(auth.Account)
+	var user = domain.Account{}
+	user, ok := val.(domain.Account)
 	if !ok {
-		return &auth.Account{Authenticated: false}, nil
+		return &domain.Account{Authenticated: false}, nil
 	}
 	return &user, nil
 }

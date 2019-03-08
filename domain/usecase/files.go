@@ -16,6 +16,9 @@ func GetFile(prefix, path string) (*domain.File, error) {
 
 	st := storage.Get(prefix)
 	handle, err := st.Open(path)
+	if err != nil {
+		return nil, err
+	}
 	file := &domain.File{
 		Handle: handle,
 		Path:   path,

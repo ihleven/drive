@@ -70,6 +70,21 @@ func Serve(w http.ResponseWriter, r *http.Request) {
 	http.ServeContent(w, r, file.Name(), file.ModTime(), file.File)
 }
 
+func Raw(w http.ResponseWriter, r *http.Request) {
+
+	path := strings.TrimPrefix(path.Clean(r.URL.Path), "/serve/")
+
+	fh, err := storage.DefaultStorage.Open(path)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+
+		return
+	}
+	defer fh.File.Close()
+	fmt.Println("fh", fh)
+	http.ServeContent(w, r, fh.Name(), fh.ModTime(), fh.File)
+}
+
 func PathHandler(w http.ResponseWriter, r *http.Request) {
 
 	usr, _ := session.GetSessionUser(r, w)

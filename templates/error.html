@@ -1,0 +1,32 @@
+{{ define "error" }}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>errro</title>
+    <link rel="stylesheet" href="/dist/css/app.css">
+    <link rel="stylesheet" href="/static/map.svg">
+</head>
+
+<body>
+
+
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-desktop is-offset-2-desktop">
+                    {{.errno}} {{.msg}}
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+
+</html>
+
+{{ end }}

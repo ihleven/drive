@@ -1,9 +1,9 @@
 package models
 
 import (
-	"drive/auth"
+	"drive/domain"
+	"drive/domain/storage"
 	"drive/file"
-	"drive/file/storage"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -183,7 +183,7 @@ func (i Image) getMetaFilename() string {
 	return filename
 }
 
-func (i *Image) WriteMeta(usr *auth.Account) error {
+func (i *Image) WriteMeta(usr *domain.Account) error {
 	filename := i.getMetaFilename()
 	fmt.Println("storage.DefaultStorage.OpenFile", filename)
 

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"syscall"
 	"time"
 	"unicode/utf8"
 )
@@ -68,6 +69,11 @@ func (fh *FileHandle) SetContent(content []byte) error {
 	return err
 }
 
+func (fh *FileHandle) Write(buffer []byte) (n int, err error) {
+	n, err = fh.File.Write(buffer)
+	return
+}
+
 func (fh *FileHandle) GetUTF8Content() (string, error) {
 
 	content, err := fh.GetContent()
@@ -80,4 +86,91 @@ func (fh *FileHandle) GetUTF8Content() (string, error) {
 	} else {
 		return string(content), errors.New("Invalid UTF-8")
 	}
+}
+
+// ReadDir reads the directory named by dirname and returns
+// a list of directory entries sorted by filename.
+// from os.File.Readdir
+func (i *FileHandle) ReadDir() ([]os.FileInfo, error) {
+
+	list, err := i.File.Readdir(-1)
+	if err != nil {
+		return nil, err
+	}
+	//sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
+	return list, nil
+}
+
+func (fh *FileHandle) ReadDirHandle() ([]domain.Handle, error) {
+
+	entries, err := fh.ReadDir()
+	if err != nil {
+		return nil, err
+	}
+	//sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
+
+	var handles = make([]*FileHandle, len(entries))
+	for index, entry := range entries {
+		if entry.Name()[0] == '.' {
+			// ignore all files starting with '.'
+			continue
+		}
+		handles[index] = &FileHandle{FileInfo: entry}
+		stat, _ := entry.Sys().(*syscall.Stat_t) // _ ist ok und kein error
+	}
+	return handles, nil
+
+	// file := FileFromInfo(info)
+
+	// r, w, _ := file.GetPermissions(usr.Uid, usr.Gid)
+	//file.Permissions = struct{ Read, Write bool }{Read: r, Write: w}
+}
+
+//PERMISSIONS
+
+func (f *FileHandle) GetPermissions(uid, gid uint32) (r, w, x bool) { // => handle
+
+	//fmt.Println(uid, gid)
+	Stat := f.Sys().(*syscall.Stat_t)
+
+	if Stat == nil {
+		return false, false, false
+	}
+
+	switch {
+	case Stat.Uid == uid:
+		ur, uw, ux := f.UserPermissions()
+		r = r || ur
+		w = w || uw
+		x = x || ux
+		//fmt.Println(r, w, x, ur, uw, ux)
+		fallthrough
+	case Stat.Gid == gid:
+		gr, gw, gx := f.GroupPermissions()
+		r = r || gr
+		w = w || gw
+		x = x || gx
+		//fmt.Println(r, w, x, gr, gw, gx)
+		fallthrough
+	default:
+		or, ow, ox := f.OthersPermissions()
+		r = r || or
+		w = w || ow
+		x = x || ox
+		//fmt.Println(r, w, x, or, ow, ox)
+	}
+	return r, w, x
+}
+
+func (f *FileHandle) UserPermissions() (r, w, x bool) {
+	rwx := f.Mode().String()
+	return rwx[1] == 'r', rwx[2] == 'w', rwx[3] == 'x'
+}
+func (f *FileHandle) GroupPermissions() (r, w, x bool) {
+	rwx := f.Mode().String()
+	return rwx[4] == 'r', rwx[5] == 'w', rwx[6] == 'x'
+}
+func (f *FileHandle) OthersPermissions() (r, w, x bool) {
+	rwx := f.Mode().String()
+	return rwx[7] == 'r', rwx[8] == 'w', rwx[9] == 'x'
 }

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"drive/domain"
 	"fmt"
 	"os/user"
 )
@@ -43,9 +44,9 @@ func GetGroupByID(gid string) *user.Group {
 	return grp
 }
 
-func Authenticate(username, password string) (*entity.Account, error) {
+func Authenticate(username, password string) (*domain.Account, error) {
 
-	usr := &entity.Account{0, 0, "anonymous", "Anonym", "", false}
+	usr := &domain.Account{0, 0, "anonymous", "Anonym", "", false}
 
 	_, err := user.Lookup(username)
 	if _, ok := err.(user.UnknownUserError); ok {
@@ -58,11 +59,11 @@ func Authenticate(username, password string) (*entity.Account, error) {
 
 	switch username {
 	case "mi":
-		usr = &Account{501, 20, "mi", "Matthias Ihle", "", true}
+		usr = &domain.Account{501, 20, "mi", "Matthias Ihle", "", true}
 	case "ihle":
-		usr = &Account{1406, 1407, "ihle", "Matthias Ihle", "", true}
+		usr = &domain.Account{1406, 1407, "ihle", "Matthias Ihle", "", true}
 	default:
-		usr = &Account{501, 20, "mi", "Matthias Ihle", "", true}, nil
+		usr = &domain.Account{501, 20, "mi", "Matthias Ihle", "", true}
 	}
 	return usr, nil
 }

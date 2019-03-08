@@ -1,14 +1,15 @@
 package web
 
 import (
-	"drive/auth"
 	"drive/domain"
 	"drive/domain/usecase"
 	"drive/session"
 	"fmt"
 	"html/template"
 	"net/http"
+	"os"
 	"path"
+	"path/filepath"
 )
 
 func Dispatch(w http.ResponseWriter, r *http.Request) {
@@ -37,13 +38,13 @@ func Dispatch(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method)
 
 }
-func GetRegisteredMIMEHandler(file *domain.File, usr *auth.Account) ViewSet {
+func GetRegisteredMIMEHandler(file *domain.File, usr *domain.Account) ViewSet {
 	m := file.GuessMIME()
 	switch m.Type {
 	case "text":
 		return &FileHandler{file, usr}
 	case "image":
-		return &FileHandler{file, usr}
+		return &DirHandler{file, usr}
 		//return ImageHandler{file: file, usr: usr}
 	default:
 		return FileHandler{}
@@ -74,7 +75,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 
-		user, err := auth.Authenticate(r.PostFormValue("username"), r.PostFormValue("password"))
+		user, err := usecase.Authenticate(r.PostFormValue("username"), r.PostFormValue("password"))
 		if err != nil {
 			ErrorResponder(w, err.Error(), 500)
 			return
@@ -107,4 +108,33 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 func assetHandler(prefix, location string) http.Handler {
 
 	return http.StripPrefix(fmt.Sprintf("/%s/", prefix), http.FileServer(http.Dir(fmt.Sprintf("./%s", location))))
+}
+
+func AlbumHandler(w http.ResponseWriter, r *http.Request) {
+
+	path, _ := filepath.Rel("/alben", path.Clean(r.URL.Path))
+	fmt.Printf(" - scanning '%s'\n", "/"+path)
+
+	file, err := storage.Open("/" + path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			http.NotFound(w, r)
+			return
+		}
+		http.Error(w, err.Error(), 500)
+	}
+
+	if file.IsDir() {
+		dir, _ := fs.NewDirectory(file)
+		album, _ := fs.NewAlbum(dir)
+		album.Render(w, r)
+		return
+	}
+	if file.IsRegular() {
+
+		diary, _ := fs.NewDiary(file, storage)
+		fmt.Println("DIARY", diary)
+		diary.ServeHTTP(w, r)
+	}
+
 }

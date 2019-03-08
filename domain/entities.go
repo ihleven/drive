@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/eminetto/clean-architecture-go/pkg/entity"
 	"github.com/h2non/filetype/types"
 )
 
@@ -35,6 +36,7 @@ type Mimetype struct {
 
 type Storage interface {
 	Open(string) (Handle, error)
+	ReadDir(string) ([]Handle, error)
 }
 
 type Handle interface {
@@ -42,6 +44,9 @@ type Handle interface {
 	GuessMIME() types.MIME
 	Close() error
 	GetFile() *os.File
+	ReadDir() ([]os.FileInfo, error)
+	ReadDirHandle() ([]Handle, error)
+	GetPermissions(uid, gid uint32) (r, w, x bool)
 }
 
 type File struct {
@@ -63,9 +68,68 @@ type File struct {
 	Permissions struct{ Read, Write, Exec bool }
 }
 
+func NewFile(handle Handle) *File {
+
+	file := &File{
+		Handle: handle,
+		//Path:       path,
+		MTime: handle.ModTime(),
+
+		Mode: handle.Mode(),
+		Name: handle.Name(),
+		Size: handle.Size(),
+	}
+	handle.GuessMIME()
+	return file
+}
+
 type Folder struct {
 	*File
 	//Parent    string
 	Entries   []*File
 	IndexFile string
+}
+
+func NewDirectory(file *File, usr *Account) (*Folder, error) {
+
+	//file.Type = "D"
+
+	folder := &Folder{File: file}
+
+	entries, err := file.Handle.ReadDirHandle()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, info := range entries {
+		if info.Name()[0] == '.' {
+			continue
+		}
+		file := NewChildFromHandle(info, usr)
+		folder.Entries = append(folder.Entries, file)
+	}
+	return folder, nil
+
+}
+
+func NewChildFromHandle(handle Handle, usr *Account) *File {
+
+	file := NewFile(handle)
+
+	//file.Path = path.Join(d.Path, info.Name())
+
+	r, w, x := handle.GetPermissions(usr.Uid, usr.Gid)
+	file.Permissions = struct{ Read, Write, Exec bool }{Read: r, Write: w, Exec: x}
+	return file
+}
+
+type Album struct {
+	ID   entity.ID `json:"id" bson:"_id,omitempty"`
+	Name string    `json:"name" bson:"name,omitempty"`
+	Path string    `json:"path" bson:"path"`
+}
+
+type Repository interface {
+	FindAll() ([]*Album, error)
+	Get() (*Album, error)
 }

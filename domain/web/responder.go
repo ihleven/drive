@@ -21,8 +21,7 @@ func ErrorResponder(w http.ResponseWriter, msg string, errno int) {
 	data := make(map[string]interface{})
 	data["msg"] = msg
 	data["errno"] = errno
-	_ = errorTmpl.Execute(w, data)
-	//fmt.Println(err)
+	rnd.HTML(w, errno, "error", data)
 }
 
 var funcMap = template.FuncMap{

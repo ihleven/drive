@@ -33,6 +33,7 @@ func Bytes(size int64) string {
 	//fmt.Printf("%d %s (%.2f %s)", size, ext[i], size2, ext2[j])
 	return fmt.Sprintf("%.1f %s", size2, ext2[j])
 }
+
 func Icon(typ string) string {
 	ext := map[string]string{"F": "file", "FI": "image", "FT": "file-text", "D": "folder", "DA": "album"}
 	if icon, ok := ext[typ]; ok {
