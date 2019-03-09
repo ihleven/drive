@@ -10,31 +10,34 @@ import (
 	"path"
 )
 
-func Dispatch(w http.ResponseWriter, r *http.Request) {
+func DispatchPrefix(prefix string) func(w http.ResponseWriter, r *http.Request) {
 
-	usr, _ := session.GetSessionUser(r, w)
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	file, err := usecase.GetFile("public", path.Clean(r.URL.Path))
-	fmt.Println(file, err)
-	if err != nil {
-		ErrorResponder(w, "error openign file: "+err.Error(), 500)
-		return
+		usr, _ := session.GetSessionUser(r, w)
+
+		file, err := usecase.GetFile(prefix, path.Clean(r.URL.Path))
+		fmt.Println(file, err)
+		if err != nil {
+			ErrorResponder(w, "error openign file: "+err.Error(), 500)
+			return
+		}
+
+		defer file.Close()
+
+		var mimeHandler = GetRegisteredMIMEHandler(file, usr)
+		switch r.Method {
+		case "GET":
+
+			mimeHandler.Render(w, r)
+
+		case "POST":
+			mimeHandler.Post(w, r)
+		}
+
+		fmt.Println(r.Method)
+
 	}
-
-	defer file.Close()
-
-	var mimeHandler = GetRegisteredMIMEHandler(file, usr)
-	switch r.Method {
-	case "GET":
-
-		mimeHandler.Render(w, r)
-
-	case "POST":
-		mimeHandler.Post(w, r)
-	}
-
-	fmt.Println(r.Method)
-
 }
 func GetRegisteredMIMEHandler(file *domain.File, usr *domain.Account) (vs ViewSet) {
 	m := file.GuessMIME()

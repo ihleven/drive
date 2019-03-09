@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"strings"
+	"time"
 )
 
 // https://blog.questionable.services/article/approximating-html-template-inheritance/
@@ -13,7 +14,9 @@ import (
 var FuncMap = template.FuncMap{
 	"bytes":       Bytes,
 	"icon":        Icon,
-	"marshalJSON": marshalJSONScript}
+	"marshalJSON": marshalJSONScript,
+	"format":      TimeFormat,
+}
 
 func Bytes(size int64) string {
 	if size < 1000 {
@@ -34,6 +37,10 @@ func Bytes(size int64) string {
 	return fmt.Sprintf("%.1f %s", size2, ext2[j])
 }
 
+func TimeFormat(t time.Time) string {
+
+	return t.Format(time.RFC822Z)
+}
 func Icon(typ string) string {
 	ext := map[string]string{"F": "file", "FI": "image", "FT": "file-text", "D": "folder", "DA": "album"}
 	if icon, ok := ext[typ]; ok {

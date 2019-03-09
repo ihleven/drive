@@ -38,7 +38,7 @@
                     <tr>
                         <td>
                             <span class="icon is-small">
-                                {{ if (ne .Type "D") }}
+                                {{ if (ne .MIME.Type "directory") }}
                                 <svg style="width:100%;height:100%">
                                     <use xlink:href="/static/entypo-icons.svg#icon-text-document"></use>
                                 </svg>
@@ -73,12 +73,12 @@
                             {{.Permissions.Write}}
                         </td>
                         <td title="{{.Size}} Bytes">
-                            {{ if (ne .Type "D") }}
+                            {{ if (ne .MIME.Type "folder") }}
                             {{.Size | bytes }}
                             {{end}}
                         </td>
                         <td>
-                            {{.FormattedMTime }}
+                            {{.MTime | format }}
                         </td>
                     </tr>
                     {{end}}

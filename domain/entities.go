@@ -75,10 +75,11 @@ func NewFile(handle Handle) *File {
 		Handle: handle,
 		//Path:       path,
 		MTime: handle.ModTime(),
-
-		Mode: handle.Mode(),
-		Name: handle.Name(),
-		Size: handle.Size(),
+		Owner: &User{},
+		Group: &Group{},
+		Mode:  handle.Mode(),
+		Name:  handle.Name(),
+		Size:  handle.Size(),
 	}
 	handle.GuessMIME()
 	return file
@@ -113,7 +114,6 @@ func NewDirectory(file *File, usr *Account) (*Folder, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	for _, info := range entries {
 		if info.Name()[0] == '.' {
 			continue
@@ -121,6 +121,7 @@ func NewDirectory(file *File, usr *Account) (*Folder, error) {
 		file := NewChildFromHandle(info, usr)
 		folder.Entries = append(folder.Entries, file)
 	}
+	fmt.Println(folder.Entries)
 	return folder, nil
 
 }

@@ -16,7 +16,7 @@ type FileSystemStorage struct {
 
 var storages = map[string]*FileSystemStorage{
 	"home":   &FileSystemStorage{Root: "/Users/mi"},
-	"public": &FileSystemStorage{Root: "C:/Users/ih/projects"},
+	"public": &FileSystemStorage{Root: "/Users/mi"},
 }
 
 func Register(root, prefix string) {

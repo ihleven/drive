@@ -4,6 +4,7 @@ import (
 	"drive/domain"
 	"drive/views"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 
@@ -16,6 +17,7 @@ var rnd *renderer.Render
 func init() {
 	fm := make([]template.FuncMap, 1)
 	fm[0] = views.FuncMap
+	fmt.Println(fm[0])
 	opts := renderer.Options{
 		FuncMap:          fm,
 		ParseGlobPattern: "./templates/*.html",
@@ -51,6 +53,10 @@ type DirHandler struct {
 
 func (h DirHandler) Render(w http.ResponseWriter, r *http.Request) {
 
+	folder, _ := domain.NewDirectory(h.File, h.User)
+	//for _, _ := range folder.Entries {
+	//fmt.Println(" ==> ", i, e)
+	//}
 	switch r.Header.Get("Accept") {
 
 	case "application/json":
@@ -58,10 +64,10 @@ func (h DirHandler) Render(w http.ResponseWriter, r *http.Request) {
 		views.SerializeJSON(w, h.Folder)
 
 	default:
-		m := map[string]interface{}{"user": h.User, "file": h.File, "entries": h.Entries}
+		m := map[string]interface{}{"user": h.User, "file": h.File, "dir": folder}
 		err := views.RenderDir(w, m)
 		if err != nil {
-			panic(err)
+			fmt.Println("render error: ", err)
 		}
 	}
 

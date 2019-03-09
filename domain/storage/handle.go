@@ -113,13 +113,13 @@ func (fh *FileHandle) ReadDirHandle() ([]domain.Handle, error) {
 	}
 	//sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
 
-	var handles = make([]domain.Handle, len(entries))
-	for index, entry := range entries {
+	var handles = make([]domain.Handle, 0)
+	for _, entry := range entries {
 		if entry.Name()[0] == '.' {
 			// ignore all files starting with '.'
 			continue
 		}
-		handles[index] = &FileHandle{FileInfo: entry}
+		handles = append(handles, &FileHandle{FileInfo: entry})
 		//stat := entry.Sys()
 		//.(*syscall.Stat_t) // _ ist ok und kein error
 	}

@@ -39,7 +39,7 @@ func CreateServer() {
 	mux.HandleFunc("/login", Login)
 	mux.HandleFunc("/logout", Logout)
 	mux.HandleFunc("/serve/", Serve)
-	mux.HandleFunc("/", Dispatch)
+	mux.HandleFunc("/", DispatchPrefix("public"))
 
 	srv := &http.Server{
 		Handler: mux,

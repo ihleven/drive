@@ -5,7 +5,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 func (f *File) Save() error {
@@ -60,10 +59,6 @@ func (f *File) ParentsAlt() []File {
 	return list
 }
 
-func (f *File) FormattedMTime() string {
-
-	return f.ModTime.Format(time.RFC822Z)
-}
 func (f *File) String() string {
 
 	return fmt.Sprintf("%s: %s", f.Type, f.Path)

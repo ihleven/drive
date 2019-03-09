@@ -1,6 +1,7 @@
 package web
 
 import (
+	"drive/views"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -24,10 +25,7 @@ func ErrorResponder(w http.ResponseWriter, msg string, errno int) {
 	rnd.HTML(w, errno, "error", data)
 }
 
-var funcMap = template.FuncMap{
-	"bytes":       Bytes,
-	"icon":        Icon,
-	"marshalJSON": marshalJSONScript}
+var funcMap = views.FuncMap
 
 func Bytes(size int64) string {
 	if size < 1000 {
