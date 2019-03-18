@@ -2,6 +2,7 @@ package web
 
 import (
 	"drive/domain"
+	"drive/domain/usecase"
 	"drive/views"
 	"encoding/json"
 	"fmt"
@@ -15,11 +16,9 @@ import (
 var rnd *renderer.Render
 
 func init() {
-	fm := make([]template.FuncMap, 1)
-	fm[0] = views.FuncMap
-	fmt.Println(fm[0])
+
 	opts := renderer.Options{
-		FuncMap:          fm,
+		FuncMap:          []template.FuncMap{views.FuncMap},
 		ParseGlobPattern: "./templates/*.html",
 	}
 
@@ -27,6 +26,7 @@ func init() {
 }
 
 type ViewSet interface {
+	Init(*domain.File, *domain.Account, domain.Storage)
 	Render(w http.ResponseWriter, r *http.Request)
 	Post(w http.ResponseWriter, r *http.Request)
 }
@@ -36,11 +36,23 @@ type FileHandler struct {
 	usr  *domain.Account
 }
 
-func (h FileHandler) Render(w http.ResponseWriter, r *http.Request) {
-	rnd.HTML(w, http.StatusOK, "file", nil)
+func (h *FileHandler) Init(file *domain.File, usr *domain.Account, st domain.Storage) {
+	fmt.Println("filehandler", file, usr)
+	h.file = file
+	h.usr = usr
+
+}
+func (h *FileHandler) Render(w http.ResponseWriter, r *http.Request) {
+	m := map[string]interface{}{"user": h.usr, "file": h.file}
+	fmt.Println("filehandler render", h.file)
+
+	err := rnd.HTML(w, http.StatusOK, "file", m)
+	if err != nil {
+		fmt.Println("render error: ", err)
+	}
 }
 
-func (h FileHandler) Post(w http.ResponseWriter, r *http.Request) {
+func (h *FileHandler) Post(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("hgfghfjh"))
 }
 
@@ -51,9 +63,14 @@ type DirHandler struct {
 	Folder  *domain.Folder
 }
 
-func (h DirHandler) Render(w http.ResponseWriter, r *http.Request) {
-
-	folder, _ := domain.NewDirectory(h.File, h.User)
+func (h *DirHandler) Init(file *domain.File, usr *domain.Account, storage domain.Storage) {
+	h.File = file
+	h.User = usr
+	folder, _ := usecase.GetFolder(storage, file, usr)
+	h.Folder = folder
+}
+func (h *DirHandler) Render(w http.ResponseWriter, r *http.Request) {
+	//folder, _ := domain.NewDirectory(h.File, h.User)
 	//for _, _ := range folder.Entries {
 	//fmt.Println(" ==> ", i, e)
 	//}
@@ -64,8 +81,10 @@ func (h DirHandler) Render(w http.ResponseWriter, r *http.Request) {
 		views.SerializeJSON(w, h.Folder)
 
 	default:
-		m := map[string]interface{}{"user": h.User, "file": h.File, "dir": folder}
-		err := views.RenderDir(w, m)
+		m := map[string]interface{}{"user": h.User, "file": h.File, "dir": h.Folder}
+		fmt.Println("dirhandler", m)
+
+		err := rnd.HTML(w, http.StatusOK, "directory", m)
 		if err != nil {
 			fmt.Println("render error: ", err)
 		}
@@ -73,7 +92,7 @@ func (h DirHandler) Render(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h DirHandler) Post(w http.ResponseWriter, r *http.Request) {
+func (h *DirHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodPost:

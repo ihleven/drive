@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 )
 
 //const serverUA = "Alexis/0.2"
@@ -13,6 +14,15 @@ var (
 	Root    string
 	cwd     string
 )
+var conf Config
+
+type Config struct {
+	Public     string
+	Homes      []string
+	Pi         float64
+	Perfection []int
+	DOB        time.Time // requires `import time`
+}
 
 type address struct {
 	host string

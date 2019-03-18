@@ -5,11 +5,17 @@ import (
 	"time"
 )
 
-func statAtime(st *syscall.Stat_t) time.Time {
-	return time.Unix(st.Atimespec.Unix())
+func statMtime(st *syscall.Stat_t) time.Time {
+	return time.Unix(st.Mtimespec.Unix())
 }
-func statCtime(st *syscall.Stat_t) time.Time {
-	return time.Unix(st.Ctimespec.Unix())
+
+func statAtime(st *syscall.Stat_t) *time.Time {
+	atime := time.Unix(st.Atimespec.Unix())
+	return &atime
+}
+func statCtime(st *syscall.Stat_t) *time.Time {
+	ctime := time.Unix(st.Ctimespec.Unix())
+	return &ctime
 }
 
 func (fh *FileHandle) StatTimes() (atime, mtime, ctime time.Time, err error) {

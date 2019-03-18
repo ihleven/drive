@@ -2,6 +2,7 @@ package web
 
 import (
 	"drive/config"
+	"drive/domain/storage"
 	"log"
 	"net/http"
 	"path"
@@ -38,8 +39,11 @@ func CreateServer() {
 	mux.Handle("/dist/", assetHandler("dist", "vue/dist"))
 	mux.HandleFunc("/login", Login)
 	mux.HandleFunc("/logout", Logout)
-	mux.HandleFunc("/serve/", Serve)
-	mux.HandleFunc("/", DispatchPrefix("public"))
+	mux.HandleFunc("/serve/home/", Serve(storage.Get("home")))
+	mux.HandleFunc("/serve/", Serve(storage.Get("public")))
+	mux.HandleFunc("/public/", DispatchStorage(storage.Get("public")))
+	mux.HandleFunc("/home/", DispatchStorage(storage.Get("home")))
+	mux.HandleFunc("/", IndexHandler)
 
 	srv := &http.Server{
 		Handler: mux,

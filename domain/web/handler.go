@@ -5,72 +5,102 @@ import (
 	"drive/domain/usecase"
 	"drive/session"
 	"fmt"
-	"html/template"
 	"net/http"
+	"os"
 	"path"
+
+	"github.com/h2non/filetype/types"
 )
 
-func DispatchPrefix(prefix string) func(w http.ResponseWriter, r *http.Request) {
+func DispatchStorage(storage domain.Storage) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		usr, _ := session.GetSessionUser(r, w)
 
-		file, err := usecase.GetFile(prefix, path.Clean(r.URL.Path))
-		fmt.Println(file, err)
+		file, err := usecase.GetFile(storage, path.Clean(r.URL.Path), usr)
 		if err != nil {
-			ErrorResponder(w, "error openign file: "+err.Error(), 500)
+			ErrorResponder(w, "error opening file: "+err.Error(), 500)
 			return
 		}
 
-		defer file.Close()
-
-		var mimeHandler = GetRegisteredMIMEHandler(file, usr)
+		var handler = GetRegisteredHandler(&file.MIME)
+		handler.Init(file, usr, storage)
 		switch r.Method {
 		case "GET":
-
-			mimeHandler.Render(w, r)
-
+			handler.Render(w, r)
 		case "POST":
-			mimeHandler.Post(w, r)
+			handler.Post(w, r)
 		}
 
-		fmt.Println(r.Method)
+		switch {
+		case file.Mode.IsRegular():
+
+			//controller := FileController{File: file, User: usr}
+			//controller.ServeHTTP(w, r)
+
+		case file.Mode.IsDir():
+
+			//controller := DirController{File: f, User: usr}
+			//controller.Render(w, r)
+
+		case file.Mode&os.ModeSymlink != 0:
+			fmt.Println("symbolic link")
+		case file.Mode&os.ModeNamedPipe != 0:
+			fmt.Println("named pipe")
+		}
 
 	}
 }
-func GetRegisteredMIMEHandler(file *domain.File, usr *domain.Account) (vs ViewSet) {
-	m := file.GuessMIME()
-	switch m.Type {
-	case "text":
-		vs = &FileHandler{file, usr}
-	case "image":
 
+func GetRegisteredHandler(MIME *types.MIME) (vs ViewSet) {
+	fmt.Println("GetRegisteredHandler", MIME)
+
+	//m := file.GuessMIME()
+	switch MIME.Type {
+	case "directory":
+		vs = &DirHandler{}
+	case "text":
+		vs = &TextFileController{}
+	case "image":
+		vs = &FileHandler{}
+		//vs = &ImageHandler{file, usr}
 		//return ImageHandler{file: file, usr: usr}
 	default:
-		vs = &DirHandler{File: file, User: usr}
+		vs = &FileHandler{}
 	}
 	return
 }
 
-func Serve(w http.ResponseWriter, r *http.Request) {
+func Serve(storage domain.Storage) func(w http.ResponseWriter, r *http.Request) {
 
-	authuser, err := session.GetSessionUser(r, w)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		authuser, err := session.GetSessionUser(r, w)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		cleanedPath := path.Clean(r.URL.Path)[6:] // strip "/serve"-prefix
+
+		handle, err := usecase.GetReadHandle(storage, cleanedPath, authuser.Uid, authuser.Gid)
+		if err != nil {
+			ErrorResponder(w, err.Error(), 500)
+			return
+		}
+
+		if handle.IsDir() {
+			r.URL.Path = path.Join(r.URL.Path, "index.html")
+			Serve(storage)(w, r)
+			return
+		}
+
+		fd := handle.Descriptor()
+		defer fd.Close()
+
+		http.ServeContent(w, r, handle.Name(), handle.ModTime(), fd)
 	}
-
-	path := path.Clean(r.URL.Path)[6:] // strip "/serve"-prefix
-
-	handle, err := usecase.GetServeContentHandle("public", path, authuser.Uid, authuser.Gid)
-	if err != nil {
-		ErrorResponder(w, err.Error(), 500)
-		return
-	}
-	defer handle.Close()
-
-	http.ServeContent(w, r, handle.Name(), handle.ModTime(), handle.GetFile())
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -96,8 +126,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", 302)
 	}
 
-	t, _ := template.ParseFiles("templates/login.html")
-	t.Execute(w, nil)
+	err := rnd.HTML(w, http.StatusOK, "login", nil)
+	if err != nil {
+		fmt.Println("login render error: ", err)
+	}
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
@@ -105,6 +137,13 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	sess.Clear()
 	sess.Save(r, w)
 	http.Redirect(w, r, "/login", 302)
+}
+
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+
+	usr, _ := session.GetSessionUser(r, w)
+
+	rnd.HTML(w, http.StatusOK, "index", map[string]interface{}{"user": usr})
 }
 
 func assetHandler(prefix, location string) http.Handler {

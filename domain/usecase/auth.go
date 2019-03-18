@@ -6,17 +6,17 @@ import (
 	"os/user"
 )
 
-var cachedUsers = map[string]*user.User{}
-var cachedGroups = map[string]*user.Group{}
+var cachedUsers = map[uint32]*domain.User{}
+var cachedGroups = map[uint32]*domain.Group{}
 
-func GetUserByID(uid string) *user.User {
+func GetUserByID(uid uint32) *domain.User {
 	usr, ok := cachedUsers[uid]
 	if !ok {
-		usr, err := user.LookupId(uid)
+		usr, err := user.LookupId(fmt.Sprintf("%d", uid))
 		if err != nil {
 			return nil
 		}
-		cachedUsers[uid] = usr
+		cachedUsers[uid] = &domain.User{Uid: usr.Uid, Gid: usr.Gid, Username: usr.Username, Name: usr.Name, HomeDir: usr.HomeDir}
 	}
 
 	//switch err.(type) {
@@ -29,17 +29,16 @@ func GetUserByID(uid string) *user.User {
 	return usr
 }
 
-func GetGroupByID(gid string) *user.Group {
+func GetGroupByID(gid uint32) *domain.Group {
 
 	grp, ok := cachedGroups[gid]
 	if !ok {
-		fmt.Println("GetGroupByID: looking up group", gid)
-		grp, err := user.LookupGroupId(gid)
+		grp, err := user.LookupGroupId(fmt.Sprintf("%d", gid))
 		if err != nil {
 			fmt.Println("GetGroupByID: error looking up group", gid, err)
 			return nil
 		}
-		cachedGroups[gid] = grp
+		cachedGroups[gid] = &domain.Group{Gid: grp.Gid, Name: grp.Name}
 	}
 	return grp
 }

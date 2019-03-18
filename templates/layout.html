@@ -1,74 +1,75 @@
-{{ define "file" }}
+{{ define "layout" }}
 <!DOCTYPE html>
 <html lang="en">
 
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Photo Album - Free Bulma template</title>
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
-        <!-- Bulma Version 0.7.4-->
-        <link rel="stylesheet" href="https://unpkg.com/bulma@0.7.4/css/bulma.min.css" />
-        <link rel="stylesheet" type="text/css" href="/static/instaAlbum.css">
-    </head>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Photo Album - Free Bulma template</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+    <!-- Bulma Version 0.7.4-->
+    <link rel="stylesheet" href="https://unpkg.com/bulma@0.7.4/css/bulma.min.css" />
+    <link rel="stylesheet" type="text/css" href="/static/instaAlbum.css">
+</head>
 
-    <body>
-        <div class="navbar is-inline-flex is-transparent">
-            <div class="navbar-brand">
-                <a class="navbar-item" href="https://ihle.cloud">
-                    <span class="title-name">matthias@ihle.</span>
-                    <svg class="feather feather-cloud sc-dnqmqq jxshSx title-svg" xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" aria-hidden="true" data-reactid="351">
-                        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-                    </svg>
-                </a>
-            </div>
-            <div class="navbar-menu">
-                <div class="navbar-item">
-                    <div class="control has-icons-left">
-                        <input class="input is-small has-text-centered" type="text" placeholder="search">
-                        <span class="icon is-left is-small">
-                            <i class="material-icons">search</i>
-                        </span>
-                    </div>
+<body>
+    <div class="navbar is-inline-flex is-transparent">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="https://ihle.cloud">
+                <span class="title-name">matthias@ihle.</span>
+                <svg class="feather feather-cloud sc-dnqmqq jxshSx title-svg" xmlns="http://www.w3.org/2000/svg" width="24"
+                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true" data-reactid="351">
+                    <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                </svg>
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-item">
+                <div class="control has-icons-left">
+                    <input class="input is-small has-text-centered" type="text" placeholder="search">
+                    <span class="icon is-left is-small">
+                        <i class="material-icons">search</i>
+                    </span>
                 </div>
             </div>
-            <div class="navbar-item is-flex-touch">
-                <a class="navbar-item">
-                    <i class="material-icons">explore</i>
-                </a>
-                <a class="navbar-item">
-                    <i class="material-icons">favorite_border</i>
-                </a>
-                <a class="navbar-item">
-                    <i class="material-icons">person_outline</i>
-                </a>
-            </div>
         </div>
-        <div class="columns body-columns">
-            <div class="column is-half is-offset-one-quarter">
+        <div class="navbar-item is-flex-touch">
+            <a class="navbar-item">
+                <i class="material-icons">explore</i>
+            </a>
+            <a class="navbar-item">
+                <i class="material-icons">favorite_border</i>
+            </a>
+            <a class="navbar-item">
+                <i class="material-icons">person_outline</i>
+            </a>
+        </div>
+    </div>
+    <div class="columns body-columns">
+        <div class="column is-half is-offset-one-quarter">
 
 
 
 
-                <footer class="footer">
-                    <div class="container is-fluid">
-                        <div class="content has-text-centered">
-                            <p>
-                                <strong>Bulma</strong> by
-                                <a href="http://jgthms.com">Jeremy Thomas</a>. The source code is licensed
-                                <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content is licensed
-                                <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY NC SA 4.0</a>.
-                            </p>
-                        </div>
+            <footer class="footer">
+                <div class="container is-fluid">
+                    <div class="content has-text-centered">
+                        <p>
+                            <strong>Bulma</strong> by
+                            <a href="http://jgthms.com">Jeremy Thomas</a>. The source code is licensed
+                            <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content is
+                            licensed
+                            <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY NC SA 4.0</a>.
+                        </p>
                     </div>
-                </footer>
-            </div>
+                </div>
+            </footer>
         </div>
-    </body>
+    </div>
+</body>
 
 </html>
 {{ end }}

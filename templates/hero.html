@@ -1,4 +1,4 @@
-{{define "hero"}}
+{{define "partials/hero"}}
 
 <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
     <div class="container">
@@ -106,8 +106,8 @@
                     </h2>
                     <nav class="breadcrumb" aria-label="breadcrumbs">
                         <ul>
-                            <li><a href="/">Home</a></li>
-                            {{range .file.Parents}}
+                            <li><a href="/">root</a></li>
+                            {{range .file.Breadcrumbs}}
                             <li><a href="{{.Path}}">{{.Name}}</a></li>
                             {{end}}
                         </ul>

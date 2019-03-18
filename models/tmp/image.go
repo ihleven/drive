@@ -3,7 +3,6 @@ package usecase
 import (
 	"drive/domain"
 	"drive/domain/storage"
-	"drive/models/auth"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -22,7 +21,7 @@ import (
 )
 
 type Image struct {
-	File          *storage.FileHandle
+	File          *domain.File
 	ColorModel    color.Model
 	Width, Height int
 	Ratio         float64
@@ -45,10 +44,10 @@ type Exif struct {
 	Model string
 }
 
-func NewImage(file *storage.FileHandle) (*Image, error) {
-	config, format, err := image.DecodeConfig(domain.File)
+func NewImage(file *domain.File) (*Image, error) {
+	config, format, err := image.DecodeConfig(file.Descriptor)
 	if err != nil {
-		log.Fatal(config.ColorModel, config.Height, config.Width, err)
+		log.Fatal(file.Path, config.ColorModel, config.Height, config.Width, err)
 		return nil, err
 	}
 	image := &Image{file,
@@ -77,8 +76,8 @@ func (i *Image) GoexifDecode() error {
 	e := &Exif{}
 	i.Exif = e
 
-	i.File.File.Seek(0, 0)
-	x, err := exif.Decode(i.File.File)
+	i.File.Descriptor.Seek(0, 0)
+	x, err := exif.Decode(i.File.Descriptor)
 	if err != nil {
 		return err
 	}
@@ -131,11 +130,14 @@ func (i *Image) GoexifDecode() error {
 	return nil
 }
 
-func (i Image) getMetaFile() *domain.File {
-
-	st := i.File.Storage.Open()
-	return nil
-
+func (i Image) getMetaFile() *file.Info {
+	base := strings.TrimSuffix(i.File.Path, filepath.Ext(i.File.Path))
+	f, err := file.Open(fmt.Sprintf("%s.txt", base), 0, 0, 0)
+	if err != nil {
+		fmt.Println("error opening meta file", err)
+		return nil
+	}
+	return f
 }
 
 func (i *Image) parseMeta() error {
@@ -175,13 +177,12 @@ func (i *Image) parseMeta() error {
 }
 
 func (i Image) getMetaFilename() string {
-	return "bullshit"
-	//base := strings.TrimSuffix(i.File.Path, filepath.Ext(i.File.Path))
-	//filename := fmt.Sprintf("%s.txt", base)
-	//return filename
+	base := strings.TrimSuffix(i.File.Path, filepath.Ext(i.File.Path))
+	filename := fmt.Sprintf("%s.txt", base)
+	return filename
 }
 
-func (i *Image) WriteMeta(usr *auth.Account) error {
+func (i *Image) WriteMeta(usr *domain.Account) error {
 	filename := i.getMetaFilename()
 	fmt.Println("storage.DefaultStorage.OpenFile", filename)
 
@@ -224,19 +225,23 @@ func (i *Image) update(requestBody []byte) {
 
 func (i *Image) MakeThumbnail() {
 	// open "test.jpg"
-
-	// decode jpeg into image.Image
-	img, err := jpeg.Decode(i.File.File)
+	file, err := os.Open(i.File.Path)
 	if err != nil {
 		log.Fatal(err)
 	}
-	//file.Close()
+
+	// decode jpeg into image.Image
+	img, err := jpeg.Decode(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	file.Close()
 
 	// resize to width 1000 using Lanczos resampling
 	// and preserve aspect ratio
 	m := resize.Resize(100, 0, img, resize.Lanczos3)
 
-	d, f := filepath.Split(i.File.Name())
+	d, f := filepath.Split(i.File.Path)
 	fn := filepath.Join(d, "thumbs", f)
 	out, err := os.Create(fn)
 	if err != nil {

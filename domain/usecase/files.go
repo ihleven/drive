@@ -2,39 +2,64 @@ package usecase
 
 import (
 	"drive/domain"
-	"drive/domain/storage"
+	"errors"
+	"path/filepath"
 )
 
-func GetHandle(path string) (domain.Handle, error) {
+func GetReadHandle(storage domain.Storage, path string, uid, gid uint32) (domain.Handle, error) {
 
-	st := storage.Get("public")
-	file, err := st.Open(path)
-	return file, err
-}
-
-func GetFile(prefix, path string) (*domain.File, error) {
-
-	st := storage.Get(prefix)
-	handle, err := st.Open(path)
+	handle, err := storage.GetHandle(path)
 	if err != nil {
 		return nil, err
 	}
-	file := &domain.File{
-		Handle: handle,
-		Path:   path,
-
-		Name:  handle.Name(),
-		Size:  handle.Size(),
-		Mode:  handle.Mode(),
-		MTime: handle.ModTime(),
-		MIME:  handle.GuessMIME(),
+	if !handle.HasReadPermission(uid, gid) {
+		return nil, errors.New("Permission denied")
 	}
-	return file, err
+	return handle, nil
 }
 
-func GetServeContentHandle(prefix, path string, uid, gid uint32) (domain.Handle, error) {
+func GetFile(storage domain.Storage, path string, usr *domain.Account) (*domain.File, error) {
 
-	st := storage.Get(prefix)
-	file, err := st.PermOpen(path, 0, uid, gid)
-	return file, err
+	handle, err := storage.GetHandle(path)
+	if err != nil {
+		return nil, err
+	}
+
+	file, err := handle.ToFile(path, usr)
+	if err != nil {
+		return nil, err
+	}
+	return file, nil
+}
+func GetFolder(storage domain.Storage, file *domain.File, usr *domain.Account) (*domain.Folder, error) {
+
+	folder := &domain.Folder{File: file}
+	//handles, err := file.ReadDirHandle()
+	handles, err := storage.ReadDir(file.Path)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, handle := range handles {
+
+		entry, _ := handle.ToFile(filepath.Join(file.Path, handle.Name()), usr)
+
+		_ = &domain.File{
+			Handle: handle,
+			Path:   filepath.Join(file.Path, handle.Name()),
+
+			Name: handle.Name(),
+
+			Mode:     handle.Mode(),
+			Modified: handle.ModTime(),
+			MIME:     handle.GuessMIME(),
+			Owner:    &domain.User{},
+			Group:    &domain.Group{},
+		}
+		folder.Entries = append(folder.Entries, entry)
+		if entry.Name == "index.html" {
+			folder.IndexFile = entry
+		}
+	}
+	return folder, nil
 }

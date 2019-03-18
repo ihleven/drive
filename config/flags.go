@@ -9,6 +9,10 @@ import (
 
 func ParseFlags() {
 
+	//if _, err := toml.Decode(tomlData, &conf); err != nil {
+	// handle error
+	//}
+
 	//cwd, _ := os.Getwd()
 
 	flag.StringVar(&Address.host, "host", "localhost", "Host")

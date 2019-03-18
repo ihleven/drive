@@ -1,3 +1,5 @@
+{{ define "directory" }}
+
 <!DOCTYPE html>
 <html>
 
@@ -5,14 +7,14 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{.file.Name}}</title>
+    <title>{{.file}}</title>
     <link rel="stylesheet" href="/dist/css/app.css">
     <link rel="stylesheet" href="/static/entypo-icons.svg">
     <link rel="stylesheet" href="/static/feather-icons.svg">
 </head>
 
 <body>
-    {{template "hero" .}}
+    {{template "partials/hero" .}}
 
     <section class="section">
 
@@ -23,14 +25,17 @@
                     <tr>
                         <th></th>
                         <th>Name</th>
+
+                        <th>MIME</th>
+                        <th>MIME</th>
+                        <th>Mode</th>
                         <th>Owner</th>
                         <th>Group</th>
-                        <th>MIME</th>
                         <th>Permissions</th>
-                        <th>R</th>
-                        <th>Write</th>
                         <th>Size</th>
-                        <th>ModTime</th>
+                        <th>Created</th>
+                        <th>Modified</th>
+                        <th>Accessed</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -39,12 +44,12 @@
                         <td>
                             <span class="icon is-small">
                                 {{ if (ne .MIME.Type "directory") }}
-                                <svg style="width:100%;height:100%">
-                                    <use xlink:href="/static/entypo-icons.svg#icon-text-document"></use>
+                                <svg style="width:1rem;height:1rem; vertical-align: -0.15rem;">
+                                    <use xlink:href="/static/feather-icons.svg#icon-file"></use>
                                 </svg>
                                 {{else}}
-                                <svg style="width:100%;height:100%">
-                                    <use xlink:href="/static/entypo-icons.svg#icon-folder"></use>
+                                <svg style="width:1rem;height:1rem; vertical-align: -0.15rem;">
+                                    <use xlink:href="/static/feather-icons.svg#icon-folder"></use>
                                 </svg>
 
                                 {{end}}
@@ -53,32 +58,59 @@
                         <td>
                             <a href="{{.Path}}" title="{{.Path}}">{{.Name}}</a>
                         </td>
+
                         <td>
-                            {{.Owner.Username }}
+                            {{.MIME.Type}}
                         </td>
                         <td>
-                            {{.Group.Name }}
-                        </td>
-                        <td>
-                            {{.MIME.Value}}
+                            {{.MIME.Subtype}}
                         </td>
                         <td>
                             {{.Mode}}
                         </td>
+                        <td>
+                            {{.Owner.Username }}
+                            {{ if .Permissions.IsOwner }}
+                            <svg style="width:1rem;height:1rem; vertical-align: -0.2rem;">
+                                <use xlink:href="/static/feather-icons.svg#icon-check-square"></use>
+                            </svg>
+                            {{else}}
+                            <svg style="width:1rem;height:1rem; vertical-align: -0.2rem;">
+                                <use xlink:href="/static/feather-icons.svg#icon-square"></use>
+                            </svg>
+                            {{end}}
+                        </td>
+                        <td>
+                            {{.Group.Name }}
+                            {{ if .Permissions.InGroup }}
+                            <svg style="width:1rem;height:1rem; vertical-align: -0.2rem;">
+                                <use xlink:href="/static/feather-icons.svg#icon-check-square"></use>
+                            </svg>
+                            {{else}}
+                            <svg style="width:1rem;height:1rem; vertical-align: -0.2rem;">
+                                <use xlink:href="/static/feather-icons.svg#icon-square"></use>
+                            </svg>
+                            {{end}}
+                        </td>
+                        <td>
+                            {{ if .Permissions.Read }}R{{else}}-{{end}} /
+                            {{ if .Permissions.Write }}W{{else}}-{{end}} /
+                            {{ if .Permissions.Exec }}X{{else}}-{{end}}
+                        </td>
 
-                        <td>
-                            {{.Permissions.Read}}
-                        </td>
-                        <td>
-                            {{.Permissions.Write}}
-                        </td>
                         <td title="{{.Size}} Bytes">
                             {{ if (ne .MIME.Type "folder") }}
                             {{.Size | bytes }}
                             {{end}}
                         </td>
                         <td>
-                            {{.MTime | format }}
+                            {{.Created | format }}
+                        </td>
+                        <td>
+                            {{.Modified | format }}
+                        </td>
+                        <td>
+                            {{.Accessed | format }}
                         </td>
                     </tr>
                     {{end}}
@@ -289,3 +321,5 @@
 </body>
 
 </html>
+
+{{ end }}
