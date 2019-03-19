@@ -15,10 +15,8 @@ import (
 
 type FileHandle struct {
 	os.FileInfo
-	file    *os.File
 	storage domain.Storage
-	//stat    *syscall.Stat_t
-	//url     string //
+	//storagePath string //
 	location string //
 
 	mode os.FileMode
@@ -189,7 +187,6 @@ func (fh *FileHandle) ReadDirHandle() ([]domain.Handle, error) {
 		return nil, err
 	}
 	//sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
-	fmt.Println("GetFolder", fh.location)
 
 	var handles = make([]domain.Handle, 0)
 	for _, entry := range entries {

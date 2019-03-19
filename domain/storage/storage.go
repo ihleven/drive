@@ -2,7 +2,7 @@ package storage
 
 import (
 	"drive/domain"
-	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -36,42 +36,49 @@ func (st *FileSystemStorage) TrimPath(path string) string {
 	return "/"
 }
 
+func (st *FileSystemStorage) Location(path string) string {
+	trimmedPath := strings.TrimPrefix(path, st.Prefix)
+	//if trimmedPath == "" {
+	//	trimmedPath = "/"
+	//}
+	return filepath.Join(st.Root, trimmedPath)
+}
+
 func (st *FileSystemStorage) GetHandle(name string) (domain.Handle, error) {
 
-	location := filepath.Join(st.Root, st.TrimPath(name))
+	location := st.Location(name)
 
 	info, err := os.Stat(location)
 	if err != nil {
 		return nil, err
 	}
+
 	handle := &FileHandle{
 		FileInfo: info,
+		mode:     info.Mode(),
 		storage:  st,
 		location: location,
-		mode:     info.Mode(),
 	}
 
 	if st.PermissionMode != 0 {
-		//fmt.Printf("Mode %b %b %b \n\n", handle.mode, handle.mode&0xfffffe00, st.PermissionMode&0x1ff)
 		handle.mode = (handle.mode & 0xfffffe00) | (st.PermissionMode & 0x1ff)
-		//fmt.Printf("Mode %b  \n\n", handle.mode)
 	}
 	return handle, nil
 }
 
-func (st *FileSystemStorage) OpenFD(name string) (*os.File, error) {
-	path := filepath.Join(st.Root, st.TrimPath(name))
-	fmt.Println("OpenFD", name, st.TrimPath(name))
-	fd, err := os.Open(path)
+func (st *FileSystemStorage) Open(location string) (*os.File, error) {
+
+	fd, err := os.Open(location)
 	if err != nil {
+		log.Fatal("error gettting descriptor", err.Error(), location)
 		return nil, err
 	}
 	return fd, nil
 }
 
-func (st *FileSystemStorage) ReadDir(name string) ([]domain.Handle, error) {
+func (st *FileSystemStorage) ReadDir(location string) ([]domain.Handle, error) {
 
-	location := filepath.Join(st.Root, st.TrimPath(name))
+	//location := filepath.Join(st.Root, st.TrimPath(name))
 
 	fd, err := os.Open(location)
 	defer fd.Close()
@@ -87,12 +94,10 @@ func (st *FileSystemStorage) ReadDir(name string) ([]domain.Handle, error) {
 
 	entries := make([]domain.Handle, 0)
 	for _, info := range list {
-		handle := &FileHandle{FileInfo: info, storage: st, mode: info.Mode(), location: filepath.Join(location, info.Name())}
 
+		handle := &FileHandle{FileInfo: info, storage: st, mode: info.Mode(), location: filepath.Join(location, info.Name())}
 		if st.PermissionMode != 0 {
-			//fmt.Printf("Mode %b %b %b \n\n", handle.mode, handle.mode&0xfffffe00, st.PermissionMode&0x1ff)
 			handle.mode = (handle.mode & 0xfffffe00) | (st.PermissionMode & 0x1ff)
-			//fmt.Printf("Mode %b  \n\n", handle.mode)
 		}
 		entries = append(entries, handle)
 	}

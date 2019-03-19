@@ -39,10 +39,10 @@ type Mimetype struct {
 
 type Storage interface {
 	GetHandle(name string) (Handle, error)
-	//Open(string) (Handle, error)
+	Open(string) (*os.File, error)
 	ReadDir(string) ([]Handle, error)
 	//PermOpen(string, uint32, uint32) (*os.File, *time.Time, error)
-	OpenFD(name string) (*os.File, error)
+	//OpenFD(name string) (*os.File, error)
 }
 
 type Handle interface {
