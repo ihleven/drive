@@ -16,16 +16,16 @@ func DispatchStorage(storage domain.Storage) func(w http.ResponseWriter, r *http
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		usr, _ := session.GetSessionUser(r, w)
+		sessionUser, _ := session.GetSessionUser(r, w)
 
-		file, err := usecase.GetFile(storage, path.Clean(r.URL.Path), usr)
+		file, err := usecase.GetFile(storage, path.Clean(r.URL.Path), sessionUser)
 		if err != nil {
 			ErrorResponder(w, "error opening file: "+err.Error(), 500)
 			return
 		}
 
 		var handler = GetRegisteredHandler(&file.MIME)
-		handler.Init(file, usr, storage)
+		handler.Init(file, sessionUser, storage)
 		switch r.Method {
 		case "GET":
 			handler.Render(w, r)

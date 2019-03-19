@@ -15,10 +15,8 @@ import (
 
 type FileHandle struct {
 	os.FileInfo
-	file    *os.File
-	storage FileSystemStorage
-	//stat    *syscall.Stat_t
-	//url     string //
+	storage domain.Storage
+	//storagePath string //
 	location string //
 
 	mode os.FileMode
@@ -51,14 +49,6 @@ func (fh *FileHandle) ToFile(path string, account *domain.Account) (*domain.File
 	}
 
 	return file, nil
-}
-func (fh *FileHandle) Group() *os.File {
-
-	if fh.storage.Group != nil {
-		group = fh.storage.group
-	} else {
-		group := usecase.GetGroupByID(stat.Gid)
-	}
 }
 
 func (fh *FileHandle) Descriptor() *os.File {
@@ -197,7 +187,6 @@ func (fh *FileHandle) ReadDirHandle() ([]domain.Handle, error) {
 		return nil, err
 	}
 	//sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
-	fmt.Println("GetFolder", fh.location)
 
 	var handles = make([]domain.Handle, 0)
 	for _, entry := range entries {

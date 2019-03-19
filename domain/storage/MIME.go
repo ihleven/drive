@@ -70,13 +70,13 @@ func (fh *FileHandle) h2nonMatchMIME261() (types.MIME, error) {
 	return typ.MIME, nil
 }
 
-func (f *FileHandle) DetectContentType() error {
-
-	f.file.Seek(0, 0)
+func (fh *FileHandle) DetectContentType() error {
+	fd := fh.Descriptor()
+	defer fd.Close()
 	// Only the first 512 bytes are used to sniff the content type.
 	buffer := make([]byte, 512)
 
-	_, err := f.file.Read(buffer)
+	_, err := fd.Read(buffer)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func (f *FileHandle) DetectContentType() error {
 	// content-type by returning "application/octet-stream" if no others seemed to match.
 	contentType := http.DetectContentType(buffer)
 	m := types.NewMIME(contentType)
-	fmt.Printf(" * http '%s' => %s\n", f.Name(), m.Type)
+	fmt.Printf(" * http '%s' => %s\n", fh.Name(), m.Type)
 
 	return nil
 }
