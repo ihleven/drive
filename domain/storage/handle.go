@@ -16,7 +16,7 @@ import (
 type FileHandle struct {
 	os.FileInfo
 	file    *os.File
-	storage domain.Storage
+	storage FileSystemStorage
 	//stat    *syscall.Stat_t
 	//url     string //
 	location string //
@@ -51,6 +51,14 @@ func (fh *FileHandle) ToFile(path string, account *domain.Account) (*domain.File
 	}
 
 	return file, nil
+}
+func (fh *FileHandle) Group() *os.File {
+
+	if fh.storage.Group != nil {
+		group = fh.storage.group
+	} else {
+		group := usecase.GetGroupByID(stat.Gid)
+	}
 }
 
 func (fh *FileHandle) Descriptor() *os.File {

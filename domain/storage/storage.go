@@ -2,6 +2,7 @@ package storage
 
 import (
 	"drive/domain"
+	"drive/domain/usecase"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,7 +11,7 @@ import (
 )
 
 var storages = map[string]*FileSystemStorage{
-	"home":   &FileSystemStorage{Root: "/Users/mi/tmp", Prefix: "/home"},
+	"home":   &FileSystemStorage{Root: "/Users/mi/tmp", Prefix: "/home", Group: usecase.GetGroupByID(20)},
 	"public": &FileSystemStorage{Root: "/Users/mi/Downloads", Prefix: "/public", PermissionMode: 0444},
 }
 
@@ -48,7 +49,8 @@ func (st *FileSystemStorage) GetHandle(name string) (domain.Handle, error) {
 		FileInfo: info,
 		storage:  st,
 		location: location,
-		mode:     info.Mode(),
+
+		mode: info.Mode(),
 	}
 
 	if st.PermissionMode != 0 {
