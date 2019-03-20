@@ -53,7 +53,7 @@ type Handle interface {
 	//Close() error
 	//GetFile() *os.File
 	//ReadDir() ([]os.FileInfo, error)
-	ReadDirHandle() ([]Handle, error)
+	ListDirHandles(bool) ([]Handle, error)
 	GetPermissions(owner uint32, group uint32, account *Account) (*Permissions, error)
 	GetContent() ([]byte, error)
 	SetContent([]byte) error
@@ -61,6 +61,7 @@ type Handle interface {
 	//Uid() uint32
 	//Gid() uint32
 	HasReadPermission(uid, gid uint32) bool
+	Storage() Storage
 }
 type Permtype int
 
@@ -168,11 +169,11 @@ type Siblings struct {
 	All []string
 }
 
-func (f *File) Siblings(storage Storage) (*Siblings, error) {
+func (f *File) Siblings() (*Siblings, error) {
 	var currentIndex int
 	siblings := &Siblings{}
 	parentPath := f.ParentPath()
-	infos, err := storage.ReadDir(parentPath)
+	infos, err := f.Storage().ReadDir(parentPath)
 	if err != nil {
 		return nil, err
 	}
@@ -211,39 +212,4 @@ type Folder struct {
 	//Parent    string
 	Entries   []*File
 	IndexFile *File
-}
-
-func NewDirectory(file *File, usr *Account) (*Folder, error) {
-
-	//file.Type = "D"
-	fmt.Println("NEwDirectory:", file.Path)
-	folder := &Folder{File: file}
-
-	entries, err := file.Handle.ReadDirHandle()
-	if err != nil {
-		return nil, err
-	}
-	for _, info := range entries {
-		if info.Name()[0] == '.' {
-			continue
-		}
-		f := NewFile(info, filepath.Join(file.Path, info.Name()))
-
-		//f := NewChildFromHandle(info, file.Path, usr)
-		folder.Entries = append(folder.Entries, f)
-	}
-	return folder, nil
-
-}
-
-type Album struct {
-	// 	"github.com/eminetto/clean-architecture-go/pkg/entity"
-	//ID   entity.ID `json:"id" bson:"_id,omitempty"`
-	Name string `json:"name" bson:"name,omitempty"`
-	Path string `json:"path" bson:"path"`
-}
-
-type Repository interface {
-	FindAll() ([]*Album, error)
-	Get() (*Album, error)
 }

@@ -67,8 +67,9 @@ func (st *FileSystemStorage) GetHandle(name string) (domain.Handle, error) {
 	return handle, nil
 }
 
-func (st *FileSystemStorage) Open(location string) (*os.File, error) {
+func (st *FileSystemStorage) Open(path string) (*os.File, error) {
 
+	location := st.Location(path)
 	fd, err := os.Open(location)
 	if err != nil {
 		log.Fatal("error gettting descriptor", err.Error(), location)
@@ -77,10 +78,9 @@ func (st *FileSystemStorage) Open(location string) (*os.File, error) {
 	return fd, nil
 }
 
-func (st *FileSystemStorage) ReadDir(location string) ([]domain.Handle, error) {
+func (st *FileSystemStorage) ReadDir(path string) ([]domain.Handle, error) {
 
-	//location := filepath.Join(st.Root, st.TrimPath(name))
-
+	location := st.Location(path)
 	fd, err := os.Open(location)
 	defer fd.Close()
 	if err != nil {

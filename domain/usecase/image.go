@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"drive/domain"
-	"drive/domain/storage"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"image"
@@ -34,7 +34,8 @@ type Image struct {
 	// https://jerz.setonhill.edu/blog/2014/10/09/writing-a-cutline-three-examples/
 
 	// Caption als allgemeingültige "standalone" Bildunterschrift und Cutline als Verbindung zum Album (ausgewählte Bilder in Reihe?)
-	Exif *Exif
+	Exif     *Exif
+	metaFile *domain.File
 }
 type Exif struct {
 	Orientation int
@@ -44,114 +45,53 @@ type Exif struct {
 	Model string
 }
 
-func NewImage(file *domain.File) (*Image, error) {
-	config, format, err := image.DecodeConfig(file.Descriptor)
+func NewImage(file *domain.File, usr *domain.Account) (*Image, error) {
+
+	fd := file.Descriptor()
+	defer fd.Close()
+
+	config, format, err := image.DecodeConfig(fd)
 	if err != nil {
-		log.Fatal(file.Path, config.ColorModel, config.Height, config.Width, err)
+		log.Fatal("NewImage", err)
 		return nil, err
 	}
-	image := &Image{file,
-		config.ColorModel, config.Width, config.Height, float64(config.Height) / float64(config.Width) * 100,
-		format, "", "", "", nil,
+
+	i := &Image{
+		File:       file,
+		ColorModel: config.ColorModel,
+		Width:      config.Width,
+		Height:     config.Height,
+		Ratio:      float64(config.Height) / float64(config.Width) * 100,
+		Format:     format,
 	}
-	if err = image.parseMeta(); err != nil {
-		fmt.Println("Error parsing meta =>", err)
+	metafile, err := GetFile(file.Storage(), i.getMetaFilename(), usr)
+	if err == nil {
+		i.metaFile = metafile
+
+		if err = i.parseMeta(); err != nil {
+			fmt.Println("Error parsing meta =>", err)
+		}
 	}
+
 	//img.MakeThumbnail()
-	if err = image.GoexifDecode(); err != nil {
+	if err = i.GoexifDecode(fd); err != nil {
 		fmt.Println("Error Decoding Exif with Goexif =>", err)
 	}
-	fmt.Println("asdf3")
-	return image, nil
-
+	fmt.Println("asdf3", i.Exif)
+	return i, nil
 }
 
-func (i *Image) GoexifDecode() error {
-	// https://github.com/rwcarlsen/goexif
-
-	// Optionally register camera makenote data parsing - currently Nikon and
-	// Canon are supported.
-	//exif.RegisterParsers(mknote.All...)
-
-	e := &Exif{}
-	i.Exif = e
-
-	i.File.Descriptor.Seek(0, 0)
-	x, err := exif.Decode(i.File.Descriptor)
-	if err != nil {
-		return err
-	}
-
-	camModel, err := x.Get(exif.Model) // normally, don't ignore errors!
-	if err != nil {
-		return err
-	}
-	model, err := camModel.StringVal()
-	if err != nil {
-		return err
-	}
-	e.Model = model
-
-	orientation, err := x.Get(exif.Orientation)
-	if err != nil {
-		return err
-	}
-	o, err := orientation.Int(0)
-
-	if err != nil {
-		return err
-	}
-	e.Orientation = o
-
-	focal, _ := x.Get(exif.FocalLength)
-	numer, denom, err := focal.Rat2(0) // retrieve first (only) rat. value
-	if err != nil {
-		return err
-	}
-	fmt.Printf("%v/%v %s\n", numer, denom, focal.String())
-
-	// Two convenience functions exist for date/time taken and GPS coords:
-	tm, err := x.DateTime()
-	if err != nil {
-		return err
-	}
-	e.Taken = tm
-
-	lat, long, err := x.LatLong()
-	if err != nil {
-		return err
-	}
-	e.Lat = lat
-	e.Lng = long
-
-	//j := x.String()
-	//fmt.Printf("json: %s", j)
-
-	return nil
-}
-
-func (i Image) getMetaFile() *file.Info {
+func (i *Image) getMetaFilename() string {
 	base := strings.TrimSuffix(i.File.Path, filepath.Ext(i.File.Path))
-	f, err := file.Open(fmt.Sprintf("%s.txt", base), 0, 0, 0)
-	if err != nil {
-		fmt.Println("error opening meta file", err)
-		return nil
-	}
-	return f
+	filename := fmt.Sprintf("%s.txt", base)
+	return filename
 }
 
 func (i *Image) parseMeta() error {
 
 	re := regexp.MustCompile(`(?s)(?P<Title>.*?)=+(?P<Caption>.*?)---+(?P<Cutline>.*?)---+`)
 
-	f, err := storage.DefaultStorage.OpenFile(i.getMetaFilename(), os.O_RDONLY, 0)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return err
-	}
-	content, err := f.GetContent()
+	content, err := i.metaFile.GetContent()
 	if err != nil {
 		return err
 	}
@@ -176,29 +116,85 @@ func (i *Image) parseMeta() error {
 	return nil
 }
 
-func (i Image) getMetaFilename() string {
-	base := strings.TrimSuffix(i.File.Path, filepath.Ext(i.File.Path))
-	filename := fmt.Sprintf("%s.txt", base)
-	return filename
-}
+func (i *Image) GoexifDecode(fd *os.File) error {
+	// https://github.com/rwcarlsen/goexif
 
-func (i *Image) WriteMeta(usr *domain.Account) error {
-	filename := i.getMetaFilename()
-	fmt.Println("storage.DefaultStorage.OpenFile", filename)
+	// Optionally register camera makenote data parsing - currently Nikon and
+	// Canon are supported.
+	//exif.RegisterParsers(mknote.All...)
 
-	f, err := storage.DefaultStorage.OpenFile(filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
+	i.Exif = &Exif{}
+
+	fd.Seek(0, 0)
+	x, err := exif.Decode(fd)
 	if err != nil {
 		return err
 	}
+
+	camModel, err := x.Get(exif.Model) // normally, don't ignore errors!
+	if err != nil {
+		return err
+	}
+	model, err := camModel.StringVal()
+	if err != nil {
+		return err
+	}
+	i.Exif.Model = model
+
+	orientation, err := x.Get(exif.Orientation)
+	if err != nil {
+		return err
+	}
+	o, err := orientation.Int(0)
+
+	if err != nil {
+		return err
+	}
+	i.Exif.Orientation = o
+
+	focal, _ := x.Get(exif.FocalLength)
+	numer, denom, err := focal.Rat2(0) // retrieve first (only) rat. value
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%v/%v %s\n", numer, denom, focal.String())
+
+	// Two convenience functions exist for date/time taken and GPS coords:
+	tm, err := x.DateTime()
+	if err != nil {
+		return err
+	}
+	i.Exif.Taken = tm
+
+	lat, long, err := x.LatLong()
+	if err != nil {
+		return err
+	}
+	i.Exif.Lat = lat
+	i.Exif.Lng = long
+
+	//j := x.String()
+	//fmt.Printf("json: %s", j)
+
+	return nil
+}
+
+func (i *Image) WriteMeta(usr *domain.Account) error {
+
+	if !i.metaFile.Permissions.Write {
+		return errors.New(fmt.Sprintf("Missing write permission for %s", i.metaFile.Name))
+	}
+	fd := i.metaFile.Descriptor()
+	fd.Close()
+
 	tmpl, err := template.New("txt").Parse("{{.Title}}\n=====\n{{.Caption}}\n-----\n{{.Cutline}}\n------\n")
 	if err != nil {
 		return err
 	}
-	err = tmpl.Execute(f.File, i)
+	err = tmpl.Execute(fd, i)
 	if err != nil {
 		return err
 	}
-	f.Close()
 	return nil
 }
 

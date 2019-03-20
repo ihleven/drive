@@ -35,7 +35,7 @@ func GetFolder(storage domain.Storage, file *domain.File, usr *domain.Account) (
 
 	folder := &domain.Folder{File: file}
 	//handles, err := file.ReadDirHandle()
-	handles, err := storage.ReadDir(file.Path)
+	handles, err := file.ListDirHandles(false)
 	if err != nil {
 		return nil, err
 	}

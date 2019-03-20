@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 	"syscall"
 	"unicode/utf8"
@@ -15,11 +17,23 @@ import (
 
 type FileHandle struct {
 	os.FileInfo
-	storage domain.Storage
-	//storagePath string //
-	location string //
+	storage  domain.Storage
+	location string
+	mode     os.FileMode
+}
 
-	mode os.FileMode
+func NewFileHandle(info os.FileInfo, st *FileSystemStorage, location string) *FileHandle {
+
+	handle := &FileHandle{
+		FileInfo: info,
+		storage:  st,
+		mode:     info.Mode(),
+		location: location,
+	}
+	if st.PermissionMode != 0 {
+		handle.mode = (handle.mode & 0xfffffe00) | (st.PermissionMode & 0x1ff)
+	}
+	return handle
 }
 
 func (fh *FileHandle) ToFile(path string, account *domain.Account) (*domain.File, error) {
@@ -52,6 +66,7 @@ func (fh *FileHandle) ToFile(path string, account *domain.Account) (*domain.File
 }
 
 func (fh *FileHandle) Descriptor() *os.File {
+
 	fd, err := os.Open(fh.location)
 	if err != nil {
 		log.Fatal("error gettting descriptor", err.Error(), fh.location)
@@ -104,9 +119,43 @@ func (fh *FileHandle) GetPermissions(owner uint32, group uint32, account *domain
 	perm.Read = int(fh.mode)&rr != 0
 	perm.Write = int(fh.mode)&wr != 0
 	perm.Exec = int(fh.mode)&xr != 0
-	fmt.Println(" ===> ", perm)
 	return perm, nil
 }
+
+func (fh *FileHandle) ListDirHandles(hideDotFiles bool) ([]domain.Handle, error) {
+
+	fd, err := os.Open(fh.location)
+	if err != nil {
+		return nil, err
+	}
+	entries, err := fd.Readdir(-1)
+	fd.Close()
+	if err != nil {
+		return nil, err
+	}
+	sort.Slice(entries, func(i, j int) bool { return entries[i].Name() < entries[j].Name() })
+
+	var handles = make([]domain.Handle, 0)
+	for _, entry := range entries {
+		if hideDotFiles && entry.Name()[0] == '.' {
+			// ignore all files starting with '.'
+			continue
+		}
+
+		handles = append(handles, NewFileHandle(
+			entry,
+			fh.storage.(*FileSystemStorage),
+			filepath.Join(fh.location, entry.Name()),
+		))
+	}
+	return handles, nil
+}
+
+func (fh *FileHandle) Storage() domain.Storage {
+	return fh.storage
+}
+
+/////////////
 
 func (fh *FileHandle) GetContent() ([]byte, error) { //offset, limit int) (e error) {
 
@@ -163,47 +212,4 @@ func (fh *FileHandle) GetUTF8Content() (string, error) {
 	} else {
 		return string(content), errors.New("Invalid UTF-8")
 	}
-}
-
-// ReadDir reads the directory named by dirname and returns
-// a list of directory entries sorted by filename.
-// from os.File.Readdir
-func (fh *FileHandle) ReadDir() ([]os.FileInfo, error) {
-
-	//if fh.
-	list, err := fh.Descriptor().Readdir(-1)
-
-	if err != nil {
-		return nil, err
-	}
-	//sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
-	return list, nil
-}
-
-func (fh *FileHandle) ReadDirHandle() ([]domain.Handle, error) {
-
-	entries, err := fh.ReadDir()
-	if err != nil {
-		return nil, err
-	}
-	//sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
-
-	var handles = make([]domain.Handle, 0)
-	for _, entry := range entries {
-		if entry.Name()[0] == '.' {
-			// ignore all files starting with '.'
-			continue
-		}
-		handle := &FileHandle{FileInfo: entry, storage: fh.storage, mode: entry.Mode()}
-
-		handles = append(handles, handle)
-		//stat := entry.Sys()
-		//.(*syscall.Stat_t) // _ ist ok und kein error
-	}
-	return handles, nil
-
-	// file := FileFromInfo(info)
-
-	// r, w, _ := file.GetPermissions(usr.Uid, usr.Gid)
-	//file.Permissions = struct{ Read, Write bool }{Read: r, Write: w}
 }
