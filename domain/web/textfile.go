@@ -22,11 +22,11 @@ type TextFileController struct {
 	StringContent string
 }
 
-func (h TextFileController) Init(file *domain.File, usr *domain.Account, st domain.Storage) {
+func (h *TextFileController) Init(file *domain.File, usr *domain.Account, st domain.Storage) {
 	h.File = file
 	h.User = usr
 }
-func (c TextFileController) Post(w http.ResponseWriter, r *http.Request) {
+func (c *TextFileController) Post(w http.ResponseWriter, r *http.Request) {
 
 	content := []byte(r.FormValue("content"))
 	fmt.Println("POST", content, len(content), !bytes.Equal(content, c.Content))
@@ -44,8 +44,8 @@ func (c TextFileController) Post(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (c TextFileController) Render(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("TextFileController")
+func (c *TextFileController) Render(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("TextFileController2", c.File)
 	title := strings.TrimSuffix(c.File.Name, filepath.Ext(c.File.Name))
 	content, err := c.File.GetContent()
 	if err != nil {
@@ -69,7 +69,7 @@ func (c TextFileController) Render(w http.ResponseWriter, r *http.Request) {
 		w.Write(json)
 	default:
 		fmt.Println("TextFileController")
-		rnd.HTML(w, http.StatusOK, "file2", m)
+		rnd.HTML(w, http.StatusOK, "file", m)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
