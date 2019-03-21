@@ -54,7 +54,6 @@ func DispatchStorage(storage domain.Storage) func(w http.ResponseWriter, r *http
 }
 
 func GetRegisteredHandler(MIME *types.MIME) (vs ViewSet) {
-	fmt.Println("GetRegisteredHandler", MIME)
 
 	//m := file.GuessMIME()
 	switch MIME.Type {
@@ -63,8 +62,7 @@ func GetRegisteredHandler(MIME *types.MIME) (vs ViewSet) {
 	case "text":
 		vs = &TextFileController{}
 	case "image":
-		vs = &FileHandler{}
-		//vs = &ImageHandler{file, usr}
+		vs = &ImageController{}
 		//return ImageHandler{file: file, usr: usr}
 	default:
 		vs = &FileHandler{}

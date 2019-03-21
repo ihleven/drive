@@ -1,10 +1,8 @@
-package handler
+package web
 
 import (
-	"drive/auth"
-	"drive/file"
-	"drive/models"
-	"drive/views"
+	"drive/domain"
+	"drive/domain/usecase"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,16 +10,24 @@ import (
 )
 
 type ImageController struct {
-	File     *file.File
-	User     *auth.Account
-	Image    *models.Image
-	Siblings *file.Siblings
+	File     *domain.File
+	User     *domain.Account
+	Image    *usecase.Image
+	Siblings *domain.Siblings
 }
 
-func (i ImageController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	image, _ := models.NewImage(i.File)
-	i.Image = image
+func (i *ImageController) Init(f *domain.File, u *domain.Account, s domain.Storage) {
+	i.File = f
+	i.User = u
 
+	image, err := usecase.NewImage(f, u)
+	if err != nil {
+		return
+	}
+	i.Image = image
+}
+
+func (i *ImageController) Render(w http.ResponseWriter, r *http.Request) {
 	siblings, err := i.File.Siblings()
 	if err != nil {
 		fmt.Println("siblings error:", err)
@@ -40,17 +46,17 @@ func (i ImageController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Header.Get("Accept") {
 	case "application/json":
-		views.SerializeJSON(w, i)
+		rnd.JSON(w, http.StatusOK, i)
 	default:
 		m := map[string]interface{}{"user": i.User, "file": i.File, "Image": i.Image, "Siblings": i.Siblings}
 
-		err := views.Render("image", w, m)
+		err := rnd.HTML(w, http.StatusOK, "image", m)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("render error: ", err)
 		}
 	}
 }
-func (i ImageController) Post(w http.ResponseWriter, r *http.Request) {
+func (i *ImageController) Post(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
