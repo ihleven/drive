@@ -40,7 +40,7 @@ const (
 
 type Perm struct {
 	uid, gid uint32
-	stat     syscall.Stat_t
+	//stat     syscall.Stat_t
 
 	r, w, x bool
 }

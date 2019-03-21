@@ -74,8 +74,9 @@ func (fh *FileHandle) HasReadPermission(uid, gid uint32) bool {
 		return true
 	}
 	//owner, group, err := fh.GetOwnerAndGroupID()
-	stat, err := fh.Stat()
-	if err != nil {
+	stat, ok := fh.Sys().(*syscall.Stat_t)
+	if !ok {
+		log.Fatal(errors.New("Sys().(*syscall.Stat_t) => underlying data source is nil"))
 		return false
 	}
 	if stat.Gid == gid && fh.mode&OS_GROUP_R != 0 {
