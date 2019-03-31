@@ -8,35 +8,13 @@ import (
 	"path"
 	"strings"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 func CreateServer() {
 
-	r := mux.NewRouter()
-	// This will serve files under http://localhost:8000/static/<filename>
-
-	r.PathPrefix("/static/").Handler(
-		http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))),
-	)
-	r.PathPrefix("/dist/").Handler(
-		http.StripPrefix("/dist/", http.FileServer(http.Dir("./vue/dist"))),
-	)
-	r.PathPrefix("/assets/").Handler(
-		http.StripPrefix("/assets/", http.FileServer(http.Dir("./vue/dist/assets"))),
-	)
-
-	//r.HandleFunc("/login", handler.Login)
-	//r.HandleFunc("/logout", handler.Logout)
-	//r.PathPrefix("/serve").HandlerFunc(handler.Raw)
-	//r.PathPrefix("/").Handler(pathRouter) //PathHandler)
-
-	//r.PathPrefix("/").HandlerFunc(Index)
-
 	mux := http.NewServeMux()
-	mux.Handle("/static/", assetHandler("static", "static"))
-	mux.Handle("/dist/", assetHandler("dist", "vue/dist"))
+	mux.Handle("/assets/", assetHandler("assets", "_static/assets"))
+	mux.Handle("/dist/", assetHandler("dist", "_static/dist"))
 	mux.HandleFunc("/login", Login)
 	mux.HandleFunc("/logout", Logout)
 	mux.HandleFunc("/serve/home/", Serve(storage.Get("home")))

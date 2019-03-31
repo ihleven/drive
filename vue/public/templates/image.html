@@ -1,0 +1,244 @@
+{{ define "image" }}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{.File.Path}}</title>
+    <link rel="stylesheet" href="/dist/css/app.css">
+    <link rel="stylesheet" href="/static/map.svg">
+    <link href=/dist/css/chunk-vendors.css rel=stylesheet>
+    <link href=/dist/css/chunk-common.css rel=stylesheet>
+    <style>
+        .header-image {
+            background-image: url("/serve{{.file.Path}}");
+            background-position: center 0%;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: contain;
+            background-color: #999;
+            height: {{.Image.Ratio}}vw!important;
+            max-height: 100vh!important;
+        }
+        .navbar.is-transparent {
+            background-color: transparent;
+        background-image: none;
+        }
+        @media screen and (max-width: 1087px)
+            .hero.is-dark .navbar-menu {
+                background-color: transparent;
+            }
+    </style>
+</head>
+
+<body>
+
+    <div>
+        <section class="hero is-dark header-image">
+            <!-- Hero header: will stick at the top -->
+            <div class="hero-head">
+                <!-- 
+                <header class="navbar is-transparent">
+                    <div class="navbar-brand">
+
+                        <div class="navbar-burger" v-on:click="showNav = !showNav" v-bind:class="{ 'is-active' : showNav }">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                    <div class="navbar-menu" v-bind:class="{ 'is-active' : showNav }">
+                        <div class="navbar-end">
+                            <a class="navbar-item" href="/about">About</a>
+                            <a class="navbar-item" href="/path">Path</a>
+                            <a class="navbar-item" href="/blog">Blog</a>
+                        </div>
+                    </div>
+                </header> -->
+            </div>
+
+
+            <!-- Hero content: will be in the middle -->
+            <div class="hero-body">
+                <div class="container has-text-centered">
+                    <h1 class="title">
+
+                    </h1>
+                    <h2 class="subtitle">
+
+                    </h2>
+                </div>
+            </div>
+            <!-- Hero footer: will stick at the bottom -->
+            <div class="hero-foot">
+                <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+                    <a class="pagination-previous" href="{{.Siblings.Prev}}">Previous</a>
+                    <a class="pagination-next" href="{{.Siblings.Next}}">Next page</a>
+                    <ul class="pagination-list">
+                        <li><a class="pagination-link" aria-label="Goto page 1" href="{{.Siblings.First}}">1</a></li>
+                        <li><span class="pagination-ellipsis">&hellip;</span></li>
+                        <li><a class="pagination-link" aria-label="Goto page 45" href="{{.Siblings.Prev}}">
+                                {{.Siblings.PrevIndex}}
+                            </a></li>
+                        <li><a class="pagination-link is-current" aria-label="Page 46" aria-current="page">{{.Siblings.CurrentIndex}}</a></li>
+                        <li><a class="pagination-link" aria-label="Goto page 47" href="{{.Siblings.Next}}">
+                                {{.Siblings.NextIndex }}</a></li>
+                        <li><span class="pagination-ellipsis">&hellip;</span></li>
+                        <li><a class="pagination-link" aria-label="Goto page 86" href="{{.Siblings.Last}}">
+                                {{.Siblings.Count}}
+                            </a></li>
+                    </ul>
+                </nav>
+
+
+            </div>
+        </section>
+    </div>
+
+
+    <section class="section">
+        <a id="main"></a>
+
+
+
+        <div class="">
+            <div class="columns">
+                <div class="column">
+                    <form method="POST">
+                        <div class="field">
+                            <label class="label">Title</label>
+                            <div class="control">
+                                <input class="input" type="text" placeholder="Text input" name="title" value="{{.Image.Title}}">
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Caption</label>
+                            <div class="control">
+                                <textarea class="textarea" placeholder="Normal textarea" name="caption">{{.Image.Caption}}</textarea>
+                            </div>
+                            <p class="help">This is a help text</p>
+                        </div>
+                        <div class="field">
+                            <label class="label">Cutline</label>
+                            <div class="control">
+                                <textarea class="textarea" placeholder="Normal textarea" name="cutline">{{.Image.Cutline}}</textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <div class="card-image">
+                            <figure class="image is-4by3" style="padding-top: {{.Image.Ratio}}%">
+                                <img src="/serve{{.file.Path}}" alt="Placeholder image">
+                            </figure>
+                        </div>
+                        <div class="card-content">
+                            <div class="media">
+                                <div class="media-left">
+                                    <figure class="image is-48x48">
+                                        <img src="/serve{{.file.Path}}" alt="{{.Image.Title}}">
+                                    </figure>
+                                </div>
+                                <div class="media-content">
+                                    <p class="title is-4">{{.Image.Title}}</p>
+                                    <p class="subtitle is-6">{{.Image.Caption}}</p>
+                                </div>
+                            </div>
+
+                            <div class="content">
+                                {{.Image.Cutline}}
+                                <br>
+                                <time datetime="2016-1-1">11:09 PM - 1 Jan 2016</time>
+                            </div>
+                        </div>
+                        <footer class="card-footer">
+                            <a href="#" class="card-footer-item">Save</a>
+                            <a href="#" class="card-footer-item">Edit</a>
+                            <a href="#" class="card-footer-item">Delete</a>
+                        </footer>
+                    </div>
+                </div>
+                <div class="column">
+                    <nav class="panel">
+                        <p class="panel-heading">
+                            Exif-Daten:
+                        </p>
+                        <div class="panel-block">
+                            {{.Image.Format}} {{.Image.Width}}x{{.Image.Height}}
+                            {{.Image.ColorModel}}
+                        </div>
+                        <a class="panel-block">
+                            <span class="panel-icon">
+                                <i class="fas fa-book" aria-hidden="true"></i>
+                            </span>
+                            {{.Image.Exif.Taken}}
+                        </a>
+                        <div class="panel-block">
+
+                            {{.Image.Exif.Lat}},
+                            {{.Image.Exif.Lng}}
+                        </div>
+                        <div class="panel-block is-flex">
+                            <div class="has-text-left">
+                                Model:
+                            </div>
+                            <span class="has-text-right">{{.Image.Exif.Model}}</span>
+
+                        </div>
+                    </nav>
+                </div>
+
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+    </section>
+
+    <img src="/serve{{.file.Path}}" />
+
+
+    <footer class="footer has-text-centered">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-desktop is-offset-2-desktop">
+                    <p>
+                        <strong class="has-text-weight-semibold">
+                            <a href="https://www.npmjs.com/package/bulma-start">bulma-start@0.0.3</a>
+                        </strong>
+                    </p>
+                    <p>
+                        <small>
+                            Source code licensed <a href="http://opensource.org/licenses/mit-license.php">MIT</a>
+                        </small>
+                    </p>
+                    <p style="margin-top: 1rem;">
+                        <a href="http://bulma.io">
+                            <img src="/static/made-with-bulma.png" alt="Made with Bulma" width="128" height="24">
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+
+    </script>
+</body>
+
+</html>
+{{ end }}

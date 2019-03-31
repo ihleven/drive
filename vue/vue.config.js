@@ -1,52 +1,31 @@
 // vue.config.js
 module.exports = {
-  //runtimeCompiler: true,
-  //baseUrl: '/',
-  //outputDir: './dist/',
-  //indexPath: 'index.html',
-  //assetsDir: 'assets/'
-  // disable hashes in filenames
-  filenameHashing: false,
-  runtimeCompiler: true
-
+    publicPath: "/",
+    outputDir: "../_static",
+    assetsDir: "assets",
+    pages: {
+        index: "./src/pages/Home/main.js",
+        folder: {
+            entry: "./src/pages/folder/folder.js",
+            template: './public/templates/directory.html',
+            filename: 'templates/directory.html',
+            minify: false,
+            chunks: ['chunk-vendors', 'chunk-common', 'folder']
+        },
+        file: {
+            entry: "./src/pages/file/file.js",
+            template: './public/templates/file.html',
+            filename: 'templates/file.html',
+            minify: false,
+            chunks: ['chunk-vendors', 'chunk-common', 'file']
+        },
+        textfile: {
+            entry: "./src/pages/Textfile/textfile.js",
+            template: './public/templates/textfile.html',
+            filename: 'templates/textfile.html',
+            minify: false,
+            chunks: ['chunk-vendors', 'chunk-common', 'textfile']
+        }
+    },
+    runtimeCompiler: true
 }
-
-var pages = {
-  index: {
-    entry: 'src/main.js',
-    template: 'public/index.html',
-    //filename: 'index.html',
-    title: 'Index Page',
-    chunks: ['chunk-vendors', 'chunk-common', 'index']
-  },
-  file: {
-    entry: 'src/entries/file.js',
-    template: '../templates/file.html',
-    //filename: 'file.html',
-    title: 'File Page',
-    chunks: ['chunk-vendors', 'chunk-common', 'file']
-  },
-  textfile: {
-    entry: 'src/entries/textfile.js',
-    template: '../templates/file.html',
-  },
-  album: {
-    entry: 'src/entries/album.js',
-    //template: '../../templates/album.html',
-    template: '../templates/album.html',
-    //filename: '../album.html',
-  },
-  diary: {
-    entry: 'src/entries/diary.js',
-    template: '../templates/diary.html',
-  }
-};
-
-var devServer = {
-  proxy: {
-    "/": {
-      target: "http://localhost:3000",
-      secure: false
-    }
-  }
-};

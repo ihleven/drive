@@ -1,15 +1,12 @@
 package web
 
 import (
-	"bytes"
 	"drive/domain"
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"net/http"
 	"path/filepath"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/gomarkdown/markdown"
 )
@@ -18,8 +15,9 @@ type TextFileController struct {
 	File          *domain.File
 	User          *domain.Account
 	Title         string
-	Content       []byte
-	StringContent string
+	Content       string
+	StringContent template.HTML
+	Markdown      string
 }
 
 func (h *TextFileController) Init(file *domain.File, usr *domain.Account, st domain.Storage) {
@@ -28,34 +26,40 @@ func (h *TextFileController) Init(file *domain.File, usr *domain.Account, st dom
 }
 func (c *TextFileController) Post(w http.ResponseWriter, r *http.Request) {
 
-	content := []byte(r.FormValue("content"))
-	fmt.Println("POST", content, len(content), !bytes.Equal(content, c.Content))
-	if len(content) > 0 && !bytes.Equal(content, c.Content) {
-		if !utf8.Valid(content) {
-			http.Error(w, "Invalid UTF-8", http.StatusBadRequest)
-			return
-		}
-		c.Content = content
-		if err := c.File.SetContent(content); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
+	// content := []byte(r.FormValue("content"))
+	// fmt.Println("POST", content, len(content), !bytes.Equal(content, c.Content))
+	// if len(content) > 0 && !bytes.Equal(content, c.Content) {
+	// 	if !utf8.Valid(content) {
+	// 		http.Error(w, "Invalid UTF-8", http.StatusBadRequest)
+	// 		return
+	// 	}
+	// 	c.Content = content
+	// 	if err := c.File.SetContent(content); err != nil {
+	// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 		return
+	// 	}
+	// }
 
 }
 
 func (c *TextFileController) Render(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("TextFileController2", c.File)
-	title := strings.TrimSuffix(c.File.Name, filepath.Ext(c.File.Name))
-	content, err := c.File.GetContent()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 
-	output := template.HTML(markdown.ToHTML(content, nil, nil))
 	stringContent, _ := c.File.GetUTF8Content()
-	m := map[string]interface{}{"user": c.User, "file": c.File, "content": stringContent, "Title": title, "Markdown": output}
+	content, _ := c.File.GetContent()
+
+	c.Title = strings.TrimSuffix(c.File.Name, filepath.Ext(c.File.Name))
+	c.StringContent = template.HTML(stringContent)
+	c.Content = stringContent
+
+	_ = template.HTML(markdown.ToHTML(content, nil, nil))
+
+	_ = map[string]interface{}{
+		"User":     c.User,
+		"File":     c.File,
+		"Content":  template.JS(stringContent),
+		"Title":    c.Title,
+		"Markdown": "",
+	}
 
 	switch r.Header.Get("Content-type") {
 
@@ -67,9 +71,10 @@ func (c *TextFileController) Render(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		w.Write(json)
+
 	default:
-		fmt.Println("TextFileController")
-		rnd.HTML(w, http.StatusOK, "file", m)
+
+		err := rnd.HTML(w, http.StatusOK, "textfile", c)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

@@ -3,7 +3,6 @@ package web
 import (
 	"drive/domain"
 	"drive/domain/usecase"
-	"drive/views"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -18,8 +17,8 @@ var rnd *renderer.Render
 func init() {
 
 	opts := renderer.Options{
-		FuncMap:          []template.FuncMap{views.FuncMap},
-		ParseGlobPattern: "./templates/*.html",
+		FuncMap:          []template.FuncMap{FuncMap},
+		ParseGlobPattern: "./_static/templates/*.html",
 	}
 
 	rnd = renderer.New(opts)
@@ -57,10 +56,9 @@ func (h *FileHandler) Post(w http.ResponseWriter, r *http.Request) {
 }
 
 type DirHandler struct {
-	File    *domain.File
-	User    *domain.Account
-	Entries []*domain.File
-	Folder  *domain.Folder
+	File   *domain.File
+	User   *domain.Account
+	Folder *domain.Folder
 }
 
 func (h *DirHandler) Init(file *domain.File, usr *domain.Account, storage domain.Storage) {
@@ -78,13 +76,13 @@ func (h *DirHandler) Render(w http.ResponseWriter, r *http.Request) {
 
 	case "application/json":
 
-		views.SerializeJSON(w, h.Folder)
+		rnd.JSON(w, 0, h.Folder)
 
 	default:
-		m := map[string]interface{}{"user": h.User, "file": h.File, "dir": h.Folder}
-		fmt.Println("dirhandler", m)
+		//m := map[string]interface{}{"user": h.User, "file": h.File, "dir": h.Folder}
+		//fmt.Println("dirhandler", m)
 
-		err := rnd.HTML(w, http.StatusOK, "directory", m)
+		err := rnd.HTML(w, http.StatusOK, "directory", h)
 		if err != nil {
 			fmt.Println("render error: ", err)
 		}

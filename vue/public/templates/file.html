@@ -1,0 +1,42 @@
+{{ define "file" }}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{.file.Path}}</title>
+</head>
+
+<body>
+
+    <div id="app">
+
+        {{template "partials/hero" .}}
+
+
+        <section class="section">
+            <button @click="edit=!edit">edit</button>
+
+            <div class="container">
+                <form method="post">
+                    <textarea class="textarea has-fixed-size box" name="content" v-if="edit">{{.content}}</textarea>
+
+                    <div class="box content" v-else>{{.Markdown}}</div>
+                    <button type="submit">save</button>
+                </form>
+            </div>
+
+        </section>
+
+        {{template "partials/footer"}}
+
+    </div>
+
+</body>
+
+</html>
+
+{{ end }}
