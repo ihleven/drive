@@ -177,7 +177,7 @@ func (fh *FileHandle) GetContent() ([]byte, error) { //offset, limit int) (e err
 
 func (fh *FileHandle) SetContent(content []byte) error {
 
-	fd := fh.Descriptor(os.O_RDWR | os.O_CREATE)
+	fd := fh.Descriptor(os.O_RDWR | os.O_CREATE | os.O_TRUNC)
 
 	n_bytes, err := fd.WriteAt(content, 0)
 	if err != nil {
@@ -185,15 +185,7 @@ func (fh *FileHandle) SetContent(content []byte) error {
 		return err
 	}
 	fd.Close()
-	fmt.Println("written:", n_bytes)
-	return err
-}
-
-func (fh *FileHandle) Write(buffer []byte) (n int, err error) {
-	fd := fh.Descriptor(0)
-	defer fd.Close()
-	n, err = fd.Write(buffer)
-	return
+	return nil
 }
 
 func (fh *FileHandle) GetUTF8Content() (string, error) {
@@ -208,6 +200,14 @@ func (fh *FileHandle) GetUTF8Content() (string, error) {
 	} else {
 		return string(content), errors.New("Invalid UTF-8")
 	}
+}
+
+func (fh *FileHandle) SetUTF8Content(content []byte) error {
+
+	if !utf8.Valid(content) {
+		return errors.New("Invalid UTF-8")
+	}
+	return fh.SetContent(content)
 }
 
 const (

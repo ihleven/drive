@@ -58,6 +58,7 @@ type Handle interface {
 	GetContent() ([]byte, error)
 	SetContent([]byte) error
 	GetUTF8Content() (string, error)
+	SetUTF8Content([]byte) error
 	//Uid() uint32
 	//Gid() uint32
 	HasReadPermission(uid, gid uint32) bool
@@ -83,17 +84,17 @@ type Permissions struct {
 
 type File struct {
 	Handle
-	Path        string `json:"path"`
-	Name        string `json:"name"`
-	Size        int64  `json:"size"`
-	Mode        os.FileMode
-	Owner       *User
-	Group       *Group
-	Permissions *Permissions
-	Created     *time.Time
-	Modified    time.Time
-	Accessed    *time.Time
-	MIME        types.MIME
+	Path        string       `json:"path"`
+	Name        string       `json:"name"`
+	Size        int64        `json:"size"`
+	Mode        os.FileMode  `json:"mode"`
+	Owner       *User        `json:"owner"`
+	Group       *Group       `json:"group"`
+	Permissions *Permissions `json:"permissions"`
+	Created     *time.Time   `json:"created"`
+	Modified    time.Time    `json:"modified"`
+	Accessed    *time.Time   `json:"accessed"`
+	MIME        types.MIME   `json:"mime"`
 }
 
 func NewFile(handle Handle, path string) *File {

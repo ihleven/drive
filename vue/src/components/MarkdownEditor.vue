@@ -144,6 +144,7 @@ export default {
         },
     },
     mounted() {
+        console.log(this.file);
         this.source = this.markdown = this.$slots.default[0].text;
         this.editor.setContent(Marked(this.markdown), false);
     },
@@ -160,17 +161,14 @@ export default {
             this.editor.setContent(Marked(this.markdown), false);
         },
         save() {
-            console.log(this.markdown);
             let form = new FormData();
-            form.append('file', new Blob([this.markdown]));
+            form.append('file', new Blob([this.markdown], { type: 'text/markdown' }));
+            form.append('name', 'blah');
 
-            console.log('save()', window.location.pathname);
             const request = new Request(window.location.pathname, {
                 method: 'POST',
                 body: form,
-                //headers: new Headers({
-                //   'Content-Type': 'application/json',
-                //}),
+                //headers: new Headers({'Content-Type': 'application/json',}),
             });
 
             fetch(request)

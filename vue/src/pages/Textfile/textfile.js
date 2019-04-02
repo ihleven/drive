@@ -4,11 +4,7 @@ import MarkdownEditor from '@/components/MarkdownEditor.vue';
 
 import '@/assets/bulma-customize.scss';
 
-//Vue.config.productionTip = false;
-
-//new Vue({
-//  render: h => h(App)
-//}).$mount("#app");
+const data = JSON.parse(document.getElementById('data').innerHTML);
 
 new Vue({
     el: '#app',
@@ -17,9 +13,11 @@ new Vue({
         MarkdownEditor,
     },
     data() {
-        return {};
+        return {
+            file: data,
+        };
     },
     mounted() {
-        //console.log("mounted", this.content)
+        console.log('file =>', this.file);
     },
 });

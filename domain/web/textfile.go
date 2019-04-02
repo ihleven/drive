@@ -35,24 +35,24 @@ func (c *TextFileController) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, _, err := r.FormFile("file")
+	file, handle, err := r.FormFile("file")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
-	// mimeType := handle.Header.Get("Content-Type")
+	mimeType := handle.Header.Get("Content-Type")
+	fmt.Println(mimeType, handle)
 
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(string(data))
 
-	err = c.File.SetContent(data)
+	err = c.File.SetUTF8Content(data)
 	if err != nil {
-		fmt.Fprintf(w, "%v", err)
+		http.Error(w, fmt.Sprintf("%v", err), http.StatusBadRequest)
 		return
 	}
 }

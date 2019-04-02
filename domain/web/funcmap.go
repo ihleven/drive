@@ -61,7 +61,7 @@ func marshalJSONScript(name string, v interface{}) template.HTML {
 
 	startTag := "<script id='" + name + "' type='application/json'>"
 	endTag := "</script>"
-	json, err := json.Marshal(v)
+	json, err := json.MarshalIndent(v, "        ", "    ")
 	//fmt.Println(string(json))
 	if err != nil {
 		return template.HTML("Error marschalling JSON: " + err.Error())
