@@ -39,4 +39,8 @@ $fa-font-path: "~font-awesome/fonts";
     }
 }
 
+[contenteditable]:focus {
+    outline: 0px solid transparent;
+}
+
 @import '../../node_modules/bulma/bulma.sass';

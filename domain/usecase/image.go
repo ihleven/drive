@@ -47,7 +47,7 @@ type Exif struct {
 
 func NewImage(file *domain.File, usr *domain.Account) (*Image, error) {
 
-	fd := file.Descriptor()
+	fd := file.Descriptor(0)
 	defer fd.Close()
 
 	config, format, err := image.DecodeConfig(fd)
@@ -184,7 +184,7 @@ func (i *Image) WriteMeta(usr *domain.Account) error {
 	if !i.metaFile.Permissions.Write {
 		return errors.New(fmt.Sprintf("Missing write permission for %s", i.metaFile.Name))
 	}
-	fd := i.metaFile.Descriptor()
+	fd := i.metaFile.Descriptor(0)
 	fd.Close()
 
 	tmpl, err := template.New("txt").Parse("{{.Title}}\n=====\n{{.Caption}}\n-----\n{{.Cutline}}\n------\n")

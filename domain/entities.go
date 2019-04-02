@@ -47,7 +47,7 @@ type Storage interface {
 
 type Handle interface {
 	os.FileInfo
-	Descriptor() *os.File
+	Descriptor(int) *os.File
 	ToFile(string, *Account) (*File, error)
 	GuessMIME() types.MIME
 	//Close() error

@@ -3,7 +3,10 @@ package web
 import (
 	"drive/domain"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"html/template"
+	"io/ioutil"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -26,20 +29,32 @@ func (h *TextFileController) Init(file *domain.File, usr *domain.Account, st dom
 }
 func (c *TextFileController) Post(w http.ResponseWriter, r *http.Request) {
 
-	// content := []byte(r.FormValue("content"))
-	// fmt.Println("POST", content, len(content), !bytes.Equal(content, c.Content))
-	// if len(content) > 0 && !bytes.Equal(content, c.Content) {
-	// 	if !utf8.Valid(content) {
-	// 		http.Error(w, "Invalid UTF-8", http.StatusBadRequest)
-	// 		return
-	// 	}
-	// 	c.Content = content
-	// 	if err := c.File.SetContent(content); err != nil {
-	// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 		return
-	// 	}
-	// }
+	if !c.File.Permissions.Write {
+		e := errors.New("missing write permission").Error()
+		http.Error(w, e, http.StatusForbidden)
+		return
+	}
 
+	file, _, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+	// mimeType := handle.Header.Get("Content-Type")
+
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Println(string(data))
+
+	err = c.File.SetContent(data)
+	if err != nil {
+		fmt.Fprintf(w, "%v", err)
+		return
+	}
 }
 
 func (c *TextFileController) Render(w http.ResponseWriter, r *http.Request) {

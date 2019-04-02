@@ -5,12 +5,10 @@ import (
 	"drive/domain/usecase"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 	"syscall"
 	"unicode/utf8"
 )
@@ -65,9 +63,9 @@ func (fh *FileHandle) ToFile(path string, account *domain.Account) (*domain.File
 	return file, nil
 }
 
-func (fh *FileHandle) Descriptor() *os.File {
+func (fh *FileHandle) Descriptor(flag int) *os.File { // , perm os.FileMode
 
-	fd, err := os.Open(fh.location)
+	fd, err := os.OpenFile(fh.location, flag, 0755)
 	if err != nil {
 		log.Fatal("error gettting descriptor", err.Error(), fh.location)
 		return nil
@@ -162,7 +160,7 @@ func (fh *FileHandle) GetContent() ([]byte, error) { //offset, limit int) (e err
 
 	var content = make([]byte, fh.Size())
 
-	fd := fh.Descriptor()
+	fd := fh.Descriptor(0)
 	defer fd.Close()
 	fd.Seek(0, 0)
 
@@ -179,23 +177,20 @@ func (fh *FileHandle) GetContent() ([]byte, error) { //offset, limit int) (e err
 
 func (fh *FileHandle) SetContent(content []byte) error {
 
-	return ioutil.WriteFile(fh.Name(), content, 0600)
+	fd := fh.Descriptor(os.O_RDWR | os.O_CREATE)
 
-	name := fh.Name()
-	fd, err := os.OpenFile(name, os.O_RDWR, 0)
+	n_bytes, err := fd.WriteAt(content, 0)
 	if err != nil {
+		fmt.Println("error writing file:", err, n_bytes)
 		return err
 	}
-
-	n_bytes, err := fd.WriteString(strings.Replace(string(content), "\r\n", "\n", -1))
-	if err != nil {
-		fmt.Println("error writing file:", err, n_bytes, fh.Name())
-	}
+	fd.Close()
+	fmt.Println("written:", n_bytes)
 	return err
 }
 
 func (fh *FileHandle) Write(buffer []byte) (n int, err error) {
-	fd := fh.Descriptor()
+	fd := fh.Descriptor(0)
 	defer fd.Close()
 	n, err = fd.Write(buffer)
 	return

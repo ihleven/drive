@@ -94,7 +94,7 @@ func Serve(storage domain.Storage) func(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		fd := handle.Descriptor()
+		fd := handle.Descriptor(0)
 		defer fd.Close()
 
 		http.ServeContent(w, r, handle.Name(), handle.ModTime(), fd)

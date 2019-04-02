@@ -27,7 +27,8 @@
 
                 <!--<code-highlighter language="{{.File.MIME.Subtype}}" :readonly="false">{{.Content}}
                         </code-highlighter>-->
-                <markdown-editor>{{.Content}}</markdown-editor>
+                <markdown-editor :readonly="{{ not .File.Permissions.Write}}">{{.Content}}
+                </markdown-editor>
 
 
 

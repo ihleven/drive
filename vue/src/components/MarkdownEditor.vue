@@ -1,74 +1,59 @@
 <template>
-    <div class="hello">
-        <div class="tabs">
-            <ul>
-                <li
-                    :class="{ 'is-active': !viewsource }"
-                    @click="viewsource = false"
-                >
-                    <a>Preview</a>
-                </li>
-                <li
-                    :class="{ 'is-active': viewsource }"
-                    @click="viewsource = true"
-                >
-                    <a>Source</a>
-                </li>
-            </ul>
+  <div class="hello">
+    <div class="tabs">
+      <ul>
+        <li :class="{ 'is-active': !viewsource }" @click="viewsource = false">
+          <a>Preview</a>
+        </li>
+        <li :class="{ 'is-active': viewsource }" @click="viewsource = true">
+          <a>Source</a>
+        </li>
+      </ul>
 
-            <a
-                class="button is-info is-outlined"
-                @click="reset"
-                :disabled="!dirty"
-                >Reset</a
-            >
-            <a class="button is-info is-outlined" :disabled="!dirty">Save</a>
-        </div>
-        <slot name="source"></slot>
-        <div v-show="viewsource">
-            <textarea
-                class="textarea"
-                v-model="markdown"
-                @input="onMarkdownChange"
-            ></textarea>
-        </div>
-        <div v-show="!viewsource">
-            <editor-menu-bubble :editor="editor">
-                <div
-                    slot-scope="{ commands, isActive, menu }"
-                    class="menububble"
-                    :class="{ 'is-active': menu.isActive }"
-                    :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`"
-                >
-                    <button
-                        class="menububble__button"
-                        :class="{ 'is-active': isActive.bold() }"
-                        @click="commands.bold"
-                    >
-                        <icon name="bold" />
-                    </button>
-
-                    <button
-                        class="menububble__button"
-                        :class="{ 'is-active': isActive.italic() }"
-                        @click="commands.italic"
-                    >
-                        <icon name="italic" />
-                    </button>
-
-                    <button
-                        class="menububble__button"
-                        :class="{ 'is-active': isActive.code() }"
-                        @click="commands.code"
-                    >
-                        <icon name="code" />
-                    </button>
-                </div>
-            </editor-menu-bubble>
-            <editor-content class="box content" :editor="editor" />
-        </div>
-        <!--<div v-html="html"></div>-->
+      <a class="button is-info is-outlined" @click="reset" :disabled="!dirty">Reset</a>
+      <a class="button is-info is-outlined" @click="save" :disabled="!dirty">Save</a>
     </div>
+    <slot name="source"></slot>
+    <div v-show="viewsource">
+      <textarea class="textarea" v-model="markdown" @input="onMarkdownChange"></textarea>
+    </div>
+    <div v-show="!viewsource">
+      <editor-menu-bubble :editor="editor">
+        <div
+          slot-scope="{ commands, isActive, menu }"
+          class="menububble"
+          :class="{ 'is-active': menu.isActive }"
+          :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`"
+        >
+          <button
+            class="menububble__button"
+            :class="{ 'is-active': isActive.bold() }"
+            @click="commands.bold"
+          >
+            <icon name="bold"/>
+          </button>
+
+          <button
+            class="menububble__button"
+            :class="{ 'is-active': isActive.italic() }"
+            @click="commands.italic"
+          >
+            <icon name="italic"/>
+          </button>
+
+          <button
+            class="menububble__button"
+            :class="{ 'is-active': isActive.code() }"
+            @click="commands.code"
+          >
+            <icon name="code"/>
+          </button>
+        </div>
+      </editor-menu-bubble>
+      <editor-content class="box content" :editor="editor"/>
+    </div>
+    <!--<div v-html="html"></div>-->
+  </div>
 </template>
 
 <script>
@@ -118,11 +103,13 @@ export default {
         EditorMenuBubble,
     },
     props: {
-        msg: String,
+        readonly: { type: Boolean, default: true },
     },
     data() {
         return {
             editor: new Editor({
+                content: this.html,
+                editable: !this.readonly,
                 extensions: [
                     new Blockquote(),
                     new BulletList(),
@@ -141,11 +128,10 @@ export default {
                     new Underline(),
                     new History(),
                 ],
-                content: this.html,
                 onUpdate: event => {
                     this.markdown = turndownService.turndown(event.getHTML());
                     //this.html = event.getHTML();
-                    console.log(' html => ', event.getHTML());
+                    //console.log(' html => ', event.getHTML());
                 },
             }),
             markdown: '',
@@ -166,12 +152,30 @@ export default {
     },
     methods: {
         onMarkdownChange(event) {
-            console.log('onMarkdownChange', event.target.value);
+            //console.log('onMarkdownChange', event.target.value);
             this.editor.setContent(Marked(event.target.value), false);
         },
         reset() {
             this.markdown = this.source;
             this.editor.setContent(Marked(this.markdown), false);
+        },
+        save() {
+            console.log(this.markdown);
+            let form = new FormData();
+            form.append('file', new Blob([this.markdown]));
+
+            console.log('save()', window.location.pathname);
+            const request = new Request(window.location.pathname, {
+                method: 'POST',
+                body: form,
+                //headers: new Headers({
+                //   'Content-Type': 'application/json',
+                //}),
+            });
+
+            fetch(request)
+                .then(response => response.json())
+                .then(body => console.log(body));
         },
     },
 };

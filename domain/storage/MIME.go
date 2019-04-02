@@ -56,7 +56,7 @@ func (f *FileHandle) GuessMIME() (m types.MIME) {
 }
 
 func (fh *FileHandle) h2nonMatchMIME261() (types.MIME, error) {
-	fd := fh.Descriptor()
+	fd := fh.Descriptor(0)
 	defer fd.Close()
 	fd.Seek(0, 0)
 	// https://github.com/h2non/filetype
@@ -71,7 +71,7 @@ func (fh *FileHandle) h2nonMatchMIME261() (types.MIME, error) {
 }
 
 func (fh *FileHandle) DetectContentType() error {
-	fd := fh.Descriptor()
+	fd := fh.Descriptor(0)
 	defer fd.Close()
 	// Only the first 512 bytes are used to sniff the content type.
 	buffer := make([]byte, 512)
