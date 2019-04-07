@@ -7,24 +7,49 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{.file.Path}}</title>
+    <title>{{.File.Path}}</title>
 </head>
 
 <body>
+
+    {{  marshalJSON "data" .File }}
 
     <div id="app">
 
         {{template "partials/hero" .}}
 
+        <section class="section">
+            <div class="container" v-cloak style="border:1px solid black">
+                {{ if eq .File.MIME.Type "text"}}
+                {{ if eq .File.MIME.Subtype "markdown" }}
+                <markdown-editor :readonly="{{ not .File.Permissions.Write}}">{{.Content}}</markdown-editor>
+                {{else}}
+                {{ if eq .File.MIME.Subtype "markup" }}
+                <code-highlighter language="{{.File.MIME.Subtype}}" :readonly="false">{{.Content}}
+                </code-highlighter>
+                {{ else }}
+                <pre class="text"><code class="language-go" v-highlight>{{.Content}}</code></pre>
+                {{ end }}
+                {{ end }}
 
+
+                <div class="content"></div>
+                {{ end }}
+
+
+
+
+
+            </div>
+        </section>
         <section class="section">
             <button @click="edit=!edit">edit</button>
 
             <div class="container">
                 <form method="post">
-                    <textarea class="textarea has-fixed-size box" name="content" v-if="edit">{{.content}}</textarea>
+                    <textarea class="textarea has-fixed-size box" name="content" v-if="edit">{{.Content}}</textarea>
 
-                    <div class="box content" v-else>{{.Markdown}}</div>
+                    <div class="box content" v-else>{{.Content}}</div>
                     <button type="submit">save</button>
                 </form>
             </div>

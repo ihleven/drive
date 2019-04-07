@@ -1,104 +1,84 @@
 {{define "partials/hero"}}
 
-<nav class="navbar is-primary" role="navigation" aria-label="main navigation">
-    <div class="container">
-        <div class="navbar-brand">
-            <a class="navbar-item title is-4" href="https://ihle.cloud">
-                <span class="">ihle.</span>
-                <svg class="feather feather-cloud sc-dnqmqq jxshSx" xmlns="http://www.w3.org/2000/svg" width="24"
-                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-reactid="351">
-                    <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-                </svg>
-            </a>
-        </div>
-        <div class="navbar-menu">
-            <div class="navbar-start">
-                <a class="navbar-item" href="/serve{{.File.Path}}">serve</a>
-
-                <a class="navbar-item" href="/login">login</a>
-
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">
-                        Docs
-                    </a>
-
-                    <div class="navbar-dropdown">
-
-                        <a class="navbar-item" href="https://bulma.io/documentation/modifiers/syntax/">
-                            Modifiers
-                        </a>
-                        <a class="navbar-item" href="https://bulma.io/documentation/columns/basics/">
-                            Columns
-                        </a>
-                        <a class="navbar-item" href="https://bulma.io/documentation/layout/container/">
-                            Layout
-                        </a>
-                        <a class="navbar-item" href="https://bulma.io/documentation/form/general/">
-                            Form
-                        </a>
-                        <hr class="navbar-divider">
-                        <a class="navbar-item" href="https://bulma.io/documentation/elements/box/">
-                            Elements
-                        </a>
-                        <a class="navbar-item is-active" href="https://bulma.io/documentation/components/breadcrumb/">
-                            Components
-                        </a>
-                    </div>
-
-                </div>
-
-
-            </div>
-
-            <div class="navbar-end">
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link is-arrowless">
-                        <span class="icon">
-                            <svg style="width:100%;height:100%">
-                                <use xlink:href="/static/feather-icons.svg#icon-user"></use>
-                            </svg>
-                        </span>
-                    </a>
-
-                    <div class="navbar-dropdown is-right is-boxed">
-
-                        <div class="dropdown-item">
-                            <strong>Matthias Ihle</strong>
-                        </div>
-
-                        <hr class="dropdown-divider">
-                        <a href="#" class="dropdown-item">
-                            Username: {{.User.Username}}
-                        </a>
-                        <a class="dropdown-item">
-                            Uid: {{.User.Uid}}
-                        </a>
-                        <hr class="dropdown-divider">
-                        <div class="dropdown-item">
-                            <strong>Groups</strong>
-                            <div>{{.User.Uid}}</div>
-                        </div>
-                        <hr class="dropdown-divider">
-                        <a href="/logout" class="dropdown-item">
-                            Logout
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</nav>
 
 <section class="hero is-primary">
     <div class="hero-head">
-        <nav class="navbar">
-            <div class="container">
-                <a class="navbar-item is-active">
-                    Home
+
+        <nav class="navbar is-primary " role="navigation" aria-label="main navigation">
+            <div class="navbar-brand">
+                <a class="navbar-item" href="https://ihle.cloud">
+                    <strong class="is-size-4">ihle.</strong>
+                    <svg class="feather feather-cloud sc-dnqmqq jxshSx" xmlns="http://www.w3.org/2000/svg" width="24"
+                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-reactid="351">
+                        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                    </svg>
+                    <span class="is-size-3">&nbsp;/</span>
                 </a>
+
+                <div class="navbar-item has-dropdown" :class="{ 'is-active': isActive }" @click="isActive=!isActive">
+                    <a class="navbar-link">
+                        {.Title}
+                    </a>
+
+                    <div class="navbar-dropdown is-boxed">
+                        <a class="navbar-item">
+                            Home
+                        </a>
+                        <a class="navbar-item">
+                            Public
+                        </a>
+                        <a class="navbar-item">
+                            Arbeit
+                        </a>
+                        <hr class="navbar-divider">
+                        <a class="navbar-item">
+                            Alben
+                        </a>
+                    </div>
+                </div>
+
             </div>
+            <div class="navbar-menu">
+
+                <div class="navbar-end">
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a class="navbar-link is-arrowless">
+                            <span class="icon">
+                                <svg style="width:100%;height:100%">
+
+                                    <use xlink:href="/feather-icons.svg#icon-user"></use>
+                                </svg>
+                            </span>
+                        </a>
+
+                        <div class="navbar-dropdown is-right is-boxed">
+
+                            <div class="dropdown-item">
+                                <strong>Matthias Ihle</strong>
+                            </div>
+
+                            <hr class="dropdown-divider">
+                            <a href="#" class="dropdown-item">
+                                Username: {{.User.Username}}
+                            </a>
+                            <a class="dropdown-item">
+                                Uid: {{.User.Uid}}
+                            </a>
+                            <hr class="dropdown-divider">
+                            <div class="dropdown-item">
+                                <strong>Groups</strong>
+                                <div>{{.User.Uid}}</div>
+                            </div>
+                            <hr class="dropdown-divider">
+                            <a href="/logout" class="dropdown-item">
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </nav>
     </div>
     <div class="hero-body">

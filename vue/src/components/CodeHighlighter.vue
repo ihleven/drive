@@ -1,9 +1,9 @@
 <template>
-  <div class="content">
-    <prism-editor v-model="code" :language="lang" :lineNumbers="linenumbers" :readonly="readonly">
-      <slot></slot>
-    </prism-editor>
-  </div>
+    <div class="content">
+        <prism-editor v-model="code" :language="lang" :lineNumbers="linenumbers" :readonly="readonly">
+            <slot></slot>
+        </prism-editor>
+    </div>
 </template>
 
 <script>
@@ -54,7 +54,7 @@ export default {
         },
     },
 };
-</script>   
+</script>
 
 <style>
 /* https://github.com/jgthms/bulma/issues/1708 */

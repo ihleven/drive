@@ -1,31 +1,38 @@
 // vue.config.js
 module.exports = {
-    publicPath: "/",
-    outputDir: "../_static",
-    assetsDir: "assets",
+    publicPath: '/',
+    outputDir: '../_static',
+    assetsDir: 'assets',
     pages: {
-        index: "./src/pages/Home/main.js",
-        folder: {
-            entry: "./src/pages/folder/folder.js",
-            template: './public/templates/directory.html',
-            filename: 'templates/directory.html',
+        index: './src/pages/Home/main.js',
+        error: {
+            entry: './src/pages/error.js',
+            template: './public/templates/error.html',
+            filename: 'templates/error.html',
             minify: false,
-            chunks: ['chunk-vendors', 'chunk-common', 'folder']
+            chunks: ['chunk-vendors', 'chunk-common', 'error'],
         },
         file: {
-            entry: "./src/pages/file/file.js",
+            entry: './src/pages/file/file.js',
             template: './public/templates/file.html',
             filename: 'templates/file.html',
             minify: false,
-            chunks: ['chunk-vendors', 'chunk-common', 'file']
+            chunks: ['chunk-vendors', 'chunk-common', 'file'],
         },
-        textfile: {
-            entry: "./src/pages/Textfile/textfile.js",
-            template: './public/templates/textfile.html',
-            filename: 'templates/textfile.html',
+        folder: {
+            entry: './src/pages/folder/folder.js',
+            template: './public/templates/folder.html',
+            filename: 'templates/folder.html',
             minify: false,
-            chunks: ['chunk-vendors', 'chunk-common', 'textfile']
-        }
+            chunks: ['chunk-vendors', 'chunk-common', 'folder'],
+        },
+        image: {
+            entry: './src/pages/image/image.js',
+            template: './public/templates/image.html',
+            filename: 'templates/image.html',
+            minify: false,
+            chunks: ['chunk-vendors', 'chunk-common', 'image'],
+        },
     },
-    runtimeCompiler: true
-}
+    runtimeCompiler: true,
+};

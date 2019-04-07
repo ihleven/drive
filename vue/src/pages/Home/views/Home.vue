@@ -6,9 +6,8 @@
     <div class="section">
       <div class="container">
         <markdown-editor>
-          # Why I built tiptap I was looking for a text * editor *
-          fofound ### some solutions that didn't really satisfy me.
-          The editor shoossation
+          # Why I built tiptap I was looking for a text * editor * fofound ### some solutions that didn't
+          really satisfy me. The editor shoossation
         </markdown-editor>
       </div>
     </div>

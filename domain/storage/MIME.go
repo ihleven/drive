@@ -26,7 +26,7 @@ func init() {
 func (f *FileHandle) GuessMIME() (m types.MIME) {
 
 	if f.IsDir() {
-		m = types.NewMIME("directory/")
+		m = types.NewMIME("dir/")
 		return
 	}
 

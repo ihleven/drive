@@ -1,4 +1,4 @@
-{{ define "directory" }}
+{{ define "folder" }}
 
 <!DOCTYPE html>
 <html>
@@ -8,8 +8,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{.File.Path}}</title>
-    <link rel="stylesheet" href="/static/entypo-icons.svg">
-    <link rel="stylesheet" href="/static/feather-icons.svg">
 
 
 </head>
@@ -29,18 +27,17 @@
 
         <div class="container">
 
-            <table class="table is-striped is-narrow is-hoverable is-fullwidth">
+            <table class="table is-striped is-hoverable is-fullwidth">
                 <thead>
                     <tr>
                         <th></th>
                         <th>Name</th>
 
-                        <th>MIME</th>
-                        <th>MIME</th>
+                        <th colspan="2" class="has-text-centered">MIME</th>
                         <th>Mode</th>
-                        <th>Owner</th>
+                        <th class="has-text-right">Owner</th>
                         <th>Group</th>
-                        <th>Permissions</th>
+                        <th>Perm</th>
                         <th>Size</th>
                         <th>Created</th>
                         <th>Modified</th>
@@ -52,13 +49,13 @@
                     <tr>
                         <td>
                             <span class="icon is-small">
-                                {{ if (ne .MIME.Type "directory") }}
-                                <svg style="width:1rem;height:1rem; vertical-align: -0.15rem;">
-                                    <use xlink:href="/static/feather-icons.svg#icon-file"></use>
+                                {{ if (ne .MIME.Type "dir") }}
+                                <svg class="feather">
+                                    <use xlink:href="/feather.svg#file" />
                                 </svg>
                                 {{else}}
-                                <svg style="width:1rem;height:1rem; vertical-align: -0.15rem;">
-                                    <use xlink:href="/static/feather-icons.svg#icon-folder"></use>
+                                <svg class="feather">
+                                    <use xlink:href="/feather.svg#folder" />
                                 </svg>
 
                                 {{end}}
@@ -68,57 +65,60 @@
                             <a href="{{.Path}}" title="{{.Path}}">{{.Name}}</a>
                         </td>
 
-                        <td>
+                        <td class="has-text-right" style="padding-right:0">
                             {{.MIME.Type}}
                         </td>
-                        <td>
-                            {{.MIME.Subtype}}
+                        <td class="nowrap" style="padding-left:0">
+                            {{ if .MIME.Subtype }} /{{.MIME.Subtype}} {{end}}
                         </td>
-                        <td>
+                        <td class="nowrap">
                             {{.Mode}}
                         </td>
-                        <td>
+                        <td
+                            class="has-text-right {{ if .Permissions.IsOwner }}is-user-group{{else}}is-not-user-group{{end}}">
                             {{.Owner.Username }}
-                            {{ if .Permissions.IsOwner }}
-                            <svg style="width:1rem;height:1rem; vertical-align: -0.2rem;">
-                                <use xlink:href="/static/feather-icons.svg#icon-check-square"></use>
-                            </svg>
-                            {{else}}
-                            <svg style="width:1rem;height:1rem; vertical-align: -0.2rem;">
-                                <use xlink:href="/static/feather-icons.svg#icon-square"></use>
-                            </svg>
-                            {{end}}
                         </td>
-                        <td>
+                        <td class="{{ if .Permissions.InGroup }}is-user-group{{else}}is-not-user-group{{end}}">
                             {{.Group.Name }}
-                            {{ if .Permissions.InGroup }}
-                            <svg style="width:1rem;height:1rem; vertical-align: -0.2rem;">
-                                <use xlink:href="/static/feather-icons.svg#icon-check-square"></use>
-                            </svg>
-                            {{else}}
-                            <svg style="width:1rem;height:1rem; vertical-align: -0.2rem;">
-                                <use xlink:href="/static/feather-icons.svg#icon-square"></use>
-                            </svg>
-                            {{end}}
                         </td>
                         <td>
-                            {{ if .Permissions.Read }}R{{else}}-{{end}} /
-                            {{ if .Permissions.Write }}W{{else}}-{{end}} /
-                            {{ if .Permissions.Exec }}X{{else}}-{{end}}
+                            <span class="icon is-small">
+                                {{ if .Permissions.Read }}
+                                <svg class="feather">
+                                    <use xlink:href="/feather.svg#eye"></use>
+                                </svg>
+                                {{else}}
+                                <svg class="feather">
+                                    <use xlink:href="/feather.svg#eye-off"></use>
+                                </svg>
+                                {{end}}
+                            </span>
+                            <span class="icon is-small">
+                                {{ if .Permissions.Write }}
+                                <svg class="feather">
+                                    <use xlink:href="/feather.svg#edit"></use>
+                                </svg>
+                                {{else}}
+                                <svg class="feather">
+                                    <use xlink:href="/feather.svg#lock"></use>
+                                </svg>
+                                {{end}}
+                            </span>
+                            {{ if .Permissions.Exec }}{{else}}{{end}}
                         </td>
 
-                        <td title="{{.Size}} Bytes">
+                        <td class="nowrap" title="{{.Size}} Bytes">
                             {{ if (ne .MIME.Type "folder") }}
                             {{.Size | bytes }}
                             {{end}}
                         </td>
-                        <td>
+                        <td class="overflow">
                             {{.Created | format }}
                         </td>
-                        <td>
+                        <td class="overflow">
                             {{.Modified | format }}
                         </td>
-                        <td>
+                        <td class="overflow" title="{{.Accessed}}">
                             {{.Accessed | format }}
                         </td>
                     </tr>

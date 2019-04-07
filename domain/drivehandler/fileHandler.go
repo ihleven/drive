@@ -1,9 +1,8 @@
-package web
+package drivehandler
 
 import (
 	"drive/domain"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -12,7 +11,50 @@ import (
 	"strings"
 
 	"github.com/gomarkdown/markdown"
+	"github.com/pkg/errors"
 )
+
+type FileHandler struct {
+	File    *domain.File
+	User    *domain.Account
+	Title   string
+	Content string
+}
+
+func (h *FileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	h.Title = strings.TrimSuffix(h.File.Name, filepath.Ext(h.File.Name))
+	content, _ := h.File.GetUTF8Content()
+	h.Content = content
+
+	h.Respond(w, r.Header.Get("Accept"))
+}
+
+func (h *FileHandler) Respond(w http.ResponseWriter, format string) error {
+
+	var err error
+
+	switch format {
+	case "application/json":
+		err = rnd.JSON(w, http.StatusOK, h)
+	default:
+		err = h.Render(w, h)
+	}
+	if err != nil {
+		return errors.Wrap(err, "render error")
+	}
+	return nil
+
+}
+
+func (h *FileHandler) Render(w http.ResponseWriter, m interface{}) error {
+
+	err := rnd.HTML(w, http.StatusOK, "file", m)
+	if err != nil {
+		return errors.Wrap(err, "render error")
+	}
+	return nil
+}
 
 type TextFileController struct {
 	File          *domain.File
@@ -41,8 +83,7 @@ func (c *TextFileController) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
-	mimeType := handle.Header.Get("Content-Type")
-	fmt.Println(mimeType, handle)
+	_ = handle.Header.Get("Content-Type")
 
 	data, err := ioutil.ReadAll(file)
 	if err != nil {

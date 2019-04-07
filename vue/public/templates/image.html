@@ -13,30 +13,30 @@
     <link href=/dist/css/chunk-common.css rel=stylesheet>
     <style>
         .header-image {
-            background-image: url("/serve{{.file.Path}}");
+            background-image: url("/serve{{.File.Path}}");
             background-position: center 0%;
             background-repeat: no-repeat;
             background-attachment: fixed;
             background-size: contain;
             background-color: #999;
-            height: {{.Image.Ratio}}vw!important;
-            max-height: 100vh!important;
+            max-height: 100vh !important;
         }
+
         .navbar.is-transparent {
             background-color: transparent;
-        background-image: none;
+            background-image: none;
         }
-        @media screen and (max-width: 1087px)
-            .hero.is-dark .navbar-menu {
-                background-color: transparent;
-            }
+
+        @media screen and (max-width: 1087px) .hero.is-dark .navbar-menu {
+            background-color: transparent;
+        }
     </style>
 </head>
 
 <body>
 
     <div>
-        <section class="hero is-dark header-image">
+        <section class="hero is-dark header-image" style="height: {{.Image.Ratio}}vw !important;">
             <!-- Hero header: will stick at the top -->
             <div class="hero-head">
                 <!-- 
@@ -82,7 +82,8 @@
                         <li><a class="pagination-link" aria-label="Goto page 45" href="{{.Siblings.Prev}}">
                                 {{.Siblings.PrevIndex}}
                             </a></li>
-                        <li><a class="pagination-link is-current" aria-label="Page 46" aria-current="page">{{.Siblings.CurrentIndex}}</a></li>
+                        <li><a class="pagination-link is-current" aria-label="Page 46"
+                                aria-current="page">{{.Siblings.CurrentIndex}}</a></li>
                         <li><a class="pagination-link" aria-label="Goto page 47" href="{{.Siblings.Next}}">
                                 {{.Siblings.NextIndex }}</a></li>
                         <li><span class="pagination-ellipsis">&hellip;</span></li>
@@ -110,21 +111,24 @@
                         <div class="field">
                             <label class="label">Title</label>
                             <div class="control">
-                                <input class="input" type="text" placeholder="Text input" name="title" value="{{.Image.Title}}">
+                                <input class="input" type="text" placeholder="Text input" name="title"
+                                    value="{{.Image.Title}}">
                             </div>
                         </div>
 
                         <div class="field">
                             <label class="label">Caption</label>
                             <div class="control">
-                                <textarea class="textarea" placeholder="Normal textarea" name="caption">{{.Image.Caption}}</textarea>
+                                <textarea class="textarea" placeholder="Normal textarea"
+                                    name="caption">{{.Image.Caption}}</textarea>
                             </div>
                             <p class="help">This is a help text</p>
                         </div>
                         <div class="field">
                             <label class="label">Cutline</label>
                             <div class="control">
-                                <textarea class="textarea" placeholder="Normal textarea" name="cutline">{{.Image.Cutline}}</textarea>
+                                <textarea class="textarea" placeholder="Normal textarea"
+                                    name="cutline">{{.Image.Cutline}}</textarea>
                             </div>
                         </div>
                     </form>
@@ -133,14 +137,14 @@
                     <div class="card">
                         <div class="card-image">
                             <figure class="image is-4by3" style="padding-top: {{.Image.Ratio}}%">
-                                <img src="/serve{{.file.Path}}" alt="Placeholder image">
+                                <img src="/serve{{.File.Path}}" alt="Placeholder image">
                             </figure>
                         </div>
                         <div class="card-content">
                             <div class="media">
                                 <div class="media-left">
                                     <figure class="image is-48x48">
-                                        <img src="/serve{{.file.Path}}" alt="{{.Image.Title}}">
+                                        <img src="/serve{{.File.Path}}" alt="{{.Image.Title}}">
                                     </figure>
                                 </div>
                                 <div class="media-content">
@@ -208,7 +212,7 @@
 
     </section>
 
-    <img src="/serve{{.file.Path}}" />
+    <img src="/serve{{.File.Path}}" />
 
 
     <footer class="footer has-text-centered">

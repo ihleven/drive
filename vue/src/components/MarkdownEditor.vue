@@ -1,59 +1,52 @@
 <template>
-  <div class="hello">
-    <div class="tabs">
-      <ul>
-        <li :class="{ 'is-active': !viewsource }" @click="viewsource = false">
-          <a>Preview</a>
-        </li>
-        <li :class="{ 'is-active': viewsource }" @click="viewsource = true">
-          <a>Source</a>
-        </li>
-      </ul>
+    <div class="hello">
+        <div class="tabs">
+            <ul>
+                <li :class="{ 'is-active': !viewsource }" @click="viewsource = false">
+                    <a>Preview</a>
+                </li>
+                <li :class="{ 'is-active': viewsource }" @click="viewsource = true">
+                    <a>Source</a>
+                </li>
+            </ul>
 
-      <a class="button is-info is-outlined" @click="reset" :disabled="!dirty">Reset</a>
-      <a class="button is-info is-outlined" @click="save" :disabled="!dirty">Save</a>
-    </div>
-    <slot name="source"></slot>
-    <div v-show="viewsource">
-      <textarea class="textarea" v-model="markdown" @input="onMarkdownChange"></textarea>
-    </div>
-    <div v-show="!viewsource">
-      <editor-menu-bubble :editor="editor">
-        <div
-          slot-scope="{ commands, isActive, menu }"
-          class="menububble"
-          :class="{ 'is-active': menu.isActive }"
-          :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`"
-        >
-          <button
-            class="menububble__button"
-            :class="{ 'is-active': isActive.bold() }"
-            @click="commands.bold"
-          >
-            <icon name="bold"/>
-          </button>
-
-          <button
-            class="menububble__button"
-            :class="{ 'is-active': isActive.italic() }"
-            @click="commands.italic"
-          >
-            <icon name="italic"/>
-          </button>
-
-          <button
-            class="menububble__button"
-            :class="{ 'is-active': isActive.code() }"
-            @click="commands.code"
-          >
-            <icon name="code"/>
-          </button>
+            <a class="button is-info is-outlined" @click="reset" :disabled="!dirty">Reset</a>
+            <a class="button is-info is-outlined" @click="save" :disabled="!dirty">Save</a>
         </div>
-      </editor-menu-bubble>
-      <editor-content class="box content" :editor="editor"/>
+        <slot name="source"></slot>
+        <div v-show="viewsource">
+            <code-highlighter language="file.mime.Subtype" :readonly="false">{{ markdown }}</code-highlighter>
+            <textarea class="textarea" v-model="markdown" @input="onMarkdownChange"></textarea>
+        </div>
+        <div v-show="!viewsource">
+            <editor-menu-bubble :editor="editor">
+                <div
+                    slot-scope="{ commands, isActive, menu }"
+                    class="menububble"
+                    :class="{ 'is-active': menu.isActive }"
+                    :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`"
+                >
+                    <button class="menububble__button" :class="{ 'is-active': isActive.bold() }" @click="commands.bold">
+                        <icon name="bold" />
+                    </button>
+
+                    <button
+                        class="menububble__button"
+                        :class="{ 'is-active': isActive.italic() }"
+                        @click="commands.italic"
+                    >
+                        <icon name="italic" />
+                    </button>
+
+                    <button class="menububble__button" :class="{ 'is-active': isActive.code() }" @click="commands.code">
+                        <icon name="code" />
+                    </button>
+                </div>
+            </editor-menu-bubble>
+            <editor-content class="box content" :editor="editor" />
+        </div>
+        <!--<div v-html="html"></div>-->
     </div>
-    <!--<div v-html="html"></div>-->
-  </div>
 </template>
 
 <script>
@@ -76,6 +69,8 @@ import {
     Underline,
     History,
 } from 'tiptap-extensions';
+import CodeHighlighter from '@/components/CodeHighlighter.vue';
+
 import TurndownService from 'turndown';
 import Marked from 'marked';
 
@@ -101,6 +96,7 @@ export default {
     components: {
         EditorContent,
         EditorMenuBubble,
+        CodeHighlighter,
     },
     props: {
         readonly: { type: Boolean, default: true },

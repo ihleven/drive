@@ -11,7 +11,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="shortcut icon" href="/assets/images/favicon.ico">
-    <meta property="og:image" content="/assets/images/open-graph.png">
 
 
 </head>
@@ -25,12 +24,24 @@
         {{template "partials/hero" .}}
 
         <section class="section">
-            <div class="container">
+            <div class="container" v-cloak style="border:1px solid black">
+                {{ if eq .File.MIME.Type "text"}}
+                {{ if eq .File.MIME.Subtype "markdown" }}
+                <markdown-editor :readonly="{{ not .File.Permissions.Write}}">{{.Content}}</markdown-editor>
+                {{else}}
+                {{ if eq .File.MIME.Subtype "markup" }}
+                <code-highlighter language="{{.File.MIME.Subtype}}" :readonly="false">{{.Content}}
+                </code-highlighter>
+                {{ else }}
+                <pre class="text"><code class="language-go" v-highlight>{{.Content}}</code></pre>
+                {{ end }}
+                {{ end }}
 
-                <!--<code-highlighter language="{{.File.MIME.Subtype}}" :readonly="false">{{.Content}}
-                        </code-highlighter>-->
-                <markdown-editor :readonly="{{ not .File.Permissions.Write}}">{{.Content}}
-                </markdown-editor>
+
+                <div class="content"></div>
+                {{ end }}
+
+
 
 
 
@@ -38,6 +49,7 @@
         </section>
 
         {{template "partials/footer"}}
+
 
 
     </div>

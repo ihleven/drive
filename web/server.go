@@ -2,7 +2,6 @@ package web
 
 import (
 	"drive/config"
-	"drive/domain/storage"
 	"log"
 	"net/http"
 	"path"
@@ -10,18 +9,20 @@ import (
 	"time"
 )
 
+var mux *http.ServeMux
+
+func init() {
+
+	mux = http.NewServeMux()
+}
+
 func CreateServer() {
 
-	mux := http.NewServeMux()
 	mux.Handle("/assets/", assetHandler("assets", "_static/assets"))
 	mux.Handle("/dist/", assetHandler("dist", "_static/dist"))
-	mux.HandleFunc("/login", Login)
-	mux.HandleFunc("/logout", Logout)
-	mux.HandleFunc("/serve/home/", Serve(storage.Get("home")))
-	mux.HandleFunc("/serve/", Serve(storage.Get("public")))
-	mux.HandleFunc("/public/", DispatchStorage(storage.Get("public")))
-	mux.HandleFunc("/home/", DispatchStorage(storage.Get("home")))
-	mux.HandleFunc("/", IndexHandler)
+	// mux.HandleFunc("/login", drivehandler.Login)
+	// mux.HandleFunc("/logout", drivehandler.Logout)
+	mux.HandleFunc("/", defaultHandler)
 
 	srv := &http.Server{
 		Handler: mux,
@@ -32,6 +33,14 @@ func CreateServer() {
 	}
 
 	log.Fatal(srv.ListenAndServe())
+}
+
+func RegisterFunc(pattern string, handlerfunc func(w http.ResponseWriter, r *http.Request)) {
+	mux.HandleFunc(pattern, handlerfunc)
+}
+
+func RegisterHandler(pattern string, handler http.Handler) {
+	mux.Handle(pattern, handler)
 }
 
 func logit(h http.Handler) http.Handler {

@@ -1,9 +1,10 @@
-package web
+package drivehandler
 
 import (
 	"drive/domain"
 	"drive/domain/storage"
 	"drive/domain/usecase"
+	"drive/templates"
 	"encoding/json"
 	"fmt"
 	_ "image/jpeg"
@@ -14,6 +15,8 @@ import (
 	"path"
 	"path/filepath"
 )
+
+var rnd = templates.Rnd
 
 type AlbumHandler struct {
 	Folder *domain.Folder
@@ -40,7 +43,7 @@ func (a *AlbumHandler) Render(w http.ResponseWriter, r *http.Request) {
 	}
 	file, _ := handle.ToFile(path, nil)
 	if file.IsDir() {
-		dir, _ := usecase.GetFolder(storage.Get("public"), file, nil)
+		dir, _ := usecase.GetFolder(file, nil)
 		_, _ = usecase.NewAlbum(dir)
 		//album.Render(w, r)
 		return

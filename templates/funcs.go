@@ -1,4 +1,4 @@
-package web
+package templates
 
 import (
 	"encoding/json"
@@ -20,7 +20,7 @@ var FuncMap = template.FuncMap{
 
 func Bytes(size int64) string {
 	if size < 1000 {
-		return fmt.Sprintf("%d Bytes", size)
+		return fmt.Sprintf("%d b.", size)
 	}
 	size2 := float64(size)
 	//ext := []string{"B", "KiB", "MiB", "GiB"}
@@ -39,7 +39,19 @@ func Bytes(size int64) string {
 
 func TimeFormat(t time.Time) string {
 
-	return t.Format(time.RFC822Z)
+	y, m, d := t.Date()
+	y2, m2, d2 := time.Now().Date()
+
+	if y == y2 && m == m2 && d == d2 {
+		return t.Format("15:04:05")
+
+	}
+	if y == y2 {
+		return t.Format("Jan 2 15:04")
+
+	}
+	return t.Format("2006, Jan 2 15h")
+
 }
 func Icon(typ string) string {
 	ext := map[string]string{"F": "file", "FI": "image", "FT": "file-text", "D": "folder", "DA": "album"}

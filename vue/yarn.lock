@@ -1488,6 +1488,11 @@ babel-plugin-dynamic-import-node@^2.2.0:
   dependencies:
     object.assign "^4.1.0"
 
+babel-plugin-prismjs@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/babel-plugin-prismjs/-/babel-plugin-prismjs-1.0.2.tgz#837bf6b32168b3ba624c054fc755946deb1b63fa"
+  integrity sha512-WbUE86Aih6h6daLpyavuikEXECrkon21oWh4MOHa5stMfY/IK1e/Sr79qEGhl7KrL16fMChB3tdbVR82ubnzOg==
+
 balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
@@ -8240,6 +8245,31 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
+
+typeface-aleo@^0.0.69:
+  version "0.0.69"
+  resolved "https://registry.yarnpkg.com/typeface-aleo/-/typeface-aleo-0.0.69.tgz#887a411122e0eb109f478fc2f9164be7492984fd"
+  integrity sha512-GWQ1BrgQfu0TFSr1TQTXhPocb+sAequcbVO6R+TEh7rpo9l4CN4hdHLq0Z32pKNJqAH6FW3B/GA1cGHbhhdVjQ==
+
+typeface-clear-sans@^0.0.44:
+  version "0.0.44"
+  resolved "https://registry.yarnpkg.com/typeface-clear-sans/-/typeface-clear-sans-0.0.44.tgz#6cad349e6ed72cb1552238807421aa498e2ae8d6"
+  integrity sha512-U2UULDIlM4sgrNYsULiz2isO1bbCHay8zDZuGPKteY2TTqR6u0ke0iJYTQv7LfL0r5Cl+Vt1eW6WrsUuoLO0YA==
+
+typeface-cooper-hewitt@^0.0.44:
+  version "0.0.44"
+  resolved "https://registry.yarnpkg.com/typeface-cooper-hewitt/-/typeface-cooper-hewitt-0.0.44.tgz#def4915d143bebb8a9a1ca4ea6b81946271a2a57"
+  integrity sha512-5TEnSbhWCnCQ25dGaFrSqCphJQoAaVeCuqmMMAXLK7uOiOn3YrMBdpq2nh4R6SEM+Z7FGYXZY7/Vdz/cDl06Ww==
+
+typeface-londrina-outline@^0.0.72:
+  version "0.0.72"
+  resolved "https://registry.yarnpkg.com/typeface-londrina-outline/-/typeface-londrina-outline-0.0.72.tgz#2fd8a4608c59fc85628fbd0aae7266c60bc0365c"
+  integrity sha512-TAnbz0RE0HSRwasotSbCZMCI4+uxtmVRLdkV5DqZErEcrWnLeSa2SEP8l8s4AYmrNBktG2xU4K+0eittD4qN2g==
+
+typeface-montserrat@^0.0.54:
+  version "0.0.54"
+  resolved "https://registry.yarnpkg.com/typeface-montserrat/-/typeface-montserrat-0.0.54.tgz#3fc338db6428d73485b75aa7bd2af8c9a55b9ab3"
+  integrity sha512-Typhap0PWT299+Va0G/8ZtycHMXrH4gBWKfiW977KEBx5rXUUCa70gvqLx1fdA0WAo6bhSAQmo8uc+QFAmjPww==
 
 uglify-js@3.4.x:
   version "3.4.10"
