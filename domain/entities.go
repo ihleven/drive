@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -20,41 +21,44 @@ type Account struct {
 }
 
 type User struct {
-	Uid      string
-	Gid      string
-	Username string
-	Name     string
-	HomeDir  string
+	Uid      string `json:"uid"`
+	Gid      string `json:"-"`
+	Username string `json:"name"`
+	Name     string `json:"-"`
+	HomeDir  string `json:"-"`
 }
 
 type Group struct {
-	Gid  string // group ID
-	Name string // group name
+	Gid  string `json:"gid"`  // group ID
+	Name string `json:"name"` // group name
 }
 type Mimetype struct {
-	Type    string // group ID
-	Subtype string // group name
-	Charset string
+	Type    string `json:"type"`    // group ID
+	Subtype string `json:"subtype"` // group name
+	Charset string `json:"charset"`
 }
 
 type Storage interface {
 	GetHandle(name string) (Handle, error)
 	Open(string) (*os.File, error)
+	Create(string) error
+	Delete(string) error
 	ReadDir(string) ([]Handle, error)
+	Save(string, io.Reader) error
+
 	//PermOpen(string, uint32, uint32) (*os.File, *time.Time, error)
-	//OpenFD(name string) (*os.File, error)
 }
 
 type Handle interface {
 	os.FileInfo
+	Storage() Storage
 	Descriptor(int) *os.File
 	ToFile(string, *Account) (*File, error)
 	GuessMIME() types.MIME
 	//Close() error
-	//GetFile() *os.File
 	//ReadDir() ([]os.FileInfo, error)
 	ListDirHandles(bool) ([]Handle, error)
-	GetPermissions(owner uint32, group uint32, account *Account) (*Permissions, error)
+	GetPermissions(owner uint32, group uint32, account *Account) *Permissions
 	GetContent() ([]byte, error)
 	SetContent([]byte) error
 	GetUTF8Content() (string, error)
@@ -62,7 +66,6 @@ type Handle interface {
 	//Uid() uint32
 	//Gid() uint32
 	HasReadPermission(uid, gid uint32) bool
-	Storage() Storage
 }
 type Permtype int
 
@@ -83,7 +86,7 @@ type Permissions struct {
 }
 
 type File struct {
-	Handle
+	Handle      `json:"-"`
 	Path        string       `json:"path"`
 	Name        string       `json:"name"`
 	Size        int64        `json:"size"`
@@ -95,22 +98,6 @@ type File struct {
 	Modified    time.Time    `json:"modified"`
 	Accessed    *time.Time   `json:"accessed"`
 	MIME        types.MIME   `json:"mime"`
-}
-
-func NewFile(handle Handle, path string) *File {
-
-	file := &File{
-		Handle: handle,
-		Path:   path,
-		Name:   handle.Name(),
-		//Size:   handle.Size(),
-		//Mode:   handle.Mode(),
-		//MTime:  handle.ModTime(),
-		//MIME:   handle.GuessMIME(),
-		Owner: &User{},
-		Group: &Group{},
-	}
-	return file
 }
 
 func ShiftPath(p string) (head, tail string) {
@@ -211,6 +198,6 @@ func (f *File) Siblings() (*Siblings, error) {
 type Folder struct {
 	*File
 	//Parent    string
-	Entries   []*File
-	IndexFile *File
+	Entries   []*File `json:"entries"`
+	IndexFile *File   `json:"indexFile"`
 }

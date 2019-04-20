@@ -10,9 +10,102 @@
     <!-- Bulma Version 0.7.4-->
     <link rel="stylesheet" href="https://unpkg.com/bulma@0.7.4/css/bulma.min.css" />
     <link rel="stylesheet" type="text/css" href="/static/instaAlbum.css">
+    <style>
+        .center,
+        .center-column,
+        .top,
+        .right,
+        .bottom,
+        .left {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .center-column {
+            flex-direction: column;
+        }
+
+        .top {
+            align-items: flex-start;
+        }
+
+        .right {
+            justify-content: flex-end;
+        }
+
+        .bottom {
+            align-items: flex-end;
+        }
+
+        .left {
+            justify-content: flex-start;
+        }
+
+        .single-spaced,
+        .single-spaced * {
+            line-height: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .desktop {
+                display: none;
+            }
+        }
+    </style>
 </head>
 
 <body>
+    <!-- .hero -->
+    <section class="hero is-fullheight is-primary is-bold">
+
+        <!-- .hero-head -->
+        <nav class="hero-head">
+            <div class="columns is-mobile is-marginless heading has-text-weight-bold">
+                <div class="column left">
+                    <figure class="navbar-item image">
+                        <svg class="feather" style="width: 6.25rem; height: 1rem;">
+                            <use xlink:href="/feather.svg#folder" />
+                        </svg>
+                    </figure>
+                    <span class="title-name">matthias@ihle.</span>
+                    <svg class="feather feather-cloud" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true" data-reactid="351">
+                        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                    </svg>
+
+                </div>
+                <div class="column center desktop">
+                    <p class="navbar-item has-text-black">MODEL S </p>
+                    <p class="navbar-item has-text-black">MODEL X </p>
+                    <p class="navbar-item has-text-black">MODEL 3 </p>
+                    <p class="navbar-item has-text-white">ROADSTER</p>
+                    <p class="navbar-item has-text-black">ENERGY </p>
+                </div>
+                <div class="column right">
+                    <p class="navbar-item desktop has-text-black desktop">SHOP </p>
+                    <p class="navbar-item desktop has-text-black desktop">SIGN IN</p>
+                    <figure class="navbar-item image">
+                        <i class="fas fa-3x fa-bars has-text-black" style="width: 1rem; height: 1rem;"></i>
+                    </figure>
+                </div>
+            </div>
+        </nav>
+        <!-- /.hero-head -->
+
+        <!-- .hero-body -->
+        <header class="hero-body">
+            <div class="is-overlay has-text-centered single-spaced" style="top: 92px;">
+                <h2 class="subtitle is-4 has-text-weight-light has-text-black">Tesla</h2>
+                <h1 class="title is-1 has-text-black">Roadster</h1>
+            </div>
+        </header>
+        <!-- /.hero-body -->
+
+    </section>
+    <!-- /.hero -->
+
     <nav class="navbar" role="navigation" aria-label="main navigation">
         <div class="container">
             <div class="navbar-brand">

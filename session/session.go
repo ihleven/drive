@@ -3,6 +3,7 @@ package session
 import (
 	"drive/domain"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -95,16 +96,19 @@ func GetSession(r *http.Request, w http.ResponseWriter) (*Session, error) {
 	}, nil
 }
 
-func Get(r *http.Request, name interface{}) interface{} {
-	session, _ := GetSession(r, nil)
-	if session == nil {
-		return nil
+func Get(r *http.Request, name interface{}) (interface{}, error) {
+
+	session, err := GetSession(r, nil)
+	if err != nil {
+		return nil, err
 	}
-	var value interface{}
-	value = session.Get(name)
-	fmt.Println("VALUE:", value)
-	return value
+	if session == nil {
+		return nil, errors.New("empty session")
+	}
+
+	return session.Get(name), nil
 }
+
 func GetString(r *http.Request, name interface{}) string {
 	session, _ := GetSession(r, nil)
 	if session == nil {
@@ -118,9 +122,16 @@ func GetString(r *http.Request, name interface{}) string {
 	return ""
 }
 
-func Set(r *http.Request, key, value interface{}) error {
-	session, _ := GetSession(r, nil)
+func Set(r *http.Request, w http.ResponseWriter, key, value interface{}) error {
+	session, err := GetSession(r, nil)
+	if err != nil {
+		return err
+	}
 	session.Set(key, value)
+	err = session.Save(r, w)
+	if err != nil {
+		return err //errors.Augment(err, errors.Session, "Session could not be saved")
+	}
 	return nil
 }
 

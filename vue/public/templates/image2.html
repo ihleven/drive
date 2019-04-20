@@ -1,4 +1,4 @@
-{{ define "image" }}
+{{ define "image2" }}
 <!DOCTYPE html>
 <html>
 
@@ -8,51 +8,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{.File.Path}}</title>
     <style>
-        html {
-            overflow-y: auto !important;
-        }
-
-        body {
-            scroll-behavior: smooth;
-            overflow-y: auto;
-        }
-
-        .perspective-container {
-            perspective: 1px;
+        #app {
+            perspective: 100px;
             transform-style: preserve-3d;
-            height: 100%;
+            height: 100vh;
             overflow-x: hidden;
-            overflow-y: auto;
-            perspective-origin: top left;
+            overflow-y: scroll;
+        }
+
+        .ParallaxContainer {
+
+            position: relative;
+            transform: translateZ(-1px) scale(2);
+            z-index: -1;
         }
 
         .ContentContainer {
             position: relative;
-            display: block;
             background-color: white;
             z-index: 1;
-            border: 1px solid green;
         }
 
 
 
-        .ParallaxContainer {
-            border: 0px solid black;
-            position: relative;
-            z-index: -1;
-            transform: translateZ(-1px) scale(2);
-            transform-origin: 0 0;
-            width: 100%;
-            height: 66.6666%;
+        .header-image {
+            background-image: url("/serve{{.File.Path}}");
+            background-position: center 0%;
+            background-repeat: no-repeat;
+            /*background-attachment: fixed;*/
+            background-size: 100vw auto;
+            background-color: #999;
+            max-height: 100vh !important;
+            height: 500px;
         }
     </style>
 </head>
 
-<body>
-    <div id="app" class="perspective-container">
+<body id="body" class="">
+    <div id="app">
 
-        <img class="ParallaxContainer" src="/serve{{.File.Path}}" />
-
+        <section class="ParallaxContainer header-image">
+            <div class="hero-body">
+                <div class="container">
+                    <h1 class="title">
+                        Hero title
+                    </h1>
+                    <h2 class="subtitle">
+                        Hero subtitle
+                    </h2>
+                </div>
+            </div>
+        </section>
 
 
 
@@ -152,6 +158,16 @@
 
                 </div>
             </div>
+
+
+
+
+
+
+
+
+
+
 
 
         </section>

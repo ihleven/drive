@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"drive/domain"
-	"errors"
+	"drive/errors"
 	"path/filepath"
 )
 
@@ -10,10 +10,10 @@ func GetReadHandle(storage domain.Storage, path string, uid, gid uint32) (domain
 
 	handle, err := storage.GetHandle(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Could not get file handle")
 	}
 	if !handle.HasReadPermission(uid, gid) {
-		return nil, errors.New("Permission denied")
+		return nil, errors.New(403, "uid: %v, gid %v has not read permission for %v", uid, gid, path)
 	}
 	return handle, nil
 }
@@ -22,15 +22,28 @@ func GetFile(storage domain.Storage, path string, usr *domain.Account) (*domain.
 
 	handle, err := storage.GetHandle(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Could not get file handle for %s", path)
 	}
 
 	file, err := handle.ToFile(path, usr)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Could not transform handle %v to File", file)
 	}
 	return file, nil
 }
+
+func DeleteFile(file *domain.File) error {
+
+	if !file.Permissions.Write {
+		return errors.New(errors.PermissionDenied, "Missing write permission for %s", file.Path)
+	}
+	err := file.Storage().Delete(file.Path)
+	if err != nil {
+		return errors.Wrap(err, "File '%s' could not be deleted!", file.Path)
+	}
+	return nil
+}
+
 func GetFolder(file *domain.File, usr *domain.Account) (*domain.Folder, error) {
 
 	folder := &domain.Folder{File: file}

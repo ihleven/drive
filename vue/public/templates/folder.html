@@ -14,13 +14,12 @@
 
 <body>
 
-    <script type="application/json" id="data">
-        {
-            "org": 10,
-            "items": ["one", "two"]
-        }
-    </script>
+    {{  marshalJSON "data" .Folder }}
 
+
+    <div id="app">
+
+    </div>
     {{template "partials/hero" .}}
 
     <section class="section">

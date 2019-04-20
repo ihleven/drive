@@ -20,8 +20,8 @@ func CreateServer() {
 
 	mux.Handle("/assets/", assetHandler("assets", "_static/assets"))
 	mux.Handle("/dist/", assetHandler("dist", "_static/dist"))
-	// mux.HandleFunc("/login", drivehandler.Login)
-	// mux.HandleFunc("/logout", drivehandler.Logout)
+	mux.HandleFunc("/login", Login)
+	mux.HandleFunc("/logout", Logout)
 	mux.HandleFunc("/", defaultHandler)
 
 	srv := &http.Server{

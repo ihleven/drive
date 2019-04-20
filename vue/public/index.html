@@ -5,14 +5,52 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
   <title>vue</title>
+
+  <style>
+    html {
+      scroll-behavior: smooth;
+      overflow: hidden !important;
+    }
+
+    body {
+      perspective: 1px;
+      transform-style: preserve-3d;
+      height: 100vh;
+      perspective-origin: 50% 25%;
+      overflow-x: hidden;
+      overflow-y: scroll;
+    }
+
+
+    .ParallaxContainer {
+      border: 1px solid black;
+      position: relative;
+      z-index: -1;
+      transform: translateZ(-1px) scale(2);
+
+      background-image: url("/serve{{.File.Path}}");
+      background-size: 100vw 50vw;
+      width: 100vw;
+      height: 50vw;
+    }
+
+    #app {
+      position: relative;
+      display: block;
+      background-color: white;
+      z-index: 1;
+      border: 1px solid green;
+    }
+  </style>
+
 </head>
 
 <body>
-  <noscript>
-    <strong>We're sorry but vue doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-  </noscript>
+
+
+  <div class="ParallaxContainer">parallax</div>
+
   <div id="app"></div>
   <!-- built files will be auto injected -->
 </body>

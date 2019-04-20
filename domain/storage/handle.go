@@ -3,7 +3,7 @@ package storage
 import (
 	"drive/domain"
 	"drive/domain/usecase"
-	"errors"
+	"drive/errors"
 	"fmt"
 	"log"
 	"os"
@@ -38,13 +38,9 @@ func (fh *FileHandle) ToFile(path string, account *domain.Account) (*domain.File
 
 	stat, err := fh.Stat()
 	if err != nil {
-		return nil, err
+		return nil, errors.Propagate(err)
 	}
-	permissions, err := fh.GetPermissions(stat.Uid, stat.Gid, account)
-	if err != nil {
-		log.Fatal("\nToFile:", err.Error())
-		return nil, nil
-	}
+
 	file := &domain.File{
 		Handle:      fh,
 		Path:        path,
@@ -53,7 +49,7 @@ func (fh *FileHandle) ToFile(path string, account *domain.Account) (*domain.File
 		Mode:        fh.mode,
 		Owner:       usecase.GetUserByID(stat.Uid),
 		Group:       usecase.GetGroupByID(stat.Gid),
-		Permissions: permissions,
+		Permissions: fh.GetPermissions(stat.Uid, stat.Gid, account),
 		Created:     statCtime(stat),
 		Modified:    fh.ModTime(),
 		Accessed:    statAtime(stat),
@@ -76,7 +72,7 @@ func (fh *FileHandle) Descriptor(flag int) *os.File { // , perm os.FileMode
 func (fh *FileHandle) Stat() (*syscall.Stat_t, error) {
 	stat, ok := fh.Sys().(*syscall.Stat_t)
 	if !ok {
-		return nil, errors.New("Sys().(*syscall.Stat_t) => underlying data source is nil")
+		return nil, errors.Errorf("Sys().(*syscall.Stat_t) => underlying data source is nil")
 	}
 	return stat, nil
 }
@@ -89,7 +85,6 @@ func (fh *FileHandle) HasReadPermission(uid, gid uint32) bool {
 	//owner, group, err := fh.GetOwnerAndGroupID()
 	stat, ok := fh.Sys().(*syscall.Stat_t)
 	if !ok {
-		log.Fatal(errors.New("Sys().(*syscall.Stat_t) => underlying data source is nil"))
 		return false
 	}
 	if stat.Gid == gid && fh.mode&OS_GROUP_R != 0 {
@@ -103,7 +98,7 @@ func (fh *FileHandle) HasReadPermission(uid, gid uint32) bool {
 
 //PERMISSIONS
 
-func (fh *FileHandle) GetPermissions(owner uint32, group uint32, account *domain.Account) (*domain.Permissions, error) { // => handle
+func (fh *FileHandle) GetPermissions(owner uint32, group uint32, account *domain.Account) *domain.Permissions { // => handle
 
 	perm := &domain.Permissions{IsOwner: account.Uid == owner, InGroup: account.Gid == group}
 
@@ -118,7 +113,7 @@ func (fh *FileHandle) GetPermissions(owner uint32, group uint32, account *domain
 	perm.Read = int(fh.mode)&rr != 0
 	perm.Write = int(fh.mode)&wr != 0
 	perm.Exec = int(fh.mode)&xr != 0
-	return perm, nil
+	return perm
 }
 
 func (fh *FileHandle) ListDirHandles(hideDotFiles bool) ([]domain.Handle, error) {
@@ -170,7 +165,7 @@ func (fh *FileHandle) GetContent() ([]byte, error) { //offset, limit int) (e err
 	}
 
 	if int64(bytes) != fh.Size() {
-		return content, errors.New(fmt.Sprintf("read only %d of %d bytes", bytes, fh.Size()))
+		return content, errors.Errorf("read only %d of %d bytes", bytes, fh.Size())
 	}
 	return content, nil
 }
@@ -198,14 +193,14 @@ func (fh *FileHandle) GetUTF8Content() (string, error) {
 	if utf8.Valid(content) {
 		return string(content), nil
 	} else {
-		return string(content), errors.New("Invalid UTF-8")
+		return string(content), errors.Errorf("Invalid UTF-8")
 	}
 }
 
 func (fh *FileHandle) SetUTF8Content(content []byte) error {
 
 	if !utf8.Valid(content) {
-		return errors.New("Invalid UTF-8")
+		return errors.Errorf("Invalid UTF-8")
 	}
 	return fh.SetContent(content)
 }

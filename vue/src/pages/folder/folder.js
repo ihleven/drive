@@ -1,24 +1,33 @@
-import Vue from "vue";
-import App from "./App.vue";
+import Vue from 'vue';
+import Folder from './Folder.vue';
 
 import '@/assets/bulma-customize.scss';
 
 //Vue.config.productionTip = false;
 
-//new Vue({
-//  render: h => h(App)
-//}).$mount("#app");
-
-
-
-
 new Vue({
-  el: "#app",
-  components: {},
   data() {
-    return JSON.parse(document.getElementById('data').innerHTML);
+    return {
+      //folder: JSON.parse(document.getElementById('data').innerHTML),
+    };
   },
   mounted() {
-    console.log("mounted", this)
-  }
-});
+    console.log('mounted', this);
+  },
+  render: h => h(Folder),
+}).$mount('#app');
+
+// new Vue({
+//     el: '#app',
+//     components: {
+//         Folder,
+//     },
+//     data() {
+//         return {
+//             folder: JSON.parse(document.getElementById('data').innerHTML),
+//         };
+//     },
+//     mounted() {
+//         console.log('mounted', this);
+//     },
+// });

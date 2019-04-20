@@ -20,8 +20,11 @@
                     {{.errno}}
                 </h1>
                 <h2 class="subtitle">
-                    {{.msg}}
+                    {{.rootCause}}
                 </h2>
+                {{ if .debug }}
+                <pre style="background: transparent">{{.msg}}</pre>
+                {{ end }}
             </div>
         </div>
     </section>

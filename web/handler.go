@@ -19,9 +19,10 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if _, err := os.Stat(path.Join("./_static", r.URL.Path)); err != nil {
 		//NotFound(w, r) os.IsNotExist(err)
-		ErrorResponder2(w, err)
+		Error(w, r, err)
 		return
 	}
+	// TODO: nicht jedes mal einen FileServer registrieren
 	http.FileServer(http.Dir("./_static")).ServeHTTP(w, r)
 }
 

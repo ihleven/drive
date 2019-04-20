@@ -3,14 +3,17 @@ package storage
 import (
 	"drive/domain"
 	"drive/domain/usecase"
-	"log"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"drive/errors"
 )
 
-var storages = map[string]*FileSystemStorage{
+var storages = map[string]domain.Storage{
 	"home":   &FileSystemStorage{Root: "/Users/mi/tmp", Prefix: "/home", Group: usecase.GetGroupByID(20)},
 	"public": &FileSystemStorage{Root: "/Users/mi/Downloads", Prefix: "/public", PermissionMode: 0444},
 }
@@ -19,7 +22,7 @@ func Register(root, prefix string) {
 	storages[prefix] = &FileSystemStorage{Root: root}
 }
 
-func Get(name string) *FileSystemStorage {
+func Get(name string) domain.Storage {
 	return storages[name]
 }
 
@@ -51,7 +54,7 @@ func (st *FileSystemStorage) GetHandle(name string) (domain.Handle, error) {
 
 	info, err := os.Stat(location)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "os.Stat failed for %s", name)
 	}
 
 	handle := &FileHandle{
@@ -72,8 +75,7 @@ func (st *FileSystemStorage) Open(path string) (*os.File, error) {
 	location := st.Location(path)
 	fd, err := os.Open(location)
 	if err != nil {
-		log.Fatal("error gettting descriptor", err.Error(), location)
-		return nil, err
+		return nil, errors.Wrap(err, "Could not get file descriptor for %v", location)
 	}
 	return fd, nil
 }
@@ -84,12 +86,12 @@ func (st *FileSystemStorage) ReadDir(path string) ([]domain.Handle, error) {
 	fd, err := os.Open(location)
 	defer fd.Close()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Could not get file descriptor for %v", location)
 	}
 
 	list, err := fd.Readdir(-1)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Could not read dir %v", fd)
 	}
 	sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
 
@@ -103,4 +105,58 @@ func (st *FileSystemStorage) ReadDir(path string) ([]domain.Handle, error) {
 		entries = append(entries, handle)
 	}
 	return entries, nil
+}
+
+func (st *FileSystemStorage) Save(path string, src io.Reader) error { // content []byte
+
+	location := st.Location(path)
+	// detect if file exists
+	var _, err = os.Stat(location)
+	if err != nil && !os.IsNotExist(err) {
+		return errors.Wrap(err, "os.Stat error for: %s", path)
+	}
+	if err == nil {
+		return errors.Errorf("File cannot be created because it already exists %s", location)
+	}
+
+	file, err := os.Create(location)
+	defer file.Close()
+	if err != nil {
+		return errors.Wrap(err, "Failed to create file: %s", location)
+	}
+	_, err = io.Copy(file, src)
+	if err != nil {
+		return errors.Wrap(err, "Failed to copy content to file")
+	}
+	return nil
+}
+
+func (st *FileSystemStorage) Create(path string) error {
+	fmt.Println("storage create", path)
+	location := st.Location(path)
+	var _, err = os.Stat(location)
+	if err != nil && !os.IsNotExist(err) {
+		return errors.Wrap(err, "os.Stat error for: %s", path)
+	}
+	if err == nil {
+		return errors.Errorf("File cannot be created because it already exists %s", location)
+	}
+
+	file, err := os.Create(location)
+	defer file.Close()
+	if err != nil {
+		return errors.Wrap(err, "Failed to create file: %s", path)
+	}
+
+	return nil
+}
+
+func (st *FileSystemStorage) Delete(path string) error {
+	fmt.Println("storage delete", path)
+	location := st.Location(path)
+	var err = os.Remove(location)
+	if err != nil {
+		return errors.Wrap(err, "Failed to delete %s", path)
+	}
+	return nil
 }

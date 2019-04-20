@@ -1,9 +1,9 @@
-package drivehandler
+package web
 
 import (
 	"drive/domain/usecase"
+	"drive/errors"
 	"drive/session"
-	"drive/web"
 	"fmt"
 	"net/http"
 )
@@ -14,14 +14,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 		user, err := usecase.Authenticate(r.PostFormValue("username"), r.PostFormValue("password"))
 		if err != nil {
-			web.ErrorResponder(w, err.Error(), 500)
+			Error(w, r, errors.Augment(err, errors.BadCredentials, "Could not validate given credentials"))
 			return
 		}
 		fmt.Println("=>", user, r.PostFormValue("username"), r.PostFormValue("password"))
 
 		session.SetSessionUser(r, w, user)
 		if err != nil {
-			web.ErrorResponder(w, "session error"+err.Error(), 500)
+			Error(w, r, errors.Augment(err, errors.Session, "Could not store User in session"))
 			return
 		}
 
