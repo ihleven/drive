@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 
@@ -25,7 +26,9 @@ func SerializeJSON(w http.ResponseWriter, status int, v interface{}) error {
 }
 
 func Render(w http.ResponseWriter, status int, name string, v interface{}) error {
-	return rnd.HTML(w, status, name, v)
+	err := rnd.HTML(w, status, name, v)
+	fmt.Println(err)
+	return err
 }
 
 //var Render = Rnd.HTML

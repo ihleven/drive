@@ -1,7 +1,8 @@
-package usecase
+package storage
 
 import (
 	"drive/domain"
+	"drive/errors"
 	"fmt"
 	"os/user"
 )
@@ -48,12 +49,11 @@ func Authenticate(username, password string) (*domain.Account, error) {
 	usr := &domain.Account{0, 0, "anonymous", "Anonym", "", false}
 
 	_, err := user.Lookup(username)
-	if _, ok := err.(user.UnknownUserError); ok {
+	if uerr, ok := err.(user.UnknownUserError); ok {
 		fmt.Println("User not existing.")
-		return nil, nil
+		return nil, errors.Propagate(uerr)
 	} else if err != nil {
-		fmt.Println("Error looking up user.")
-		return nil, err
+		return nil, errors.Wrap(err, "Error looking up user %s", username)
 	}
 
 	switch username {
@@ -61,8 +61,6 @@ func Authenticate(username, password string) (*domain.Account, error) {
 		usr = &domain.Account{501, 20, "mi", "Matthias Ihle", "", true}
 	case "ihle":
 		usr = &domain.Account{1406, 1407, "ihle", "Matthias Ihle", "", true}
-	default:
-		usr = &domain.Account{501, 20, "mi", "Matthias Ihle", "", true}
 	}
 	return usr, nil
 }

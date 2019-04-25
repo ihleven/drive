@@ -2,7 +2,8 @@ package main
 
 import (
 	"drive/config"
-	"drive/domain/drivehandler"
+	"drive/domain/storage"
+	drivehandler "drive/drive/views"
 	"drive/web"
 	"path"
 	"strings"
@@ -10,6 +11,8 @@ import (
 
 func main() {
 	config.ParseFlags()
+	storage.Register("home", "/Users/mi/tmp", "/home", storage.GetGroupByID(20))
+
 	//storage.SetDefaultStorage(config.Root)
 	drivehandler.Setup()
 

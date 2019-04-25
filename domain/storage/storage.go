@@ -2,7 +2,6 @@ package storage
 
 import (
 	"drive/domain"
-	"drive/domain/usecase"
 	"fmt"
 	"io"
 	"os"
@@ -14,12 +13,16 @@ import (
 )
 
 var storages = map[string]domain.Storage{
-	"home":   &FileSystemStorage{Root: "/Users/mi/tmp", Prefix: "/home", Group: usecase.GetGroupByID(20)},
+	//"home":   &FileSystemStorage{Root: "/Users/mi/tmp", Prefix: "/home", Group: usecase.GetGroupByID(20)},
 	"public": &FileSystemStorage{Root: "/Users/mi/Downloads", Prefix: "/public", PermissionMode: 0444},
 }
 
-func Register(root, prefix string) {
-	storages[prefix] = &FileSystemStorage{Root: root}
+func Register(name, root, prefix string, group *domain.Group) {
+	storages[name] = &FileSystemStorage{
+		Root:   root,
+		Prefix: prefix,
+		Group:  group,
+	}
 }
 
 func Get(name string) domain.Storage {

@@ -1,7 +1,7 @@
 package web
 
 import (
-	"drive/domain/usecase"
+	"drive/domain/storage"
 	"drive/errors"
 	"drive/session"
 	"drive/templates"
@@ -13,7 +13,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 
-		user, err := usecase.Authenticate(r.PostFormValue("username"), r.PostFormValue("password"))
+		user, err := storage.Authenticate(r.PostFormValue("username"), r.PostFormValue("password"))
 		if err != nil {
 			Error(w, r, errors.Augment(err, errors.BadCredentials, "Could not validate given credentials"))
 			return

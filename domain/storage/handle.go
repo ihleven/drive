@@ -2,7 +2,6 @@ package storage
 
 import (
 	"drive/domain"
-	"drive/domain/usecase"
 	"drive/errors"
 	"fmt"
 	"log"
@@ -47,8 +46,8 @@ func (fh *FileHandle) ToFile(path string, account *domain.Account) (*domain.File
 		Name:        fh.Name(),
 		Size:        fh.Size(),
 		Mode:        fh.mode,
-		Owner:       usecase.GetUserByID(stat.Uid),
-		Group:       usecase.GetGroupByID(stat.Gid),
+		Owner:       GetUserByID(stat.Uid),
+		Group:       GetGroupByID(stat.Gid),
 		Permissions: fh.GetPermissions(stat.Uid, stat.Gid, account),
 		Created:     statCtime(stat),
 		Modified:    fh.ModTime(),
