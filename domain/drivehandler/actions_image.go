@@ -38,7 +38,7 @@ func (v *ImageView) GetAction(r *http.Request, w http.ResponseWriter) error {
 	fmt.Printf("GetAction => Image %s\n", file.Name)
 
 	if !file.Permissions.Read {
-		return errors.New(403, "User %v has not read permission for %v", user.Name, file.Path)
+		return errors.New(errors.PermissionDenied, "Missing read permission for %v (User %s)", file.Path, user.Name)
 	}
 
 	image, err := usecase.NewImage(v.File, v.User)

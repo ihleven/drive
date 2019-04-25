@@ -2,10 +2,12 @@ package usecase
 
 import (
 	"drive/domain"
+	"drive/errors"
 	"encoding/json"
 	"fmt"
 	_ "image/jpeg"
 	_ "image/png"
+	"path/filepath"
 	"time"
 )
 
@@ -15,45 +17,64 @@ import (
 //
 // Metadaten in Datei meta.json => wird von struct AlbumMeta geparst.
 type Album struct {
-	*domain.Folder `json:"-"`
+	*domain.File `json:"file"`
 	// Datei in der die folgenden Felder als JSON gespeichert werden.
-	AlbumFile   string `json:"metafile,omitempty"`
-	Title       string
-	Description string
-	Keywords    []string
+	//AlbumFile   string `json:"metafile,omitempty"`
+	Title       string   `json:"title"`
+	Subtitle    string   `json:"subtitle"`
+	Description string   `json:"description"`
+	Keywords    []string `json:"keywords"`
 	// Die Bilder des Albums. Entweder alle Bilder des Verzeichnisses oder eine Liste von Bildern aus AlbumFile
-	Images []Image
+	Images []Image2 `json:"images"`
+
+	//Entries   []File `json:"entries"`
+	//IndexFile *File  `json:"indexFile"`
 }
 
-func NewAlbum(dir *domain.Folder) (*Album, error) {
+func GetAlbum(storage domain.Storage, path string, usr *domain.Account) (*Album, error) {
 
-	album := Album{Folder: dir}
+	file, err := GetFile(storage, path, usr)
+	if err != nil {
+		return nil, errors.Wrap(err, "Could not get file for path %s", path)
+	}
+	if !file.HasReadPermission(usr.Uid, usr.Gid) {
+		return nil, errors.New(403, "user: %v has no read permission for %v", usr, path)
+	}
 
-	for i := 0; i < len(dir.Entries); i++ {
-		file := dir.Entries[i]
+	album := Album{File: file}
+
+	handles, err := storage.ReadDir(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "Could not list album folder")
+	}
+	fmt.Println("file", file, handles)
+
+	for _, handle := range handles {
+		fmt.Println(handle.Name())
+		mime := handle.GuessMIME()
 		switch {
-		case file.Name == "album.html":
-			album.AlbumFile = file.Name
-
-		//case strings.HasSuffix(file.Name, ".dia"):
-		//	album.parseDiary(file.AsTextfile())
-
+		case mime.Type == "image":
+			image, _ := NewImageFromHandle(handle)
+			album.Images = append(album.Images, *image)
+		case handle.Name() == "album.json":
+			err := json.NewDecoder(handle.Descriptor(0)).Decode(&album)
+			if err != nil {
+				return nil, errors.Wrap(err, "Could not parse album file")
+			}
 		case file.MIME.Value == "text/diary; charset=utf-8":
 			album.parseDiary(file.Name)
+			//case strings.HasSuffix(file.Name, ".dia"):
+			//	album.parseDiary(file.AsTextfile())
+			//		album.parseMeta()
+			//		album.Title = fmt.Sprintf("%s | alben", dir.Name)
+
 		}
 
-		if file.MIME.Type == "image" {
-			img, err := NewImage(file, nil)
-			if err != nil {
-				fmt.Println(" - ERROR '%s'\n\n\n", err)
-			} else {
-				album.Images = append(album.Images, *img)
-			}
-		}
+		path = filepath.Join(file.Path, handle.Name())
+
+		//folder.Entries = append(folder.Entries, entry)
 
 	}
-	album.parseMeta()
-	album.Title = fmt.Sprintf("%s | alben", dir.Name)
 	return &album, nil
 }
 

@@ -14,6 +14,7 @@ const (
 	Session
 	BadRequest
 	ParseError
+	NotImplemented
 )
 
 func (e ErrorCode) HTTPStatusCode() int {
@@ -27,6 +28,8 @@ func (e ErrorCode) HTTPStatusCode() int {
 		return 403
 	case NotFound, PathError:
 		return 404
+	case NotImplemented:
+		return 405
 	default:
 		return 500
 	}

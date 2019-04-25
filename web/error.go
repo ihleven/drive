@@ -10,8 +10,6 @@ import (
 	"strings"
 )
 
-var rnd = templates.Rnd
-
 func Error(w http.ResponseWriter, r *http.Request, err error) {
 	//_ = fmt.Sprintf("ERROR: %+v", err)
 	msg := fmt.Sprintf("%+v", err)
@@ -28,7 +26,7 @@ func Error(w http.ResponseWriter, r *http.Request, err error) {
 
 	switch {
 	case accept == "application/json":
-		err = rnd.JSON(w, status, msg)
+		err = templates.SerializeJSON(w, status, msg)
 	case strings.Contains(accept, "text/html"):
 		//session.Set(r, w, "debug", true)
 
@@ -44,7 +42,7 @@ func Error(w http.ResponseWriter, r *http.Request, err error) {
 			}
 		}
 
-		templates.Rnd.HTML(w, status, "error", data)
+		templates.Render(w, status, "error", data)
 	default:
 		http.Error(w, msg, status)
 

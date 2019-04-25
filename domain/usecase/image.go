@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"drive/domain"
+	"drive/errors"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"html/template"
 	"image"
@@ -37,12 +37,51 @@ type Image struct {
 	Exif     *Exif
 	metaFile *domain.File
 }
+
+type Image2 struct {
+	Handle        domain.Handle
+	ColorModel    color.Model
+	Width, Height int
+	Ratio         float64
+	Format        string
+	Title         string
+	Caption       string // a “caption” is more like a title, while the “cutline” first describes what is happening in the picture, and then explains the significance of the event depicted.
+	Cutline       string // the “cutline” is text below a picture, explaining what the reader is looking at
+
+	// https://web.ku.edu/~edit/captions.html
+	// https://jerz.setonhill.edu/blog/2014/10/09/writing-a-cutline-three-examples/
+
+	// Caption als allgemeingültige "standalone" Bildunterschrift und Cutline als Verbindung zum Album (ausgewählte Bilder in Reihe?)
+	Exif     *Exif
+	metaFile *domain.File
+}
 type Exif struct {
 	Orientation int
 	Taken       time.Time
 	Lat,
 	Lng float64
 	Model string
+}
+
+func NewImageFromHandle(handle domain.Handle) (*Image2, error) {
+
+	fd := handle.Descriptor(0)
+	defer fd.Close()
+
+	config, format, err := image.DecodeConfig(fd)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error decoding image")
+	}
+
+	i := &Image2{
+		Handle:     handle,
+		ColorModel: config.ColorModel,
+		Width:      config.Width,
+		Height:     config.Height,
+		Ratio:      float64(config.Height) / float64(config.Width) * 100,
+		Format:     format,
+	}
+	return i, nil
 }
 
 func NewImage(file *domain.File, usr *domain.Account) (*Image, error) {
@@ -182,7 +221,7 @@ func (i *Image) GoexifDecode(fd *os.File) error {
 func (i *Image) WriteMeta(usr *domain.Account) error {
 
 	if !i.metaFile.Permissions.Write {
-		return errors.New(fmt.Sprintf("Missing write permission for %s", i.metaFile.Name))
+		return errors.Errorf("Missing write permission for %s", i.metaFile.Name)
 	}
 	fd := i.metaFile.Descriptor(0)
 	fd.Close()

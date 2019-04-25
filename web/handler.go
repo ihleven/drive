@@ -2,6 +2,7 @@ package web
 
 import (
 	"drive/session"
+	"drive/templates"
 	"fmt"
 	"net/http"
 	"os"
@@ -14,7 +15,7 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		/* Index page */
 		usr, _ := session.GetSessionUser(r, w)
-		rnd.HTML(w, http.StatusOK, "index", map[string]interface{}{"User": usr})
+		templates.Render(w, http.StatusOK, "index", map[string]interface{}{"User": usr})
 		return
 	}
 	if _, err := os.Stat(path.Join("./_static", r.URL.Path)); err != nil {

@@ -1,10 +1,11 @@
 package drivehandler
 
 import (
+	"drive/templates"
 	"fmt"
 	"net/http"
 
-	"github.com/pkg/errors"
+	"drive/errors"
 )
 
 type Actioneer interface {
@@ -33,13 +34,13 @@ func (a *ActionResponder) PostAction(r *http.Request, w http.ResponseWriter) err
 }
 func (a *ActionResponder) DeleteAction(r *http.Request, w http.ResponseWriter) error {
 	fmt.Println("DeleteAction")
-	return nil
+	return errors.New(errors.NotImplemented, "Method Delete not implemented")
 }
 func (a *ActionResponder) Respond(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (err error) {
 
 	switch r.Header.Get("Accept") {
 	case "application/json":
-		err = rnd.JSON(w, http.StatusOK, data)
+		err = templates.SerializeJSON(w, http.StatusOK, data)
 	default:
 		//err = rnd.HTML(w, http.StatusOK, a.template, data)
 		err = a.Render(w, http.StatusOK, a.template, data)
@@ -52,5 +53,6 @@ func (a *ActionResponder) Respond(w http.ResponseWriter, r *http.Request, data m
 }
 func (a *ActionResponder) Render(w http.ResponseWriter, status int, template string, data map[string]interface{}) error {
 
-	return rnd.HTML(w, status, template, data)
+	//return rnd.HTML(w, status, template, data)
+	return templates.Render(w, status, template, data)
 }

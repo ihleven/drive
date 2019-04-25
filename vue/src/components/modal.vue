@@ -1,47 +1,47 @@
 <template>
-    <transition name="modal-fade">
-        <div class="modal" :class="{ 'is-active': visible }">
-            <div class="modal-background"></div>
-            <div class="modal-content">
-                <div class="box dropbox">
-                    <article class="media" v-for="file in files" :key="file.id">
-                        <div class="media-left">
-                            <figure class="image is-128x128">
-                                <img src="https://bulma.io/images/placeholders/128x128.png" :ref="file.id" />
-                            </figure>
-                        </div>
-                        <div class="media-content">
-                            <div class="content">
-                                <strong>{{ file.file.name }}</strong>
-                                <br />
-                                <small>{{ file.file.size }}</small>
-                                <br />
-                                <small>{{ file.file.lastModified }}</small>
-                            </div>
-                            <button @click="upload(file.file)">Upload</button>
-                        </div>
-                    </article>
-                    <input
-                        type="file"
-                        multiple
-                        :name="uploadFieldName"
-                        :disabled="isSaving"
-                        @change="onFileSelect"
-                        accept="image/*"
-                        class="input-file"
-                    />
-                    <p>
-                        Drag your file(s) here to begin
-                        <br />or click to browse
-                    </p>
-                    <p v-if="isSaving">Uploading {{ fileCount }} files...</p>
-
-                    <button class="button">Cancel</button>
-                </div>
+  <transition name="modal-fade">
+    <div class="modal" :class="{ 'is-active': visible }">
+      <div class="modal-background"></div>
+      <div class="modal-content">
+        <div class="box dropbox">
+          <article class="media" v-for="file in files" :key="file.id">
+            <div class="media-left">
+              <figure class="image is-128x128">
+                <img src="https://bulma.io/images/placeholders/128x128.png" :ref="file.id">
+              </figure>
             </div>
-            <button class="modal-close is-large" aria-label="close" @click="close">close</button>
+            <div class="media-content">
+              <div class="content">
+                <strong>{{ file.file.name }}</strong>
+                <br>
+                <small>{{ file.file.size }}</small>
+                <br>
+                <small>{{ file.file.lastModified }}</small>
+              </div>
+              <button @click="upload(file.file)">Upload</button>
+            </div>
+          </article>
+          <input
+            type="file"
+            multiple
+            :name="uploadFieldName"
+            :disabled="isSaving"
+            @change="onFileSelect"
+            accept="image/*"
+            class="input-file"
+          >
+          <p>
+            Drag your file(s) here to begin
+            <br>or click to browse
+          </p>
+          <p v-if="isSaving">Uploading {{ fileCount }} files...</p>
+
+          <button class="button">Cancel</button>
         </div>
-    </transition>
+      </div>
+      <button class="modal-close is-large" aria-label="close" @click="close">close</button>
+    </div>
+  </transition>
 </template>
 
 <script>
@@ -52,7 +52,11 @@ export default {
         url: String,
     },
     data() {
-        return { files: [] };
+        return {
+            uploadFieldName: 'file',
+            isSaving: false,
+            files: [],
+        };
     },
     methods: {
         close() {

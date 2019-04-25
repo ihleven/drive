@@ -95,14 +95,10 @@ func (st *FileSystemStorage) ReadDir(path string) ([]domain.Handle, error) {
 	}
 	sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
 
-	entries := make([]domain.Handle, 0)
-	for _, info := range list {
+	entries := make([]domain.Handle, len(list))
+	for index, info := range list {
 
-		handle := &FileHandle{FileInfo: info, storage: st, mode: info.Mode(), location: filepath.Join(location, info.Name())}
-		if st.PermissionMode != 0 {
-			handle.mode = (handle.mode & 0xfffffe00) | (st.PermissionMode & 0x1ff)
-		}
-		entries = append(entries, handle)
+		entries[index] = NewFileHandle(info, st, filepath.Join(location, info.Name()))
 	}
 	return entries, nil
 }

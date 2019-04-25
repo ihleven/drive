@@ -33,6 +33,13 @@ module.exports = {
             minify: false,
             chunks: ['chunk-vendors', 'chunk-common', 'image'],
         },
+        album: {
+            entry: './src/pages/album/album.js',
+            template: './public/templates/album.html',
+            filename: 'templates/album.html',
+            minify: false,
+            chunks: ['chunk-vendors', 'chunk-common', 'album'],
+        },
     },
     runtimeCompiler: true,
 };

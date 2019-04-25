@@ -16,6 +16,7 @@ func Setup() {
 	web.RegisterFunc("/serve/", Serve(storage.Get("public")))
 	web.RegisterFunc("/public/", DispatchStorage(storage.Get("public")))
 	web.RegisterFunc("/home/", DispatchStorage(storage.Get("home")))
+	web.RegisterFunc("/alben/", AlbumHandler)
 }
 
 func DispatchStorage(storage domain.Storage) func(w http.ResponseWriter, r *http.Request) {

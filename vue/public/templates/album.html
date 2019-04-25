@@ -1,3 +1,5 @@
+{{ define "album" }}
+
 <!DOCTYPE html>
 <html>
 
@@ -11,76 +13,20 @@
     <meta name="keywords" content="{{ .Keywords }}" />
     <meta name="author" content="Matthias Ihle" />
 
-    <link rel="stylesheet" href="/static/uikit.min.css" />
-    <link rel="stylesheet" href="/static/style.css" />
 
 </head>
 
 <body>
 
-    {{ marshalJSON "data-album" . }}
-
-    <div id="vueapp">
-
-
-        <div class="uk-section uk-section-small uk-section-muted">
-
-            <div class="uk-container">
-
-                <nav class="uk-navbar-container" uk-navbar>
-                    <div class="uk-navbar-left">
-                        <ul class="uk-breadcrumb">
-                            <li><a href="/" uk-icon="icon: home; ratio: .8"></a></li>
-                            {{range .Parents}}
-                            <li><a class="uk-text-emphasis" href="/alben/{{.Path}} ">{{.Name}}</a></li>
-                            {{end}}
-                        </ul>
-                    </div>
-                    <div class="uk-navbar-right">
-
-                        <div class="uk-button-group">
-                            <a href="{{.Path}}" class="uk-button uk-button-default" uk-icon="icon: folder"></a>
-                        </div>
-                        <ul class="uk-iconnav">
-                            <li>
-                                <a href="{{.Path}}" class="uk-button uk-button-default" uk-icon="icon: folder"></a>
-                            </li>
-                        </ul>
+    {{  marshalJSON "data" . }}
 
 
 
-                    </div>
-                </nav>
-
-                <h4 class="uk-text-lead">{{.Name}}</h4>
-
-
-
-            </div>
-        </div>
-
-
-
-
-        <router-link to="/">
-            <a>/bar</a>
-        </router-link>
-        <router-link to="/foo">
-            <a>/foo</a>
-        </router-link>
-
-
-        <div class="uk-section">
-
-            <pswp-gallery :images="directory.Images"></pswp-gallery>
-
-        </div>
-
-        <router-view></router-view>
-
-    </div>
+    <div id="app"></div>
 
 
 </body>
 
 </html>
+
+{{ end }}

@@ -4,6 +4,7 @@ import (
 	"drive/domain/usecase"
 	"drive/errors"
 	"drive/session"
+	"drive/templates"
 	"fmt"
 	"net/http"
 )
@@ -31,7 +32,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", 302)
 	}
 
-	err := rnd.HTML(w, http.StatusOK, "login", nil)
+	err := templates.Render(w, http.StatusOK, "login", nil)
 	if err != nil {
 		fmt.Println("login render error: ", err)
 	}
