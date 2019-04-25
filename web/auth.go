@@ -1,7 +1,7 @@
 package web
 
 import (
-	"drive/domain/storage"
+	"drive/drive/storage"
 	"drive/errors"
 	"drive/session"
 	"drive/templates"
