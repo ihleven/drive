@@ -1,7 +1,6 @@
 package web
 
 import (
-	"drive/config"
 	"log"
 	"net/http"
 	"path"
@@ -9,14 +8,14 @@ import (
 	"time"
 )
 
-var mux *http.ServeMux
-
-func init() {
-
-	mux = http.NewServeMux()
+type server struct {
+	address string
+	mux     *http.ServeMux
 }
 
-func CreateServer() {
+func NewServer(address string) *server {
+
+	mux := http.NewServeMux()
 
 	mux.Handle("/assets/", assetHandler("assets", "_static/assets"))
 	mux.Handle("/dist/", assetHandler("dist", "_static/dist"))
@@ -24,23 +23,28 @@ func CreateServer() {
 	mux.HandleFunc("/logout", Logout)
 	mux.HandleFunc("/", defaultHandler)
 
-	srv := &http.Server{
-		Handler: mux,
-		Addr:    config.Address.String(),
+	return &server{address: address, mux: mux}
+}
+
+func (s server) Run() {
+
+	httpServer := &http.Server{
+		Handler: s.mux,
+		Addr:    s.address,
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Fatal(srv.ListenAndServe())
+	log.Fatal(httpServer.ListenAndServe())
 }
 
-func RegisterFunc(pattern string, handlerfunc func(w http.ResponseWriter, r *http.Request)) {
-	mux.HandleFunc(pattern, handlerfunc)
+func (s server) RegisterHandlerFunc(pattern string, handlerfunc func(w http.ResponseWriter, r *http.Request)) {
+	s.mux.HandleFunc(pattern, handlerfunc)
 }
 
-func RegisterHandler(pattern string, handler http.Handler) {
-	mux.Handle(pattern, handler)
+func (s server) RegisterHandler(pattern string, handler http.Handler) {
+	s.mux.Handle(pattern, handler)
 }
 
 func logit(h http.Handler) http.Handler {

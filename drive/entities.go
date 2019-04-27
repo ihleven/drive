@@ -33,8 +33,8 @@ type Group struct {
 	Name string `json:"name"` // group name
 }
 type Mimetype struct {
-	Type    string `json:"type"`    // group ID
-	Subtype string `json:"subtype"` // group name
+	Type    string `json:"type"`
+	Subtype string `json:"subtype"`
 	Charset string `json:"charset"`
 }
 
@@ -49,24 +49,57 @@ type Storage interface {
 	//PermOpen(string, uint32, uint32) (*os.File, *time.Time, error)
 }
 
+type Mimer interface {
+	Guess() (Mimetype, error)
+	MIME() string
+	Parts() (string, string, string)
+	Type() string
+	Subtype() string
+	Charset() string
+}
+type Locator interface {
+	Storage() Storage
+	Location() string
+	Descriptor(int) *os.File
+}
+
 type Handle interface {
 	os.FileInfo
 	Storage() Storage
 	Descriptor(int) *os.File
+
 	ToFile(string, *Account) (*File, error)
 	GuessMIME() types.MIME
-	//Close() error
-	//ReadDir() ([]os.FileInfo, error)
+
 	ListDirHandles(bool) ([]Handle, error)
-	GetPermissions(owner uint32, group uint32, account *Account) *Permissions
+
 	GetContent() ([]byte, error)
 	SetContent([]byte) error
 	GetUTF8Content() (string, error)
 	SetUTF8Content([]byte) error
+
 	//Uid() uint32
 	//Gid() uint32
+	GetPermissions(owner uint32, group uint32, account *Account) *Permissions
 	HasReadPermission(uid, gid uint32) bool
 }
+
+type UTF8er interface {
+	GetUTF8Content() (string, error)
+	SetUTF8Content([]byte) error
+}
+type Loader interface {
+	Load() ([]byte, error)
+}
+type Saver interface {
+	Save([]byte) error
+}
+type Loaver interface {
+	Load() ([]byte, error)
+	Save([]byte) error
+	Write(p []byte) (n int, err error)
+}
+
 type Permtype int
 
 const (

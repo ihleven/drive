@@ -68,6 +68,7 @@ func (st *FileSystemStorage) GetHandle(name string) (domain.Handle, error) {
 	}
 
 	if st.PermissionMode != 0 {
+		// replace 9 least significant bits from mode with storage.PermissionMode
 		handle.mode = (handle.mode & 0xfffffe00) | (st.PermissionMode & 0x1ff)
 	}
 	return handle, nil
@@ -118,12 +119,12 @@ func (st *FileSystemStorage) Save(path string, src io.Reader) error { // content
 		return errors.Errorf("File cannot be created because it already exists %s", location)
 	}
 
-	file, err := os.Create(location)
-	defer file.Close()
+	dest, err := os.Create(location)
+	defer dest.Close()
 	if err != nil {
 		return errors.Wrap(err, "Failed to create file: %s", location)
 	}
-	_, err = io.Copy(file, src)
+	_, err = io.Copy(dest, src)
 	if err != nil {
 		return errors.Wrap(err, "Failed to copy content to file")
 	}

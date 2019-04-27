@@ -12,6 +12,7 @@ import (
 	"unicode/utf8"
 )
 
+// erfüllt Mimer, Locator,
 type FileHandle struct {
 	os.FileInfo
 	storage  domain.Storage
@@ -25,7 +26,7 @@ func NewFileHandle(info os.FileInfo, st *FileSystemStorage, location string) *Fi
 		FileInfo: info,
 		storage:  st,
 		mode:     info.Mode(),
-		location: location,
+		location: location, // TODO: durch path ersetzen!!! => location über storage, redundanz vermeiden
 	}
 	if st.PermissionMode != 0 {
 		handle.mode = (handle.mode & 0xfffffe00) | (st.PermissionMode & 0x1ff)
@@ -58,6 +59,12 @@ func (fh *FileHandle) ToFile(path string, account *domain.Account) (*domain.File
 	return file, nil
 }
 
+func (fh *FileHandle) Storage() domain.Storage {
+	return fh.storage
+}
+func (fh *FileHandle) Location() string {
+	return fh.location
+}
 func (fh *FileHandle) Descriptor(flag int) *os.File { // , perm os.FileMode
 
 	fd, err := os.OpenFile(fh.location, flag, 0755)
@@ -142,10 +149,6 @@ func (fh *FileHandle) ListDirHandles(hideDotFiles bool) ([]domain.Handle, error)
 		))
 	}
 	return handles, nil
-}
-
-func (fh *FileHandle) Storage() domain.Storage {
-	return fh.storage
 }
 
 /////////////

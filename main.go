@@ -14,9 +14,10 @@ func main() {
 	storage.Register("home", "/Users/mi/tmp", "/home", storage.GetGroupByID(20))
 
 	//storage.SetDefaultStorage(config.Root)
-	drivehandler.Setup()
 
-	web.CreateServer()
+	webserver := web.NewServer(config.Address.String())
+	drivehandler.RegisterHandlers(webserver.RegisterHandlerFunc)
+	webserver.Run()
 }
 
 // ShiftPath splits off the first component of p, which will be cleaned of

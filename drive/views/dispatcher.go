@@ -9,13 +9,13 @@ import (
 	"path"
 )
 
-func Setup() {
-
-	web.RegisterFunc("/serve/home/", Serve(storage.Get("home")))
-	web.RegisterFunc("/serve/", Serve(storage.Get("public")))
-	web.RegisterFunc("/public/", DispatchStorage(storage.Get("public")))
-	web.RegisterFunc("/home/", DispatchStorage(storage.Get("home")))
-	web.RegisterFunc("/alben/", AlbumHandler)
+func RegisterHandlers(register func(string, func(http.ResponseWriter, *http.Request))) {
+	//
+	register("/serve/home/", Serve(storage.Get("home")))
+	register("/serve/", Serve(storage.Get("public")))
+	register("/public/", DispatchStorage(storage.Get("public")))
+	register("/home/", DispatchStorage(storage.Get("home")))
+	register("/alben/", AlbumHandler)
 }
 
 func DispatchStorage(storage drive.Storage) func(w http.ResponseWriter, r *http.Request) {
