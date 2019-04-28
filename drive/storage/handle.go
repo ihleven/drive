@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
-	"sort"
 	"syscall"
 	"unicode/utf8"
 )
@@ -16,20 +14,18 @@ import (
 // erfüllt Mimer, Locator,
 type FileHandle struct {
 	os.FileInfo
-	storage  drive.Storage
-	location string
-	mode     os.FileMode
-	path     string // ???
+	storage drive.Storage
+	path    string // ???
+	mode    os.FileMode
 }
 
-func NewFileHandle(info os.FileInfo, st *FileSystemStorage, location string, path string) *FileHandle {
+func NewFileHandle(info os.FileInfo, st *FileSystemStorage, path string) *FileHandle {
 
 	handle := &FileHandle{
 		FileInfo: info,
 		storage:  st,
 		mode:     info.Mode(),
-		location: location, // TODO: durch path ersetzen!!! => location über storage, redundanz vermeiden
-		path:     path,     // ???
+		path:     path, // ???
 	}
 	if st.PermissionMode != 0 {
 		handle.mode = (handle.mode & 0xfffffe00) | (st.PermissionMode & 0x1ff)
@@ -37,7 +33,7 @@ func NewFileHandle(info os.FileInfo, st *FileSystemStorage, location string, pat
 	return handle
 }
 
-func (fh *FileHandle) ToFile(path string, account *domain.Account) (*drive.File, error) {
+func (fh *FileHandle) ToFile(account *domain.Account) (*drive.File, error) {
 
 	stat, err := fh.Stat()
 	if err != nil {
@@ -46,7 +42,7 @@ func (fh *FileHandle) ToFile(path string, account *domain.Account) (*drive.File,
 
 	file := &drive.File{
 		Handle:      fh,
-		Path:        path,
+		Path:        fh.path,
 		Name:        fh.Name(),
 		Size:        fh.Size(),
 		Mode:        fh.mode,
@@ -63,19 +59,24 @@ func (fh *FileHandle) ToFile(path string, account *domain.Account) (*drive.File,
 }
 
 func (fh *FileHandle) Storage() drive.Storage {
+
 	return fh.storage
 }
+
 func (fh *FileHandle) Location() string {
-	return fh.location
+
+	return fh.storage.Location(fh.path)
 }
+
 func (fh *FileHandle) URL() string {
 	return fh.path
-} // ???
+}
+
 func (fh *FileHandle) Descriptor(flag int) *os.File { // , perm os.FileMode
 
-	fd, err := os.OpenFile(fh.location, flag, 0755)
+	fd, err := os.OpenFile(fh.Location(), flag, 0755)
 	if err != nil {
-		log.Fatal("error gettting descriptor", err.Error(), fh.location)
+		log.Fatal("error gettting descriptor", err.Error(), fh.Location())
 		return nil
 	}
 	return fd
@@ -126,36 +127,6 @@ func (fh *FileHandle) GetPermissions(owner uint32, group uint32, account *domain
 	perm.Write = int(fh.mode)&wr != 0
 	perm.Exec = int(fh.mode)&xr != 0
 	return perm
-}
-
-func (fh *FileHandle) ListDirHandles(hideDotFiles bool) ([]drive.Handle, error) {
-
-	fd, err := os.Open(fh.location)
-	if err != nil {
-		return nil, err
-	}
-	entries, err := fd.Readdir(-1)
-	fd.Close()
-	if err != nil {
-		return nil, err
-	}
-	sort.Slice(entries, func(i, j int) bool { return entries[i].Name() < entries[j].Name() })
-
-	var handles = make([]drive.Handle, 0)
-	for _, entry := range entries {
-		if hideDotFiles && entry.Name()[0] == '.' {
-			// ignore all files starting with '.'
-			continue
-		}
-
-		handles = append(handles, NewFileHandle(
-			entry,
-			fh.storage.(*FileSystemStorage),
-			filepath.Join(fh.location, entry.Name()),
-			"", // ???
-		))
-	}
-	return handles, nil
 }
 
 /////////////

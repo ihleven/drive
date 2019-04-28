@@ -38,7 +38,7 @@ type Storage interface {
 	Delete(string) error
 	ReadDir(string) ([]Handle, error)
 	Save(string, io.Reader) error
-
+	Location(string) string
 	//PermOpen(string, uint32, uint32) (*os.File, *time.Time, error)
 }
 
@@ -58,14 +58,13 @@ type Locator interface {
 
 type Handle interface {
 	os.FileInfo
-	Storage() Storage
-	Descriptor(int) *os.File
+	Locator
+	//Storage() Storage
+	//Descriptor(int) *os.File
 	URL() string // ???
 
-	ToFile(string, *domain.Account) (*File, error)
+	ToFile(*domain.Account) (*File, error)
 	GuessMIME() types.MIME
-
-	ListDirHandles(bool) ([]Handle, error)
 
 	GetContent() ([]byte, error)
 	SetContent([]byte) error

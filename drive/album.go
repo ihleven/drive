@@ -29,6 +29,8 @@ type Album struct {
 
 	//Entries   []File `json:"entries"`
 	Image string `json:"image"`
+	From  string `json:"from"`
+	Until string `json:"until"`
 }
 
 func GetAlbum(storage Storage, path string, usr *domain.Account) (*Album, error) {
@@ -54,7 +56,7 @@ func GetAlbum(storage Storage, path string, usr *domain.Account) (*Album, error)
 		case mime.Type == "image":
 			image, _ := NewImageFromHandle(handle)
 			album.Images = append(album.Images, *image)
-		case handle.Name() == "album.json":
+		case handle.Name() == "_meta.json":
 			err := json.NewDecoder(handle.Descriptor(0)).Decode(&album)
 			if err != nil {
 				return nil, errors.Wrap(err, "Could not parse album file")

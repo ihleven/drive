@@ -3,7 +3,6 @@ package drive
 import (
 	"drive/domain"
 	"drive/errors"
-	"path/filepath"
 )
 
 func GetReadHandle(storage Storage, path string, uid, gid uint32) (Handle, error) {
@@ -25,7 +24,7 @@ func GetFile(storage Storage, path string, usr *domain.Account) (*File, error) {
 		return nil, errors.Wrap(err, "Could not get file handle for %s", path)
 	}
 
-	file, err := handle.ToFile(path, usr)
+	file, err := handle.ToFile(usr)
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not transform handle %v to File", file)
 	}
@@ -48,14 +47,14 @@ func GetFolder(file *File, usr *domain.Account) (*Folder, error) {
 
 	folder := &Folder{File: file}
 	//handles, err := file.ReadDirHandle()
-	handles, err := file.ListDirHandles(false)
+	handles, err := file.Storage().ReadDir(file.Path)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, handle := range handles {
 
-		entry, _ := handle.ToFile(filepath.Join(file.Path, handle.Name()), usr)
+		entry, _ := handle.ToFile(usr) // filepath.Join(file.Path, handle.Name()),
 
 		folder.Entries = append(folder.Entries, entry)
 		if entry.Name == "index.html" {

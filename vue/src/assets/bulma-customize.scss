@@ -41,7 +41,8 @@ $navbar-breakpoint: 300px;
 
 $fa-font-path: "~font-awesome/fonts";
 
-
+$footer-background-color: $grey-darker;
+$footer-padding: 3rem 1.5rem 6rem;
 
 .navbar {
     &.is-transparent {
@@ -111,3 +112,5 @@ svg {
 }
 
 @import '../../node_modules/bulma/bulma.sass';
+
+@import '../../node_modules/bulma-timeline/src/sass/index.sass';

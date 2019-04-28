@@ -62,11 +62,10 @@ func (st *FileSystemStorage) GetHandle(name string) (domain.Handle, error) {
 	}
 
 	handle := &FileHandle{
+		path:     name,
+		storage:  st,
 		FileInfo: info,
 		mode:     info.Mode(),
-		storage:  st,
-		location: location,
-		path:     name, // ???
 	}
 
 	if st.PermissionMode != 0 {
@@ -103,8 +102,8 @@ func (st *FileSystemStorage) ReadDir(path string) ([]domain.Handle, error) {
 
 	entries := make([]domain.Handle, len(list))
 	for index, info := range list {
-		p := filepath.Join(path, info.Name())
-		entries[index] = NewFileHandle(info, st, filepath.Join(location, info.Name()), p)
+
+		entries[index] = NewFileHandle(info, st, filepath.Join(path, info.Name()))
 	}
 	return entries, nil
 }
