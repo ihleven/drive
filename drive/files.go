@@ -1,6 +1,7 @@
 package drive
 
 import (
+	"drive/domain"
 	"drive/errors"
 	"path/filepath"
 )
@@ -17,7 +18,7 @@ func GetReadHandle(storage Storage, path string, uid, gid uint32) (Handle, error
 	return handle, nil
 }
 
-func GetFile(storage Storage, path string, usr *Account) (*File, error) {
+func GetFile(storage Storage, path string, usr *domain.Account) (*File, error) {
 
 	handle, err := storage.GetHandle(path)
 	if err != nil {
@@ -43,7 +44,7 @@ func DeleteFile(file *File) error {
 	return nil
 }
 
-func GetFolder(file *File, usr *Account) (*Folder, error) {
+func GetFolder(file *File, usr *domain.Account) (*Folder, error) {
 
 	folder := &Folder{File: file}
 	//handles, err := file.ReadDirHandle()

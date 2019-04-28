@@ -1,7 +1,8 @@
 package storage
 
 import (
-	domain "drive/drive"
+	"drive/domain"
+	"drive/drive"
 	"drive/errors"
 	"fmt"
 	"log"
@@ -15,18 +16,20 @@ import (
 // erfüllt Mimer, Locator,
 type FileHandle struct {
 	os.FileInfo
-	storage  domain.Storage
+	storage  drive.Storage
 	location string
 	mode     os.FileMode
+	path     string // ???
 }
 
-func NewFileHandle(info os.FileInfo, st *FileSystemStorage, location string) *FileHandle {
+func NewFileHandle(info os.FileInfo, st *FileSystemStorage, location string, path string) *FileHandle {
 
 	handle := &FileHandle{
 		FileInfo: info,
 		storage:  st,
 		mode:     info.Mode(),
 		location: location, // TODO: durch path ersetzen!!! => location über storage, redundanz vermeiden
+		path:     path,     // ???
 	}
 	if st.PermissionMode != 0 {
 		handle.mode = (handle.mode & 0xfffffe00) | (st.PermissionMode & 0x1ff)
@@ -34,14 +37,14 @@ func NewFileHandle(info os.FileInfo, st *FileSystemStorage, location string) *Fi
 	return handle
 }
 
-func (fh *FileHandle) ToFile(path string, account *domain.Account) (*domain.File, error) {
+func (fh *FileHandle) ToFile(path string, account *domain.Account) (*drive.File, error) {
 
 	stat, err := fh.Stat()
 	if err != nil {
 		return nil, errors.Propagate(err)
 	}
 
-	file := &domain.File{
+	file := &drive.File{
 		Handle:      fh,
 		Path:        path,
 		Name:        fh.Name(),
@@ -59,12 +62,15 @@ func (fh *FileHandle) ToFile(path string, account *domain.Account) (*domain.File
 	return file, nil
 }
 
-func (fh *FileHandle) Storage() domain.Storage {
+func (fh *FileHandle) Storage() drive.Storage {
 	return fh.storage
 }
 func (fh *FileHandle) Location() string {
 	return fh.location
 }
+func (fh *FileHandle) URL() string {
+	return fh.path
+} // ???
 func (fh *FileHandle) Descriptor(flag int) *os.File { // , perm os.FileMode
 
 	fd, err := os.OpenFile(fh.location, flag, 0755)
@@ -104,9 +110,9 @@ func (fh *FileHandle) HasReadPermission(uid, gid uint32) bool {
 
 //PERMISSIONS
 
-func (fh *FileHandle) GetPermissions(owner uint32, group uint32, account *domain.Account) *domain.Permissions { // => handle
+func (fh *FileHandle) GetPermissions(owner uint32, group uint32, account *domain.Account) *drive.Permissions { // => handle
 
-	perm := &domain.Permissions{IsOwner: account.Uid == owner, InGroup: account.Gid == group}
+	perm := &drive.Permissions{IsOwner: account.Uid == owner, InGroup: account.Gid == group}
 
 	rr, wr, xr := OS_OTH_R, OS_OTH_W, OS_OTH_X
 	if perm.InGroup {
@@ -122,7 +128,7 @@ func (fh *FileHandle) GetPermissions(owner uint32, group uint32, account *domain
 	return perm
 }
 
-func (fh *FileHandle) ListDirHandles(hideDotFiles bool) ([]domain.Handle, error) {
+func (fh *FileHandle) ListDirHandles(hideDotFiles bool) ([]drive.Handle, error) {
 
 	fd, err := os.Open(fh.location)
 	if err != nil {
@@ -135,7 +141,7 @@ func (fh *FileHandle) ListDirHandles(hideDotFiles bool) ([]domain.Handle, error)
 	}
 	sort.Slice(entries, func(i, j int) bool { return entries[i].Name() < entries[j].Name() })
 
-	var handles = make([]domain.Handle, 0)
+	var handles = make([]drive.Handle, 0)
 	for _, entry := range entries {
 		if hideDotFiles && entry.Name()[0] == '.' {
 			// ignore all files starting with '.'
@@ -146,6 +152,7 @@ func (fh *FileHandle) ListDirHandles(hideDotFiles bool) ([]domain.Handle, error)
 			entry,
 			fh.storage.(*FileSystemStorage),
 			filepath.Join(fh.location, entry.Name()),
+			"", // ???
 		))
 	}
 	return handles, nil

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"drive/domain"
 	"drive/drive"
 	"drive/errors"
 	"fmt"
@@ -44,9 +45,9 @@ func GetGroupByID(gid uint32) *drive.Group {
 	return grp
 }
 
-func Authenticate(username, password string) (*drive.Account, error) {
+func Authenticate(username, password string) (*domain.Account, error) {
 
-	usr := &drive.Account{0, 0, "anonymous", "Anonym", "", false}
+	usr := &domain.Account{0, 0, "anonymous", "Anonym", "", false}
 
 	_, err := user.Lookup(username)
 	if uerr, ok := err.(user.UnknownUserError); ok {
@@ -58,9 +59,9 @@ func Authenticate(username, password string) (*drive.Account, error) {
 
 	switch username {
 	case "mi":
-		usr = &drive.Account{501, 20, "mi", "Matthias Ihle", "", true}
+		usr = &domain.Account{501, 20, "mi", "Matthias Ihle", "", true}
 	case "ihle":
-		usr = &drive.Account{1406, 1407, "ihle", "Matthias Ihle", "", true}
+		usr = &domain.Account{1406, 1407, "ihle", "Matthias Ihle", "", true}
 	}
 	return usr, nil
 }

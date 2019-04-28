@@ -2,7 +2,6 @@ package drivehandler
 
 import (
 	"drive/templates"
-	"drive/web"
 	"fmt"
 	"net/http"
 
@@ -48,7 +47,7 @@ func (a *ActionResponder) Respond(w http.ResponseWriter, r *http.Request, data m
 	}
 
 	if err != nil {
-		web.Error(w, r, errors.Wrap(err, "render error"))
+		errors.Error(w, r, errors.Wrap(err, "render error"))
 	}
 	return
 }

@@ -1,6 +1,7 @@
 package drive
 
 import (
+	"drive/domain"
 	"fmt"
 	"io"
 	"os"
@@ -11,14 +12,6 @@ import (
 
 	"github.com/h2non/filetype/types"
 )
-
-type Account struct {
-	Uid, Gid      uint32
-	Username      string
-	Name          string
-	HomeDir       string
-	Authenticated bool
-}
 
 type User struct {
 	Uid      string `json:"uid"`
@@ -67,8 +60,9 @@ type Handle interface {
 	os.FileInfo
 	Storage() Storage
 	Descriptor(int) *os.File
+	URL() string // ???
 
-	ToFile(string, *Account) (*File, error)
+	ToFile(string, *domain.Account) (*File, error)
 	GuessMIME() types.MIME
 
 	ListDirHandles(bool) ([]Handle, error)
@@ -80,7 +74,7 @@ type Handle interface {
 
 	//Uid() uint32
 	//Gid() uint32
-	GetPermissions(owner uint32, group uint32, account *Account) *Permissions
+	GetPermissions(owner uint32, group uint32, account *domain.Account) *Permissions
 	HasReadPermission(uid, gid uint32) bool
 }
 
@@ -110,7 +104,7 @@ const (
 )
 
 type Permissions struct {
-	Account *Account
+	Account *domain.Account
 	//Type              Permtype
 	//Mode              os.FileMode
 	IsOwner           bool

@@ -1,6 +1,7 @@
 package drive
 
 import (
+	"drive/domain"
 	"drive/errors"
 	"encoding/json"
 	"fmt"
@@ -52,7 +53,9 @@ type Image2 struct {
 
 	// Caption als allgemeingültige "standalone" Bildunterschrift und Cutline als Verbindung zum Album (ausgewählte Bilder in Reihe?)
 	Exif     *Exif
-	metaFile *File
+	MetaFile *File
+	URL      string
+	Name     string
 }
 type Exif struct {
 	Orientation int
@@ -79,11 +82,13 @@ func NewImageFromHandle(handle Handle) (*Image2, error) {
 		Height:     config.Height,
 		Ratio:      float64(config.Height) / float64(config.Width) * 100,
 		Format:     format,
+		URL:        handle.URL(),
+		Name:       handle.Name(),
 	}
 	return i, nil
 }
 
-func NewImage(file *File, usr *Account) (*Image, error) {
+func NewImage(file *File, usr *domain.Account) (*Image, error) {
 
 	fd := file.Descriptor(0)
 	defer fd.Close()
@@ -217,7 +222,7 @@ func (i *Image) GoexifDecode(fd *os.File) error {
 	return nil
 }
 
-func (i *Image) WriteMeta(usr *Account) error {
+func (i *Image) WriteMeta(usr *domain.Account) error {
 
 	if !i.metaFile.Permissions.Write {
 		return errors.Errorf("Missing write permission for %s", i.metaFile.Name)

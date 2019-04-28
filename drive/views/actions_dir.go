@@ -1,8 +1,8 @@
 package drivehandler
 
 import (
+	"drive/domain"
 	"drive/drive"
-	"drive/web"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,7 +17,7 @@ Dir
 type DirActionResponder struct {
 	ActionResponder
 	File *drive.File
-	User *drive.Account
+	User *domain.Account
 }
 
 func (a *DirActionResponder) GetAction(r *http.Request, w http.ResponseWriter) error {
@@ -63,7 +63,7 @@ func (a *DirActionResponder) PostAction(r *http.Request, w http.ResponseWriter) 
 	err = file.Storage().Save(file.Path+"/"+multipart.Filename, formfile) //os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return errors.Wrap(err, "Failed to open file")
-		web.Error(w, r, err)
+		errors.Error(w, r, err)
 	}
 	//return nil
 

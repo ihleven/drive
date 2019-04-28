@@ -1,10 +1,9 @@
 package session
 
 import (
-	"drive/drive"
+	"drive/domain"
 	"encoding/gob"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -31,7 +30,7 @@ func init() {
 		HttpOnly: true,
 		//Secure:   false,
 	}
-	gob.Register(drive.Account{})
+	gob.Register(domain.Account{})
 }
 
 type Session struct {
@@ -57,7 +56,6 @@ func (s *Session) Get(name interface{}) interface{} {
 }
 func (s *Session) GetString(name string) string {
 	str := s.Session.Values[name].(string)
-	fmt.Println("---", str)
 	return str
 }
 
@@ -85,7 +83,7 @@ func GetSession(r *http.Request, w http.ResponseWriter) (*Session, error) {
 
 	session, err := store.Get(r, SESSION_NAME)
 	if err != nil {
-		fmt.Println("ERROR session.GetSession", err.Error())
+		//fmt.Println("ERROR session.GetSession", err.Error())
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
 		return nil, err
 	}
@@ -135,44 +133,25 @@ func Set(r *http.Request, w http.ResponseWriter, key, value interface{}) error {
 	return nil
 }
 
-func GetSessionUser(r *http.Request, w http.ResponseWriter) (*drive.Account, error) {
+func GetSessionUser(r *http.Request, w http.ResponseWriter) (*domain.Account, error) {
 	sess, err := GetSession(r, w)
 	if err != nil {
 		return nil, err
 	}
 
-	val := sess.Get("user")
-	var user = drive.Account{}
-	user, ok := val.(drive.Account)
-	if !ok {
-		return &drive.Account{Authenticated: false}, nil
+	if user, ok := sess.Get("user").(domain.Account); ok {
+		return &user, nil
+	} else {
+		return &domain.Account{Authenticated: false}, nil
 	}
-	return &user, nil
 }
 
-func SetSessionUser(r *http.Request, w http.ResponseWriter, user *drive.Account) (err error) {
+func SetSessionUser(r *http.Request, w http.ResponseWriter, user *domain.Account) (err error) {
 	sess, err := GetSession(r, w)
 	if err != nil {
-		fmt.Println("SetSessoinUser GetSession Error: ", err)
 		return
 	}
 	sess.Set("user", user)
 	sess.Save(r, w)
-	//	err = session.Save()
 	return
-}
-
-func AuthUser(r *http.Request, w http.ResponseWriter) (*drive.Account, error) {
-	sess, err := GetSession(r, w)
-	if err != nil {
-		return nil, err
-	}
-
-	val := sess.Get("user")
-	var user = drive.Account{}
-	user, ok := val.(drive.Account)
-	if !ok {
-		return &drive.Account{Authenticated: false}, nil
-	}
-	return &user, nil
 }

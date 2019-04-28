@@ -1,10 +1,11 @@
 package drivehandler
 
 import (
+	"drive/domain"
 	"drive/drive"
 	"drive/drive/storage"
+	"drive/errors"
 	"drive/session"
-	"drive/web"
 	"net/http"
 	"path"
 )
@@ -26,7 +27,7 @@ func DispatchStorage(storage drive.Storage) func(w http.ResponseWriter, r *http.
 
 		file, err := drive.GetFile(storage, path.Clean(r.URL.Path), sessionUser)
 		if err != nil {
-			web.Error(w, r, err)
+			errors.Error(w, r, err)
 			return
 		}
 
@@ -43,13 +44,13 @@ func DispatchStorage(storage drive.Storage) func(w http.ResponseWriter, r *http.
 			}
 			if err != nil {
 
-				web.Error(w, r, err)
+				errors.Error(w, r, err)
 			}
 		}
 	}
 }
 
-func GetActioneer(file *drive.File, sessionUser *drive.Account) Actioneer {
+func GetActioneer(file *drive.File, sessionUser *domain.Account) Actioneer {
 	switch {
 	case file.IsDir():
 		return &DirActionResponder{File: file, User: sessionUser}
@@ -71,7 +72,7 @@ func Serve(storage drive.Storage) func(w http.ResponseWriter, r *http.Request) {
 
 		authuser, err := session.GetSessionUser(r, w)
 		if err != nil {
-			web.Error(w, r, err)
+			errors.Error(w, r, err)
 			return
 		}
 
@@ -79,7 +80,7 @@ func Serve(storage drive.Storage) func(w http.ResponseWriter, r *http.Request) {
 
 		handle, err := drive.GetReadHandle(storage, cleanedPath, authuser.Uid, authuser.Gid)
 		if err != nil {
-			web.Error(w, r, err)
+			errors.Error(w, r, err)
 			return
 		}
 

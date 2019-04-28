@@ -1,6 +1,7 @@
 package drive
 
 import (
+	"drive/domain"
 	"drive/errors"
 	"encoding/json"
 	"fmt"
@@ -27,10 +28,10 @@ type Album struct {
 	Images []Image2 `json:"images"`
 
 	//Entries   []File `json:"entries"`
-	//IndexFile *File  `json:"indexFile"`
+	Image string `json:"image"`
 }
 
-func GetAlbum(storage Storage, path string, usr *Account) (*Album, error) {
+func GetAlbum(storage Storage, path string, usr *domain.Account) (*Album, error) {
 
 	file, err := GetFile(storage, path, usr)
 	if err != nil {
@@ -46,10 +47,8 @@ func GetAlbum(storage Storage, path string, usr *Account) (*Album, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not list album folder")
 	}
-	fmt.Println("file", file, handles)
 
 	for _, handle := range handles {
-		fmt.Println(handle.Name())
 		mime := handle.GuessMIME()
 		switch {
 		case mime.Type == "image":

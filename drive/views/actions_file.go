@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"drive/domain"
 	"drive/drive"
 	"drive/errors"
 )
@@ -20,7 +21,7 @@ Files
 type FileActionResponder struct {
 	ActionResponder
 	File *drive.File
-	User *drive.Account
+	User *domain.Account
 }
 
 func (a *FileActionResponder) GetAction(r *http.Request, w http.ResponseWriter) error {

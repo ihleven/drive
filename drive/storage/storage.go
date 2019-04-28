@@ -34,6 +34,7 @@ type FileSystemStorage struct {
 	Owner          *domain.User  // alle Dateien gehören automatisch diesem User ( => homes )
 	Group          *domain.Group // jedes File des Storage bekommt automatisch diese Gruppe ( z.B. brunhilde )
 	PermissionMode os.FileMode   // wenn gesetzt erhält jedes File dies Permission =< wird nicht mehr auf fs gelesen
+
 }
 
 func (st *FileSystemStorage) TrimPath(path string) string {
@@ -65,6 +66,7 @@ func (st *FileSystemStorage) GetHandle(name string) (domain.Handle, error) {
 		mode:     info.Mode(),
 		storage:  st,
 		location: location,
+		path:     name, // ???
 	}
 
 	if st.PermissionMode != 0 {
@@ -101,8 +103,8 @@ func (st *FileSystemStorage) ReadDir(path string) ([]domain.Handle, error) {
 
 	entries := make([]domain.Handle, len(list))
 	for index, info := range list {
-
-		entries[index] = NewFileHandle(info, st, filepath.Join(location, info.Name()))
+		p := filepath.Join(path, info.Name())
+		entries[index] = NewFileHandle(info, st, filepath.Join(location, info.Name()), p)
 	}
 	return entries, nil
 }

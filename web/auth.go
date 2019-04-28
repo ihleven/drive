@@ -15,14 +15,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 		user, err := storage.Authenticate(r.PostFormValue("username"), r.PostFormValue("password"))
 		if err != nil {
-			Error(w, r, errors.Augment(err, errors.BadCredentials, "Could not validate given credentials"))
+			errors.Error(w, r, errors.Augment(err, errors.BadCredentials, "Could not validate given credentials"))
 			return
 		}
 		fmt.Println("=>", user, r.PostFormValue("username"), r.PostFormValue("password"))
 
 		session.SetSessionUser(r, w, user)
 		if err != nil {
-			Error(w, r, errors.Augment(err, errors.Session, "Could not store User in session"))
+			errors.Error(w, r, errors.Augment(err, errors.Session, "Could not store User in session"))
 			return
 		}
 

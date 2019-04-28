@@ -1,6 +1,7 @@
 package drivehandler
 
 import (
+	"drive/domain"
 	"drive/drive"
 	"fmt"
 	"net/http"
@@ -20,18 +21,18 @@ type DriveHandler interface {
 type ImageView struct {
 	ActionResponder
 	File *drive.File
-	User *drive.Account
+	User *domain.Account
 }
 
 type ImageHandler struct {
 	File     *drive.File
-	User     *drive.Account
+	User     *domain.Account
 	Image    *drive.Image
 	Siblings *drive.Siblings
 }
 
 func (v *ImageView) GetAction(r *http.Request, w http.ResponseWriter) error {
-	v.template = "image"
+	v.template = "image2"
 	file, user := v.File, v.User
 
 	fmt.Printf("GetAction => Image %s\n", file.Name)

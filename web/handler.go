@@ -1,6 +1,7 @@
 package web
 
 import (
+	"drive/errors"
 	"drive/session"
 	"drive/templates"
 	"fmt"
@@ -20,7 +21,7 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if _, err := os.Stat(path.Join("./_static", r.URL.Path)); err != nil {
 		//NotFound(w, r) os.IsNotExist(err)
-		Error(w, r, err)
+		errors.Error(w, r, err)
 		return
 	}
 	// TODO: nicht jedes mal einen FileServer registrieren
