@@ -41,6 +41,9 @@ func DispatchStorage(storage drive.Storage) func(w http.ResponseWriter, r *http.
 				err = responder.DeleteAction(r, w)
 			case http.MethodPost:
 				err = responder.PostAction(r, w)
+
+			case http.MethodPut:
+				err = responder.PutAction(r, w)
 			}
 			if err != nil {
 

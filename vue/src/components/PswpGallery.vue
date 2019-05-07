@@ -60,25 +60,27 @@ export default {
     props: ['images'],
 
     data() {
-        return {
-            items: [],
-        };
+        return {};
     },
-
+    computed: {
+        items() {
+            if (!this.images) return [];
+            return this.images.map(item => {
+                if (typeof item == 'string') {
+                    return this.imageMetaFromFilename(item);
+                }
+                return {
+                    msrc: '/serve/home/' + item.URL.replace(item.Name, 'thumbs/' + item.Name),
+                    src: '/serve/home/' + item.URL,
+                    w: item.Width,
+                    h: item.Height,
+                    title: item.Title,
+                };
+            });
+        },
+    },
     created() {
         console.log('images:', this.images);
-        this.items = this.images.map(item => {
-            if (typeof item == 'string') {
-                return this.imageMetaFromFilename(item);
-            }
-            return {
-                msrc: '/serve/home/' + item.URL.replace(item.Name, 'thumbs/' + item.Name),
-                src: '/serve/home/' + item.URL,
-                w: item.Width,
-                h: item.Height,
-                title: item.Title,
-            };
-        });
     },
 
     methods: {

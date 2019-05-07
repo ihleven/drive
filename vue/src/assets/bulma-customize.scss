@@ -37,12 +37,20 @@ $input-border-color: transparent;
 $input-shadow: none;
 
 //$navbar-height : 2rem;
-$navbar-breakpoint: 300px;
 
 $fa-font-path: "~font-awesome/fonts";
 
 $footer-background-color: $grey-darker;
 $footer-padding: 3rem 1.5rem 6rem;
+
+$modal-content-width:80%;
+$modal-card-spacing:10px;
+$modal-card-head-background-color: #fff;
+$modal-card-head-border-bottom: 0px solid #fff;
+$modal-card-head-padding: 0px;
+$modal-card-head-radius:2px;
+
+
 
 .navbar {
     &.is-transparent {

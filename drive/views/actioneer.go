@@ -11,6 +11,7 @@ import (
 type Actioneer interface {
 	GetAction(*http.Request, http.ResponseWriter) error
 	PostAction(*http.Request, http.ResponseWriter) error
+	PutAction(*http.Request, http.ResponseWriter) error
 	DeleteAction(*http.Request, http.ResponseWriter) error
 	//}
 	//type Responder interface {
@@ -35,6 +36,10 @@ func (a *ActionResponder) PostAction(r *http.Request, w http.ResponseWriter) err
 func (a *ActionResponder) DeleteAction(r *http.Request, w http.ResponseWriter) error {
 	fmt.Println("DeleteAction")
 	return errors.New(errors.NotImplemented, "Method Delete not implemented")
+}
+func (a *ActionResponder) PutAction(r *http.Request, w http.ResponseWriter) error {
+	fmt.Println("PutAction")
+	return errors.New(errors.NotImplemented, "Method Put not implemented")
 }
 func (a *ActionResponder) Respond(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (err error) {
 

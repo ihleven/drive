@@ -39,23 +39,24 @@ type Image struct {
 }
 
 type Image2 struct {
-	Handle        Handle
-	ColorModel    color.Model
-	Width, Height int
-	Ratio         float64
-	Format        string
-	Title         string
-	Caption       string // a “caption” is more like a title, while the “cutline” first describes what is happening in the picture, and then explains the significance of the event depicted.
-	Cutline       string // the “cutline” is text below a picture, explaining what the reader is looking at
+	Handle     Handle      `json:"_"`
+	ColorModel color.Model `json:"_"`
+	Width      int         `json:"w"`
+	Height     int         `json:"h"`
+	Ratio      float64     `json:"_"`
+	Format     string      `json:"_"`
+	Title      string      `json:"title"`
+	Caption    string      `json:"_"` // a “caption” is more like a title, while the “cutline” first describes what is happening in the picture, and then explains the significance of the event depicted.
+	Cutline    string      `json:"_"` // the “cutline” is text below a picture, explaining what the reader is looking at
 
 	// https://web.ku.edu/~edit/captions.html
 	// https://jerz.setonhill.edu/blog/2014/10/09/writing-a-cutline-three-examples/
 
 	// Caption als allgemeingültige "standalone" Bildunterschrift und Cutline als Verbindung zum Album (ausgewählte Bilder in Reihe?)
-	Exif     *Exif
-	MetaFile *File
-	URL      string
-	Name     string
+	Exif     *Exif  `json:"_"`
+	MetaFile *File  `json:"_"`
+	URL      string `json:"URL"`
+	Name     string `json:"name"`
 }
 type Exif struct {
 	Orientation int

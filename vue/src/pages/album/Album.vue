@@ -1,23 +1,79 @@
 <script>
 import UploadModal from '@/components/modal.vue';
 import PswpGallery from '@/components/PswpGallery.vue';
+import Cloud11Figure from '@/components/Cloud11Figure.vue';
+import TipTap from './TipTap.vue';
+import { mapState, mapActions } from 'vuex'
+import AlbumImage from './AlbumImage.vue';
 
 export default {
+    name: "Album",
     components: {
         UploadModal,
         PswpGallery,
+        Cloud11Figure,
+        TipTap,
+        AlbumImage
     },
-    props: {
-        album: Object,
+    provide: {
+        prefix:"/serve/home",
+        album: "Mallorca"
     },
+    //props: {
+    //    album: Object,
+    //},
     data() {
         return {
             isModalVisible: false,
+            selectedSource: null,
+            markdown: null,
+
         };
     },
-    methods: {},
-    mounted() {
-        console.log('Album.vue =>', this.album);
+    computed: mapState({
+      album: state => state.album,
+      diaries: state => state.album.diaries,
+      pages: state => state.album.pages,
+      diaryNames: state => state.album.diaryNames,
+    }),
+    methods: {
+      handleSelect(i) {
+
+         this.$set(i, "selected", !i.selected)  
+
+          this.$store.commit('diaryImage', {
+            diaryName: 'undefined',
+            image: i,
+            mode: i.selected ? 'add' : 'remove',
+          })
+      },
+      selectSource(source) {
+          if (source.name === this.selectedSource) {
+              this.selectedSource = null;
+          } else {
+              this.selectedSource=source.name
+          }
+      },
+      onUpdateMarkdown(event) {
+          console.log("onupdateMarkdown", event);
+      },
+      put(source) {
+          fetch(this.album.file.path + '/' + source.name, {
+            method: 'put',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({CreateThumbnails: true})
+            })
+            .then(res=>res.json())
+            .then(res => console.log(res));
+
+      }
+    },
+    created() {
+        this.markdown = this.pages[0]
+        //console.log('Album.vue =>', this.markdown);
     },
 };
 </script>
@@ -38,7 +94,7 @@ export default {
                                 <a>Grid</a>
                             </li>
                             <li>
-                                <a class="button is-dark" href="/home/14">folder</a>
+                                <a class="" href="/home/14">folder</a>
                             </li>
                             <li>
                                 <a>Components</a>
@@ -57,26 +113,13 @@ export default {
                 </div>
             </div>
             <div class="hero-foot">
-                <nav class="tabs">
+                <nav class="tabs is-boxed is-dark">
                     <div class="container">
                         <ul>
-                            <li class="is-active">
-                                <a>Overview</a>
-                            </li>
-                            <li>
-                                <a>Modifiers</a>
-                            </li>
-                            <li>
-                                <a>Grid</a>
-                            </li>
-                            <li>
-                                <a class="button is-dark" href="/home/14">folder</a>
-                            </li>
-                            <li>
-                                <a>Components</a>
-                            </li>
-                            <li>
-                                <a>Layout</a>
+                            <li v-for="source in album.sources" :key="source.name" 
+                            :class="{'is-active': selectedSource==source.name}" 
+                              @click="selectSource(source)" >
+                                <a>{{source.name}}</a>
                             </li>
                         </ul>
                     </div>
@@ -84,7 +127,7 @@ export default {
             </div>
         </section>
 
-        <section class="section has-background-dark">
+        <section class="section has-background-dark" v-if="!selectedSource">
             <div class="container">
                 <h1 class="title">Section</h1>
                 <h2 class="subtitle">
@@ -95,26 +138,76 @@ export default {
             </div>
         </section>
 
+        <div v-for="source in album.sources" :key="source.name">
+            <button @click="put(source)">thumbs</button>
+            <section class="section has-background-dark" v-if="selectedSource==source.name">
+            <div class="container" >
+                <h1 class="title">{{source.name}}</h1>
+                <h2 class="subtitle">{{source.camera}} / {{source.photographer}}</h2>
+
+<div v-for="(i, index) in source.images" :key="i.URL">
+                <cloud11-figure 
+                  :src="'/serve/home/' + i.URL" 
+                  :type="i.selected ? 'sel' : 'not'" 
+                  :tags="['leaf','plant','forest','green']"
+                  @select="handleSelect(i)" 
+                /> 
+                <label class="checkbox">
+  <input type="checkbox" v-model="i.selected">
+  <span style="color:white">selected: {{i.selected}}</span>
+</label>
+</div>
+
+
+            
+      
+      
+     
+            </div>
+        </section>
+</div>
+        <section class="section has-background-light" v-for="moment in album.moments" :key="moment.title">
+            <div class="container">
+                <h1 class="title">{{moment.title}}</h1>
+                <h2 class="subtitle">
+                    {{moment.title}}
+                </h2>
+                <pswp-gallery :images="moment.images"></pswp-gallery>
+            </div>
+        </section>
+        <section class="section has-background-primary" v-for="name in diaryNames" :key="name">
+            <div class="container">
+                <h1 class="title">{{diaries[name].title}}</h1>
+                <h2 class="subtitle">
+                    {{diaries[name].title}}
+                </h2>
+                {{ diaries[name] }}
+                <img :src="'/serve/home' + i.URL" v-for="i in diaries[name].images" :key="i.name" style="width: 100px" />
+                <pswp-gallery :images="diaries[name].images"></pswp-gallery>
+            </div>
+        </section>
+
+        <section class="section has-background-light" >
+            <div class="container">
+                <h1 class="title"></h1>
+<textarea v-model="markdown"></textarea>
+                <tip-tap  v-model="markdown"></tip-tap>
+            </div>
+        </section>
+
         <section class="section">
             <div class="container">
                 <div class="timeline is-centered">
                     <header class="timeline-header">
                         <a class="tag is-medium is-primary" href="/home/60/">Hotel Friday Attitude</a>
                     </header>
-                    <div class="timeline-item is-primary">
-                        <div class="timeline-marker is-primary"></div>
-                        <div class="timeline-content">
-                            <p class="heading">January 2016</p>
-                            <p>Timeline content - Can include any HTML element</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item is-warning">
-                        <div class="timeline-marker is-warning is-image is-64x64">
-                            <img src="/serve/home/14/DSC02257.jpg" />
-                        </div>
-                        <div class="timeline-content">
-                            <p class="heading">February 2016</p>
-                            <p>Timeline content - Can include any HTML element</p>
+                    <div class="timeline-item is-primary" v-for="moment in album.moments" :key="moment.title">
+                        <div class="timeline-marker is-primary is-image is-64x64" 
+                        :style="{background: 'url( /serve/home' + moment.image + ')', 'background-size':'cover'}"
+                        ></div>
+                        <div class="timeline-content" :style="{'padding':'1.5rem 3rem 0 3rem'}">
+                            <p class="heading">{{moment.title}}</p>
+                            <p>Timeline content</p>
                         </div>
                     </div>
                     <header class="timeline-header">
@@ -164,10 +257,15 @@ export default {
                 <upload-modal :visible.sync="isModalVisible" :url="album.file.path" />
             </div>
         </footer>
+        {{diaries}}
+        <album-image src="/serve/home/txt/DSC02261.jpg" />
     </div>
 </template>
 
 <style lang="css">
+.selected {
+  border: 5px solid white;
+}
 .has-bg-img {
     background: url('/serve/home/14/DSC02359.jpg') center center;
     background-size: cover;
@@ -207,5 +305,12 @@ export default {
     position: relative;
     background-color: white;
     z-index: 1;
+}
+
+
+.thumb {
+    display: inline-block;
+    margin: 1rem;
+    max-height: 100px;
 }
 </style>

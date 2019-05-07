@@ -77,15 +77,18 @@ func (a *DirActionResponder) PostAction(r *http.Request, w http.ResponseWriter) 
 }
 
 func (a *DirActionResponder) PutAction(r *http.Request, w http.ResponseWriter) error {
-
+	fmt.Println("PUT")
 	decoder := json.NewDecoder(r.Body)
+
 	var options struct {
 		CreateThumbnails bool
 	}
 	err := decoder.Decode(&options)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
+	fmt.Println("PUT Options:", options.CreateThumbnails)
 	if options.CreateThumbnails {
 
 		// file.Mkdir(filepath.Join(d.File.Path, "thumbs"))
