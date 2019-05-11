@@ -2,36 +2,40 @@
   <transition name="modal-fade">
     <div class="modal" :class="{ 'is-active': visible }">
       <div class="modal-background"></div>
-      <div class="modal-content">
-        <div class="card">
-          <div class="card-content">
-            {{ images }}
-            <div class="tabs">
-              <ul>
-                <li class="is-active" v-for="s in sources" :key="s.name" @click="selectSource(s)">
-                  <a>{{ s.name }}</a>
-                </li>
-              </ul>
-            </div>
-            <div class="columns is-mobile">
-              <div class="column" v-for="image in source.images" :key="image.name">
-                <img
-                  :src="'/serve/home' + image.URL"
-                  style="max-height:5rem;"
-                  @click="toggleImage(image)"
-                  :class="{ selected: image.selected }"
-                >
-              </div>
-              <div class="column">Auto</div>
-              <div class="column">Auto</div>
-            </div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <div class="tabs is-fullwidth">
+            <ul>
+              <li
+                :class="{ 'is-active': s.name == source.name }"
+                v-for="s in sources"
+                :key="s.name"
+                @click="selectSource(s)"
+              >
+                <a>{{ s.name }}</a>
+              </li>
+            </ul>
           </div>
-          <footer class="card-footer">
-            <a href="#" class="card-footer-item">Save</a>
-            <a href="#" class="card-footer-item">Edit</a>
-            <a href="#" class="card-footer-item" @click="close">Close</a>
-          </footer>
-        </div>
+        </header>
+        <section class="modal-card-body">
+          {{ images }}
+          <div class>
+            <img
+              v-for="image in source.images"
+              :key="image.name"
+              class="image"
+              :src="'/serve' + source.path + '/thumbs/x100/' + image.name"
+              style="max-height:5rem;"
+              @click="toggleImage(image)"
+              :class="{ selected: image.selected }"
+            >
+          </div>
+        </section>
+
+        <footer class="modal-card-foot">
+          <button class="button is-success" @click="close">Save changes</button>
+          <button class="button">Cancel</button>
+        </footer>
       </div>
 
       <button class="modal-close is-large" aria-label="close" @click="close">close</button>
@@ -95,6 +99,10 @@ export default {
 }
 .selected {
     border: 4px solid black !important;
+}
+.image {
+    display: inline-block !important;
+    margin: 0 10px 10px 0;
 }
 </style>
 

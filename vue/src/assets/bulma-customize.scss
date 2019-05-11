@@ -43,21 +43,16 @@ $fa-font-path: "~font-awesome/fonts";
 $footer-background-color: $grey-darker;
 $footer-padding: 3rem 1.5rem 6rem;
 
-$modal-content-width:80%;
+//$modal-content-width:80%;
 $modal-card-spacing:10px;
 $modal-card-head-background-color: #fff;
-$modal-card-head-border-bottom: 0px solid #fff;
-$modal-card-head-padding: 0px;
-$modal-card-head-radius:2px;
+$modal-card-head-border-bottom: 0px solid white;
+$modal-card-head-padding: 10px 20px 0 20px;
+//$modal-card-head-radius:2px;
+
+$navbar-breakpoint: 60px;
 
 
-
-.navbar {
-    &.is-transparent {
-        background-color: transparent;
-        background-image: none;
-    }
-}
 
 [contenteditable]:focus {
     outline: 0px solid transparent;
@@ -118,6 +113,42 @@ svg {
     white-space: nowrap;
     overflow: hidden;
 }
+
+
+html,
+body {
+    max-height: 100vh;
+    height: 100vh;
+    overflow: hidden !important;
+}
+
+
+::-webkit-scrollbar {
+    width: 12px;
+    background: transparent;
+    /* Optional: just make scrollbar invisible */
+}
+
+::-webkit-scrollbar-track {
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+}
+
+
+/* Optional: show position indicator in red */
+::-webkit-scrollbar-thumb {
+    background: #FF0000;
+}
+
+
+
+
+
+
 
 @import '../../node_modules/bulma/bulma.sass';
 

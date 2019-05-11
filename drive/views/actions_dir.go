@@ -77,33 +77,28 @@ func (a *DirActionResponder) PostAction(r *http.Request, w http.ResponseWriter) 
 }
 
 func (a *DirActionResponder) PutAction(r *http.Request, w http.ResponseWriter) error {
-	fmt.Println("PUT")
-	decoder := json.NewDecoder(r.Body)
+
+	file := a.File
+	fmt.Printf("PutAction => Directory \"%s/\"\n", file.Name)
+
+	//if !file.Permissions.Write {
+	//	return errors.Errorf("no write permissions")
+	//}
 
 	var options struct {
 		CreateThumbnails bool
 	}
-	err := decoder.Decode(&options)
+	err := json.NewDecoder(r.Body).Decode(&options)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return errors.Wrap(err, "Error decoding put request body")
 	}
-	fmt.Println("PUT Options:", options.CreateThumbnails)
+
 	if options.CreateThumbnails {
 
-		// file.Mkdir(filepath.Join(d.File.Path, "thumbs"))
-
-		// for i := 0; i < len(d.Directory.Entries); i++ {
-		// 	file := d.Directory.Entries[i]
-
-		// 	if file.MIME.Type == "image" {
-		// 		//img, err := file.AsImage()
-
-		// 		//img.MakeThumbnail()
-		// 	}
-
-		// }
-
+		err := drive.MakeThumbs(file.Handle)
+		if err != nil {
+			return errors.Wrap(err, "Error making thumbnails")
+		}
 	}
 	return nil
 }

@@ -40,6 +40,7 @@ type Album struct {
 }
 type Source struct {
 	Name         string   `json:"name"`
+	Path         string   `json:"path"`
 	Camera       string   `json:"camera"`
 	Photographer string   `json:"photographer"`
 	Images       []Image2 `json:"images"`
@@ -109,7 +110,7 @@ func GetAlbum(storage Storage, path string, usr *domain.Account) (*Album, error)
 				}
 				if subhandle.Name() == "_source.json" {
 					fmt.Println("subalbum", subhandle.Name())
-					source = &Source{Name: handle.Name()}
+					source = &Source{Name: handle.Name(), Path: handle.URL()}
 					err := json.NewDecoder(subhandle.Descriptor(0)).Decode(source)
 					if err != nil {
 						return nil, errors.Wrap(err, "Could not parse album file")

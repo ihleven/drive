@@ -263,32 +263,78 @@ func (i *Image) update(requestBody []byte) {
 	i.WriteMeta(nil)
 }
 
-func (i *Image) MakeThumbnail() {
-	// open "test.jpg"
-	file, err := os.Open(i.File.Path)
+func MakeThumbs(handle Handle) error {
+
+	thumbs := filepath.Join(handle.Location(), "thumbs")
+	if err := os.RemoveAll(thumbs); err != nil {
+		return errors.Wrap(err, "Could not delete thumbs folder")
+	}
+	if err := os.Mkdir(thumbs, 0755); err != nil {
+		return errors.Wrap(err, "Could not create thumbs folder")
+	}
+	for _, format := range thumbFormats {
+		if err := os.Mkdir(filepath.Join(thumbs, format.Name), 0755); err != nil {
+			return errors.Wrap(err, "Could not create thumbs folder for format %v", format)
+		}
+	}
+	handles, err := handle.Storage().ReadDir(handle.URL())
 	if err != nil {
-		log.Fatal(err)
+		return errors.Wrap(err, "Could not read thumbs folder")
 	}
 
+	for _, entry := range handles {
+
+		if mime := entry.GuessMIME(); mime.Value == "image/jpeg" {
+
+			err = MakeThumbnail(entry, thumbs)
+			if err != nil {
+				return errors.Wrap(err, "Could not create thumbnail")
+			}
+		}
+
+	}
+	return nil
+}
+
+type thumbformat struct {
+	Name string
+	X, Y uint
+}
+
+var thumbFormats = []thumbformat{{"x100", 0, 100}, {"96", 96, 96}} //map[string]thumbformat
+
+func MakeThumbnail(orig Handle, thumbnailFolder string) error {
+
+	fd := orig.Descriptor(0)
+	defer fd.Close()
+	if fd == nil {
+		return errors.Errorf("Could not open fd")
+	}
 	// decode jpeg into image.Image
-	img, err := jpeg.Decode(file)
+	img, err := jpeg.Decode(fd)
 	if err != nil {
-		log.Fatal(err)
+		return errors.Wrap(err, "error jpeg decoding %s", orig.Name())
 	}
-	file.Close()
 
-	// resize to width 1000 using Lanczos resampling
-	// and preserve aspect ratio
-	m := resize.Resize(100, 0, img, resize.Lanczos3)
+	for _, format := range thumbFormats {
+		fmt.Println(format)
+		// resize to width 100 using Lanczos resampling
+		// and preserve aspect ratio
+		thumb := resize.Resize(format.X, format.Y, img, resize.Lanczos3)
 
-	d, f := filepath.Split(i.File.Path)
-	fn := filepath.Join(d, "thumbs", f)
-	out, err := os.Create(fn)
-	if err != nil {
-		log.Fatal(err)
+		location := filepath.Join(thumbnailFolder, format.Name, orig.Name())
+		fmt.Println(format, location)
+		dest, err := os.OpenFile(location, os.O_RDWR|os.O_CREATE, 0755)
+		defer dest.Close()
+		if err != nil {
+			return errors.Wrap(err, "Failed to create file: %s", location)
+		}
+
+		// write new image to file
+		err = jpeg.Encode(dest, thumb, nil)
+		if err != nil {
+			return errors.Wrap(err, "Could not jpeg.Encode")
+		}
 	}
-	defer out.Close()
-
-	// write new image to file
-	jpeg.Encode(out, m, nil)
+	return nil
 }

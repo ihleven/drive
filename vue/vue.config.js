@@ -4,7 +4,14 @@ module.exports = {
     outputDir: '../_static',
     assetsDir: 'assets',
     pages: {
-        index: './src/pages/Home/main.js',
+        //index: './src/pages/Home/main.js',
+        index: {
+            entry: './src/pages/Home/main.js',
+            template: './public/templates/index.html',
+            filename: 'templates/index.html',
+            minify: false,
+            chunks: ['chunk-vendors', 'chunk-common', 'index'],
+        },
         error: {
             entry: './src/pages/error.js',
             template: './public/templates/error.html',

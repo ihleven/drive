@@ -32,13 +32,13 @@ type Mimetype struct {
 }
 
 type Storage interface {
+	Location(string) string
 	GetHandle(name string) (Handle, error)
 	Open(string) (*os.File, error)
 	Create(string) error
 	Delete(string) error
 	ReadDir(string) ([]Handle, error)
 	Save(string, io.Reader) error
-	Location(string) string
 	//PermOpen(string, uint32, uint32) (*os.File, *time.Time, error)
 }
 
@@ -59,8 +59,7 @@ type Locator interface {
 type Handle interface {
 	os.FileInfo
 	Locator
-	//Storage() Storage
-	//Descriptor(int) *os.File
+
 	URL() string // ???
 
 	ToFile(*domain.Account) (*File, error)

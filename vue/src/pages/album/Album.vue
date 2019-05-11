@@ -19,23 +19,30 @@ export default {
         prefix:"/serve/home",
         album: "Mallorca"
     },
-    //props: {
-    //    album: Object,
-    //},
+    
     data() {
         return {
             isModalVisible: false,
             selectedSource: null,
             markdown: null,
-
+            menuOpen:false,
         };
     },
-    computed: mapState({
-      album: state => state.album,
-      diaries: state => state.album.diaries,
-      pages: state => state.album.pages,
-      diaryNames: state => state.album.diaryNames,
-    }),
+    computed: {
+
+        appStyles() {
+            return {
+                'overflow-y': this.menuOpen ? 'hidden' : 'overlay',
+                'background-image':'url(/serve/home/14/DSC02257.jpg'
+            }
+        },
+        ...mapState({
+            album: state => state.album,
+            diaries: state => state.album.diaries,
+            pages: state => state.album.pages,
+            diaryNames: state => state.album.diaryNames,
+        }),
+    },
     methods: {
       handleSelect(i) {
 
@@ -69,42 +76,70 @@ export default {
             .then(res=>res.json())
             .then(res => console.log(res));
 
+      },
+      overlayNavigationToggler() {
+        this.menuOpen = !this.menuOpen;
       }
     },
     created() {
         this.markdown = this.pages[0]
-        //console.log('Album.vue =>', this.markdown);
+        console.log('Album.vue =>', this.menu);
     },
 };
 </script>
+
 <template>
-    <div class="bg" style="background-image:url(/serve/home/14/DSC02257.jpg)">
+    
+    <div class="bg" :style="appStyles">
+
+        <nav class="navigation" :class="{open:menuOpen}">
+            <section class="hero is-dark is-fullheight">
+                <div class="hero-body">
+                    <div class="container">
+                        <h1 class="title">Fullheight title</h1>
+                        <h2 class="subtitle">Fullheight subtitle</h2>
+                    </div>
+                </div>
+            </section>
+        </nav>
+
+        <button class="navigation-trigger" @click="overlayNavigationToggler">
+            <svg class="feather-fat">
+                <use xlink:href="/feather.svg#x"></use>
+            </svg>
+        </button>
+
         <section class="hero is-medium is-transparent">
             <div class="hero-head">
-                <nav class="tabs">
-                    <div class="container">
-                        <ul>
-                            <li class="is-active">
-                                <a>Overview</a>
-                            </li>
-                            <li>
-                                <a>Modifiers</a>
-                            </li>
-                            <li>
-                                <a>Grid</a>
-                            </li>
-                            <li>
-                                <a class="" href="/home/14">folder</a>
-                            </li>
-                            <li>
-                                <a>Components</a>
-                            </li>
-                            <li>
-                                <a>Layout</a>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">            
+            
+    <a class="navbar-item" href="/">
+        <span>matthias@</span><span class="is-size-5">ihle.</span>
+        <svg class="cloud-icon">
+            <use xlink:href="/feather.svg#cloud"></use>
+        </svg>
+    </a>
+
+    <div class="navbar-item has-dropdown is-hoverable">
+        
+        <a class="navbar-link">Docs</a>
+
+        <div class="navbar-dropdown is-boxed">
+            <a class="navbar-item" href="/home">Home</a>
+            <a class="navbar-item" href="/public">public</a>
+            <a class="navbar-item" href="/alben/Mallorca">Alben / Mallorca</a>
+            <hr class="navbar-divider">
+            <a class="navbar-item" href="/arbeit">Arbeit</a>
+            <hr class="navbar-divider">
+            <div class="navbar-item" href="/logout">Logout</div>
+        </div>
+    </div>
+
+    <a class="navbar-item">Home</a>
+
+</nav>
+
             </div>
             <div class="hero-body">
                 <div class="container">
@@ -117,8 +152,8 @@ export default {
                     <div class="container">
                         <ul>
                             <li v-for="source in album.sources" :key="source.name" 
-                            :class="{'is-active': selectedSource==source.name}" 
-                              @click="selectSource(source)" >
+                                :class="{'is-active': selectedSource==source.name}" 
+                                @click="selectSource(source)" >
                                 <a>{{source.name}}</a>
                             </li>
                         </ul>
@@ -262,6 +297,69 @@ export default {
     </div>
 </template>
 
+
+<style lang="scss" scoped>
+
+.navigation {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    width: 100vw;
+    height: 100vh;
+    text-align: left;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1000;
+    line-height: 1;
+    transition: all .3s ease-in-out 0s;
+}
+
+.navigation.open {
+    opacity: 1;
+    pointer-events: auto;
+    overflow: hidden;
+}
+.navigation-trigger {
+    position: absolute;
+    bottom: 1rem;
+    right: .5rem;
+    padding: 1rem;
+    z-index: 1000000;
+    cursor: pointer;
+    transition-property: opacity,filter;
+    transition-duration: .15s;
+    transition-timing-function: linear;
+    background-color: transparent;
+    border: 0;
+    margin: 0;
+    outline: 0;
+    height: 3rem;
+    width: 3rem;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: content-box;
+}
+
+
+    .navbar {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .cloud-icon {
+        width:1.5rem;
+        height:1.5rem;
+        fill: none;
+    stroke: grey;
+    stroke-width: .5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    }
+</style>
+
 <style lang="css">
 .selected {
   border: 5px solid white;
@@ -274,6 +372,10 @@ export default {
     background-size: contain;
     background-position: 0 0;
     background-repeat: no-repeat;
+    overflow-x: auto;
+    overflow-y: overlay;
+    max-height: 100vh;
+    height: 100vh;
 }
 .outline {
     color: black !important;
@@ -312,5 +414,14 @@ export default {
     display: inline-block;
     margin: 1rem;
     max-height: 100px;
+}
+
+
+.feather-fat {
+    fill: none;
+    stroke: grey;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 </style>

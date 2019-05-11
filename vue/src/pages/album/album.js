@@ -13,7 +13,6 @@ store.commit('setAlbum', data.Album);
 
 new Vue({
     store,
-
     render: h =>
         h(
             Album //, {props: {album: data.Album,},}
