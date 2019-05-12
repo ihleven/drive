@@ -1,32 +1,22 @@
 <script>
 export default {
-    name: 'Album',
+    name: 'Clou11',
     data() {
         return {
             menuOpen: false,
         };
-    },
-    computed: {
-        appStyles() {
-            return {
-                'overflow-y': this.menuOpen ? 'hidden' : 'overlay',
-                height: '100vh',
-            };
-        },
     },
     methods: {
         overlayNavigationToggler() {
             this.menuOpen = !this.menuOpen;
         },
     },
-    created() {
-        console.log('Album.vue =>', this.menu);
-    },
+    created() {},
 };
 </script>
 
 <template>
-    <div style="overflow:hidden">
+    <div class="application-wrapper">
         <nav class="navigation" :class="{ open: menuOpen }">
             <section class="hero is-dark is-fullheight">
                 <div class="hero-body">
@@ -44,13 +34,19 @@ export default {
                 <use xlink:href="/feather.svg#x"></use>
             </svg>
         </button>
+
         <div class="MainContainer">
-            <div class="ParallaxContainer">
-                <h1>Aloha!</h1>
-            </div>
+            <section class="hero is-medium parallax">
+                <div class="hero-body">
+                    <div class="container">
+                        <h1 class="title">Primary bold title</h1>
+                        <h2 class="subtitle">Primary bold subtitle</h2>
+                    </div>
+                </div>
+            </section>
 
             <div class="ContentContainer">
-                <section class="section has-background-primary">
+                <section class="section is-transparent" style="background:transparent;position:absolute;top:-200px">
                     <div class="container">
                         <h1 class="title">Section</h1>
                         <h2 class="subtitle">
@@ -58,7 +54,8 @@ export default {
                             <strong>sections</strong>, like the one you're currently reading
                         </h2>
                     </div>
-
+                </section>
+                <section class="section has-background-primary">
                     <div class="container">
                         <div class="content">
                             <p>
@@ -143,6 +140,21 @@ export default {
     </div>
 </template>
 
+<style lang="css">
+html,
+body,
+.application-wrapper {
+    max-height: 100vh;
+    height: 100vh;
+    overflow: hidden !important;
+}
+
+svg {
+    width: 100%;
+    height: 100%;
+}
+</style>
+
 <style lang="scss">
 .MainContainer {
     perspective: 1px;
@@ -155,13 +167,12 @@ export default {
     -webkit-overflow-scrolling: touch;
 }
 
-.ParallaxContainer {
+.parallax {
+    height: 66vh;
+    z-index: -1;
     position: relative;
-    height: 100vh;
-    max-height: 100vh !important;
     transform: translateZ(-1px) scale(2);
     transform-origin: 0 0;
-    z-index: -1;
 
     background: url(https://www.toptal.com/designers/subtlepatterns/patterns/sakura.png);
     background-color: rgb(250, 228, 216);
@@ -176,7 +187,6 @@ export default {
 .ContentContainer {
     display: block;
     position: relative;
-    background-color: white;
     z-index: 1;
     border: 1px solid red;
 }
@@ -187,13 +197,12 @@ export default {
     bottom: 0;
     left: 0;
     right: 0;
-    background: #fff;
     width: 100vw;
     height: 100vh;
-    text-align: left;
+    text-align: right;
     opacity: 0;
     pointer-events: none;
-    z-index: 1000;
+    z-index: 1;
     line-height: 1;
     transition: all 0.3s ease-in-out 0s;
 }

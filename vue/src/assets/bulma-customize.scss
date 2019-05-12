@@ -18,12 +18,11 @@ $pink: #FA7C91;
 $brown: #757763;
 $beige-light: #D0D1CD;
 $beige-lighter: #EFF0EB;
-$black: #000000;
-$color: #000000;
+//$black: #000000;
+//$color: #000000;
 
 // Update Bulma's global variables
-$family-sans-serif: "Nunito",
-sans-serif;
+//$family-sans-serif: "Nunito", sans-serif;
 $grey-dark: $brown;
 $grey-light: $beige-light;
 $primary: $purple;
@@ -66,7 +65,7 @@ $navbar-breakpoint: 60px;
     content: "loading…"
 }
 
-/* https://github.com/jgthms/bulma/issues/1708 */
+/* https://github.com/jgthms/bulma/issues/1708 Bulma conflicts with Prism.js syntax highlighting plugin*/
 .text .tag,
 .text .number {
     display: inline;
@@ -115,34 +114,8 @@ svg {
 }
 
 
-html,
-body {
-    max-height: 100vh;
-    height: 100vh;
-    overflow: hidden !important;
-}
 
 
-::-webkit-scrollbar {
-    width: 12px;
-    background: transparent;
-    /* Optional: just make scrollbar invisible */
-}
-
-::-webkit-scrollbar-track {
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
-}
-
-
-/* Optional: show position indicator in red */
-::-webkit-scrollbar-thumb {
-    background: #FF0000;
-}
 
 
 

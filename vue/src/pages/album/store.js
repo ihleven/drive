@@ -8,6 +8,14 @@ const debug = process.env.NODE_ENV !== 'production';
 const album = {
     state: {
         file: {},
+        title: '',
+        subtitle: '',
+        description: '',
+        keywords: null,
+        images: null,
+        image: null,
+        from: null,
+        until: null,
         diaryNames: [],
         diaries: {},
         sources: [],
@@ -16,6 +24,14 @@ const album = {
     mutations: {
         setAlbum(state, album) {
             state.file = album.file;
+            state.title = album.title;
+            state.subtitle = album.subtitle;
+            state.description = album.description;
+            state.keywords = album.keywords;
+            state.images = album.images;
+            state.image = album.image;
+            state.from = album.from;
+            state.until = album.until;
             state.sources = album.sources;
             state.pages = album.pages;
             console.log(state.pages);

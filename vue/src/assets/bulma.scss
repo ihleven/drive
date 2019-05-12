@@ -4,24 +4,4 @@ $navbar-breakpoint: 300px;
 
 
 
-html {
-    max-height: 100vh;
-    height: 100vh;
-    overflow: hidden !important;
-    scroll-behavior: smooth;
-}
-
-body {
-    max-height: 100vh;
-    height: 100vh;
-    overflow: hidden !important;
-}
-
-
-svg {
-    width: 100%;
-    height: 100%;
-}
-
-
 @import 'bulma/bulma.sass';

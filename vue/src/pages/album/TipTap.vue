@@ -28,10 +28,11 @@ export default {
     data() {
         return {
             editor: null,
+            metadata: null,
             isImageSelectVisible: false,
             imageCommand: null,
             //viewsource: false,
-            converter: new showdown.Converter(),
+            converter: new showdown.Converter({ metadata: true }),
         };
     },
     watch: {
@@ -40,6 +41,7 @@ export default {
             if (md !== this.markdown) {
                 //this.editor.setContent(val);
                 let html = this.converter.makeHtml(md);
+                this.metadata = this.converter.getMetadata();
                 //console.log('showdown', nv, ov);
                 this.editor.setContent(html, false);
                 //this.html = html;
@@ -64,7 +66,7 @@ export default {
                 new History(),
             ],
             onUpdate: ({ getHTML }) => {
-                this.markdown = this.converter.makeMarkdown(getHTML());
+                this.markdown = this.converter.makeMarkdown(getHTML(), this.metadata);
                 this.$emit('update:source', this.markdown);
             },
         });
@@ -96,6 +98,9 @@ export default {
 
 <template>
     <div class="container">
+        {{ metadata }}
+        <br />------- Meta
+        <br />
         <editor-menu-bar :editor="editor">
             <div slot-scope="{ commands, isActive }">
                 <div class="buttons has-addons is-centered">
