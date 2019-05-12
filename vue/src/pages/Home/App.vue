@@ -152,6 +152,7 @@ export default {
     max-height: 100vh;
     overflow-x: hidden;
     overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
 }
 
 .ParallaxContainer {

@@ -6,7 +6,7 @@
 # Another benefit is that we can pass this file to our Docker 
 # build context and have the version set in the binary that ends
 # up inside the Docker image too.
-VERSION         :=      $(shell cat ./VERSION)
+VERSION         :=      0.7
 IMAGE_NAME      :=      cirocosta/l7
 
 
@@ -28,7 +28,9 @@ all: install
 # always work - except if there's an OS limitation in the build flags 
 # (e.g, a linux-only project).
 install:
-	go install -v
+	GOOS=linux GOARCH=amd64 go build -o drive-unix
+	scp drive-unix ihle@web569.webfaction.com:~ihle/webapps/drive/
+	scp -r _static ihle@web569.webfaction.com:~ihle/webapps/drive/
 
 
 # Keeping `./main.go` with just a `cli` and `./lib/*.go` with actual 
@@ -47,7 +49,7 @@ test:
 # By using the `./...` notation, all the non-vendor packages are going
 # to be formatted (including test files).
 fmt:
-        go fmt ./... -v
+	go fmt ./... -v
 
 
 # This target is only useful if you plan to also create a Docker image at
