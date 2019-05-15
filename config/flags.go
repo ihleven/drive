@@ -4,23 +4,41 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/namsral/flag"
+	arg "github.com/alexflint/go-arg"
 )
 
-func ParseFlags() {
+// Args defines the application configuration
+type args struct {
+	Port           int    `arg:"env"`
+	Verbose        bool   `arg:"-v" help:"verbosity level"`
+	ConfigFilePath string `arg:"env:CLOUD11_CONFIG"`
+}
 
-	//if _, err := toml.Decode(tomlData, &conf); err != nil {
-	// handle error
-	//}
+// Version return the application name and version
+func (a args) Version() string {
+	return "cloud11-v0.0.1"
+}
 
-	//cwd, _ := os.Getwd()
+// Description explains the function of the application
+func (a args) Description() string {
+	return "\nthis program does this and that\n"
+}
 
-	flag.StringVar(&Address.host, "host", "localhost", "Host")
-	flag.IntVar(&Address.port, "port", 3000, "Port")
-	flag.StringVar(&Root, "root", getCwd(), "Root folder")
-	flag.BoolVar(&verbose, "verbose", false, "help message")
-	flag.Parse()
-	fmt.Println(Root)
+// Args holds the current application configuration defined in Args
+var Args args
+
+// ParseArgs parses the application configuration into Config by reading command line args and environment variables
+func ParseArgs() settings {
+
+	Args.ConfigFilePath = "cloud11.toml"
+	arg.MustParse(&Args)
+
+	readConfigFile(Args.ConfigFilePath)
+
+	if Args.Port != 0 {
+		Settings.Address.port = Args.Port
+	}
+	return Settings
 }
 
 func getCwd() string {

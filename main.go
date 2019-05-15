@@ -10,12 +10,17 @@ import (
 )
 
 func main() {
-	config.ParseFlags()
-	storage.Register("home", "/Users/mi/tmp", "/home", storage.GetGroupByID(20))
+	settings := config.ParseArgs()
 
 	//storage.SetDefaultStorage(config.Root)
 
-	webserver := web.NewServer(config.Address.String())
+	webserver := web.NewServer(config.Settings.Address.String())
+	for name, stor := range settings.Storages {
+		st := storage.Register(name, stor.Root, stor.Path, storage.GetGroupByID(stor.Group))
+		webserver.RegisterHandlerFunc("/serve"+stor.Path+"/", drivehandler.Serve(st))
+		webserver.RegisterHandlerFunc(stor.Path+"/", drivehandler.DispatchStorage(st))
+
+	}
 	drivehandler.RegisterHandlers(webserver.RegisterHandlerFunc)
 	webserver.Run()
 }

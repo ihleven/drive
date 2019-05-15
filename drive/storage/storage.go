@@ -13,16 +13,18 @@ import (
 )
 
 var storages = map[string]domain.Storage{
-	//"home":   &FileSystemStorage{Root: "/Users/mi/tmp", Prefix: "/home", Group: usecase.GetGroupByID(20)},
-	"public": &FileSystemStorage{Root: "/Users/mi/Downloads", Prefix: "/public", PermissionMode: 0444},
+	//"home": &FileSystemStorage{Root: "/Users/mi/tmp", Prefix: "/home", Group: usecase.GetGroupByID(20)},
+	//"public": &FileSystemStorage{Root: "/Users/mi/Downloads", Prefix: "/public", PermissionMode: 0444},
 }
 
-func Register(name, root, prefix string, group *domain.Group) {
+func Register(name, root, prefix string, group *domain.Group) domain.Storage {
+
 	storages[name] = &FileSystemStorage{
 		Root:   root,
 		Prefix: prefix,
 		Group:  group,
 	}
+	return storages[name]
 }
 
 func Get(name string) domain.Storage {
@@ -45,10 +47,16 @@ func (st *FileSystemStorage) TrimPath(path string) string {
 }
 
 func (st *FileSystemStorage) Location(path string) string {
+
 	trimmedPath := strings.TrimPrefix(path, st.Prefix)
 	//if trimmedPath == "" {
 	//	trimmedPath = "/"
 	//}
+	if trimmedPath != path {
+		fmt.Printf("trimmed (%s): %s => %s, location: %s \n", st.Prefix, path, trimmedPath, filepath.Join(st.Root, trimmedPath))
+	} else {
+		fmt.Printf("not trimmed: %s => %s\n", path, filepath.Join(st.Root, trimmedPath))
+	}
 	return filepath.Join(st.Root, trimmedPath)
 }
 
