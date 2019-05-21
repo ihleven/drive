@@ -17,10 +17,11 @@ enabled = true
   [storages.home]
   root = "/Users/mi/tmp"
   path = "/home"
+  albumPath = "/alben"
   group = 20
 
   [storages.public]
   root = "/Users/mi/Downloads"
-  path = "/public/"
+  path = "/public"
 
 

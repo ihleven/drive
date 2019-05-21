@@ -10,14 +10,14 @@ import (
 	"path"
 )
 
-func RegisterHandlers(register func(string, func(http.ResponseWriter, *http.Request))) {
+//func RegisterHandlers(register func(string, func(http.ResponseWriter, *http.Request))) {
 
-	//register("/serve/home/", Serve(storage.Get("home")))
-	//register("/serve/", Serve(storage.Get("public")))
-	//register("/public/", DispatchStorage(storage.Get("public")))
-	//register("/home/", DispatchStorage(storage.Get("home")))
-	register("/alben/", AlbumHandler)
-}
+//register("/serve/home/", Serve(storage.Get("home")))
+//register("/serve/", Serve(storage.Get("public")))
+//register("/public/", DispatchStorage(storage.Get("public")))
+//register("/home/", DispatchStorage(storage.Get("home")))
+
+//}
 
 func DispatchStorage(storage drive.Storage) func(w http.ResponseWriter, r *http.Request) {
 

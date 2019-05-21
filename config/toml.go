@@ -28,9 +28,10 @@ type database struct {
 }
 
 type storage struct {
-	Root  string
-	Path  string
-	Group uint32
+	Root      string
+	Path      string
+	AlbumPath string
+	Group     uint32
 }
 
 type clients struct {

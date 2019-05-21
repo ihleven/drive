@@ -1,11 +1,4 @@
-# I usually keep a `VERSION` file in the root so that anyone
-# can clearly check what's the VERSION of `master` or any
-# branch at any time by checking the `VERSION` in that git
-# revision.
-#
-# Another benefit is that we can pass this file to our Docker 
-# build context and have the version set in the binary that ends
-# up inside the Docker image too.
+
 VERSION         :=      0.7
 IMAGE_NAME      :=      cirocosta/l7
 
@@ -14,10 +7,7 @@ IMAGE_NAME      :=      cirocosta/l7
 # of the first target found I really prefer to make sure that this
 # first one is a non-destructive one that does the most simple 
 # desired installation. 
-#
-# It's very common to people set it as `all` but it could be anything 
-# like `a`.
-all: install
+default: install
 
 
 # Install just performs a normal `go install` which builds the source
@@ -27,7 +17,7 @@ all: install
 # As I always commit `vendor` to `git`, a `go install` will typically 
 # always work - except if there's an OS limitation in the build flags 
 # (e.g, a linux-only project).
-install:
+deploy:
 	GOOS=linux GOARCH=amd64 go build -o drive-unix
 	scp drive-unix ihle@web569.webfaction.com:~ihle/webapps/drive/
 	scp -r _static ihle@web569.webfaction.com:~ihle/webapps/drive/
@@ -51,16 +41,6 @@ test:
 fmt:
 	go fmt ./... -v
 
-
-# This target is only useful if you plan to also create a Docker image at
-# the end. 
-#
-# I really like publishing a Docker image together with the GitHub release
-# because Docker makes it very simple to someone run your binary without
-# having to worry about the retrieval of the binary and execution of it
-# - docker already provides the necessary boundaries.
-image:
-	docker build -t cirocosta/l7 .
 
 
 # This is pretty much an optional thing that I tend always to include.

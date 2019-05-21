@@ -22,11 +22,16 @@ export default {
             return 1 + (this.translateZ * -1) / this.perspective;
         },
         styles() {
-            return {
-                height: this.ratio + 'vw',
-                'background-image': 'url(' + this.image + ')',
+            let styles = {
                 transform: 'translateZ(' + this.translateZ + 'px) scale(' + this.scale + ')',
             };
+            if (this.image) {
+                styles['background-image'] = 'url(' + this.image + ')';
+            }
+            if (this.ratio) {
+                styles.height = this.ratio + 'vw';
+            }
+            return styles;
         },
         mainStyles() {
             return {
@@ -47,20 +52,13 @@ export default {
     </div>
 
     <div class="ContentContainer">
+      <slot name="attached"></slot>
+
       <slot></slot>
     </div>
   </div>
 </template>
 
-<style lang="css">
-html,
-body,
-.application-wrapper {
-    max-height: 100vh;
-    height: 100vh;
-    overflow: hidden !important;
-}
-</style>
 
 <style lang="css" scoped>
 .MainContainer {
@@ -95,5 +93,11 @@ body,
     display: block;
     position: relative;
     z-index: 1;
+}
+
+.attached {
+    position: absolute;
+    transform: translateY(-100%);
+    width: 100%;
 }
 </style>

@@ -14,6 +14,7 @@ import (
 Dir
 **************
 */
+
 type DirActionResponder struct {
 	ActionResponder
 	File *drive.File
@@ -31,9 +32,9 @@ func (a *DirActionResponder) GetAction(r *http.Request, w http.ResponseWriter) e
 	}
 
 	a.Respond(w, r, map[string]interface{}{
-		"File":   a.File,
-		"User":   a.User,
-		"Folder": folder,
+		"Folder":      folder,
+		"Account":     a.User,
+		"Breadcrumbs": a.File.Breadcrumbs(),
 	})
 
 	return nil

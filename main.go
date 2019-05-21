@@ -1,6 +1,7 @@
 package main
 
 import (
+	"drive/arbeit"
 	"drive/config"
 	"drive/drive/storage"
 	drivehandler "drive/drive/views"
@@ -21,7 +22,9 @@ func main() {
 		webserver.RegisterHandlerFunc(stor.Path+"/", drivehandler.DispatchStorage(st))
 
 	}
-	drivehandler.RegisterHandlers(webserver.RegisterHandlerFunc)
+	webserver.RegisterHandlerFunc("/alben/", drivehandler.AlbumHandler(storage.Get("home")))
+	//drivehandler.RegisterHandlers(webserver.RegisterHandlerFunc)
+	arbeit.RegisterHandlers(webserver.RegisterHandlerFunc)
 	webserver.Run()
 }
 

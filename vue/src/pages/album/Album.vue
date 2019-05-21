@@ -5,8 +5,11 @@ import Cloud11Figure from '@/components/Cloud11Figure.vue';
 import TipTap from './TipTap.vue';
 import { mapState, mapActions } from 'vuex'
 import AlbumImage from './AlbumImage.vue';
-import Parallax from './Parallax.vue';
-import NavigationOverlay from './NavigationOverlay.vue';
+import Parallax from '@/components/Parallax.vue';
+import NavigationOverlay from '@/components/NavigationOverlay.vue';
+import NavbarTop from '@/components/NavbarTop.vue';
+import Cloud11Page from '@/components/Cloud11Page.vue';
+
 
 export default {
     name: "Album",
@@ -16,7 +19,7 @@ export default {
         Cloud11Figure,
         TipTap,
         AlbumImage,
-        Parallax, NavigationOverlay
+        Parallax, NavigationOverlay, NavbarTop, Cloud11Page
     },
     provide: {
         prefix:"/serve/home",
@@ -25,17 +28,16 @@ export default {
     
     data() {
         return {
+            account: {},
             isModalVisible: false,
             selectedSource: null,
             markdown: null,
-            menuOpen:false,
         };
     },
     computed: {
 
         appStyles() {
-            return {
-            }
+            return {}
         },
         ...mapState({
             album: state => state.album,
@@ -77,9 +79,6 @@ export default {
             .then(res=>res.json())
             .then(res => console.log(res));
 
-      },
-      overlayNavigationToggler() {
-        this.menuOpen = !this.menuOpen;
       }
     },
     created() {
@@ -91,61 +90,38 @@ export default {
 
 <template>
     
-    <div class="application-wrapper">
-
-        <navigation-overlay :open.sync="menuOpen">
-            <h3 class="title is-spaced"><a href="/alben">Fotoalben</a></h3>
-            <h4 class="subtitle"><a href="/alben/Mallorca">Mallorca</a></h4>
-            <a class="subtitle" href="/alben/hochzeitsreise">Hochzeitsreise</a>
-            <h2 class="subtitle">Fullheight subtitle</h2>
-        </navigation-overlay>
-                
-        <Parallax :image="'/serve/home/Mallorca/Roger/DSC03702.JPG'" :ratio="75" 
+    <cloud11-page :account="account">
+    
+        <Parallax :image="'/serve/home/14/' + album.image" :ratio="66" 
                   :perspective="1" :translate-z="-1">
 
-            <template #header>
-                <nav class="navbar is-transparent top" role="navigation" aria-label="main navigation">            
-                        
-                        <a class="navbar-item" href="/">
-                            <!--<span class="login">matthias@</span>-->
-                            <span class="domain">ihle.</span>
-                            <svg class="cloud-icon">
-                                <use xlink:href="/feather.svg#cloud"></use>
-                            </svg>
-                        </a>
-                        
-                    
-                    <a class="navbar-item hamburger" @click="overlayNavigationToggler">
-                        <svg class="">
-                            <use xlink:href="/feather.svg#menu"></use>
-                        </svg>
-                    </a>
+           
 
-                </nav>
+            <template #attached>
+
+                <section class="hero attached" >
+                    <div class="hero-body">
+                        <div class="container">
+                            <h1 class="title outline4">{{ album.title }} kjh</h1>
+                            <h2 class="subtitle outline">{{ album.subtitle }}</h2>
+                        </div>
+                    </div>
+                    <div class="hero-foot">
+                        <nav class="navbar">
+                            <a class="navbar-item" v-for="source in album.sources" :key="source.name" 
+                                                            :class="{'is-active': selectedSource==source.name}" 
+                                                            @click="selectSource(source)" >>
+                                {{source.name}}
+                            </a>
+
+                            <a class="navbar-item">
+                                ljhgjkhg
+                            </a>
+                        </nav>
+                    </div>
+                </section>
             </template>
 
-
-            <section class="hero album-meta" >
-                <div class="hero-body">
-                    <div class="container">
-                        <h1 class="title outline4">{{ album.title }}</h1>
-                        <h2 class="subtitle outline">{{ album.subtitle }}</h2>
-                    </div>
-                </div>
-                <div class="hero-foot">
-                    <nav class="tabs is-right is-boxed is-dark">
-                        <div class="container">
-                            <ul>
-                                <li v-for="source in album.sources" :key="source.name" 
-                                    :class="{'is-active': selectedSource==source.name}" 
-                                    @click="selectSource(source)" >
-                                    <a>{{source.name}}</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </nav>
-                </div>
-            </section>
 
             <section class="section has-background-white">
                 <div class="container">
@@ -278,70 +254,14 @@ export default {
         </Parallax>
 
         
-
-    </div>
+</cloud11-page>
+   
 </template>
 
 
-<style lang="scss" scoped>
-
-
- 
-    .navbar.top {
-        max-width: 100%;
-        margin: 0 auto;
-        background-color: transparent;
-        justify-content: space-between;
-    }
-    .navbar.top .login {
-        color: white;
-        font-size: 1rem;
-        font-weight: 200;
-    }
-    .navbar.top .domain {
-        color: white;
-        font-size: 1.25rem;
-        font-weight: 400;
-    }
-    .navbar.top .cloud-icon {
-        width:1.5rem;
-        height:1.5rem;
-        fill: none;
-        stroke: white;
-        stroke-width: 2;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-    }
-    .navbar.top .hamburger:hover {
-        background-color: rgba(255, 255, 255, 0.26)!important;;
-        padding: 0.25rem 0.5rem;
-        transition: all .2s ease-in-out 0s;
-    }
-    .navbar.top .hamburger svg {
-        stroke: white;
-        stroke-width: 2;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        width:2rem;
-        height:2rem;
-        fill: none;
-    }
-    .navbar.top .hamburger:hover svg {
-        stroke-width: 2.5;
-        width:2.5rem;
-        height:2.5rem;
-        transition: all .2s ease-in-out 0s;
-    }
-    
-</style>
 
 <style lang="css">
 
-.album-meta {
-    position:absolute;
-    transform:translateY(-100%);
-    width: 100%;
-}
 
 .outline {
     color: black !important;

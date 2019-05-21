@@ -35,10 +35,12 @@ const album = {
             state.sources = album.sources;
             state.pages = album.pages;
             console.log(state.pages);
-            album.diaries.forEach(diary => {
-                state.diaries[diary.name] = diary;
-                state.diaryNames.push(diary.name);
-            });
+            if (album.diaries) {
+                album.diaries.forEach(diary => {
+                    state.diaries[diary.name] = diary;
+                    state.diaryNames.push(diary.name);
+                });
+            }
         },
         diaryImage(state, payload) {
             let diary = state.diaries[payload.diaryName];

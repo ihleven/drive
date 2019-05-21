@@ -2,7 +2,6 @@ package drivehandler
 
 import (
 	"drive/drive"
-	"drive/drive/storage"
 	"drive/errors"
 	"drive/session"
 	"drive/templates"
@@ -21,24 +20,29 @@ func AlbumListHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func AlbumHandler(w http.ResponseWriter, r *http.Request) {
+func AlbumHandler(storage drive.Storage) func(w http.ResponseWriter, r *http.Request) {
 
-	sessionUser, _ := session.GetSessionUser(r, w)
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	path, _ := filepath.Rel("/alben", path.Clean(r.URL.Path))
+		//func AlbumHandler(w http.ResponseWriter, r *http.Request) {
 
-	if path == "." {
-		AlbumListHandler(w, r)
-		return
-	}
-	album, err := drive.GetAlbum(storage.Get("home"), filepath.Join("/home", path), sessionUser)
-	if err != nil {
-		errors.Error(w, r, err)
-		return
-	}
+		sessionUser, _ := session.GetSessionUser(r, w)
 
-	err = templates.Render(w, http.StatusOK, "album", map[string]interface{}{"Album": album})
-	if err != nil {
-		errors.Error(w, r, err)
+		path, _ := filepath.Rel("/alben", path.Clean(r.URL.Path))
+
+		if path == "." {
+			AlbumListHandler(w, r)
+			return
+		}
+		album, err := drive.GetAlbum(storage, path, sessionUser)
+		if err != nil {
+			errors.Error(w, r, err)
+			return
+		}
+
+		err = templates.Render(w, http.StatusOK, "album", map[string]interface{}{"Album": album})
+		if err != nil {
+			errors.Error(w, r, err)
+		}
 	}
 }
