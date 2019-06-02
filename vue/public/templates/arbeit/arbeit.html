@@ -1,0 +1,64 @@
+{{ define "arbeit" }}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>arbeit</title>
+
+
+
+    <style>
+        .r {
+            text-align: right !important;
+        }
+
+        .c {
+            text-align: center !important;
+        }
+
+        .l {
+            text-align: left !important;
+        }
+
+        small {
+            font-size: 0.875em;
+            color: #A6ACAF
+        }
+
+        .U {
+            background-color: #AED6F1;
+        }
+
+        .W {
+            background-color: #F2F2F2;
+        }
+
+        .F {
+            background-color: #F2D7D5;
+        }
+
+        .holiday {
+            color: #C70039;
+        }
+
+        .K {
+            background-color: #F7DC6F;
+        }
+
+        .line {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+
+<body>
+    {{  marshalJSON "data" . }}
+
+    <div id="app"></div>
+</body>
+{{end}}

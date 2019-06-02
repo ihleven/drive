@@ -2,7 +2,7 @@
 export default {
     name: 'NavbarTop',
     props: {
-        account: Object,
+        account: { type: Object, default: () => new Object() },
     },
     methods: {
         close() {

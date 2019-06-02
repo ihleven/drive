@@ -2,10 +2,12 @@ package main
 
 import (
 	"drive/arbeit"
+	"drive/arbeit/pg_arbeit"
 	"drive/config"
 	"drive/drive/storage"
 	drivehandler "drive/drive/views"
 	"drive/web"
+	"fmt"
 	"path"
 	"strings"
 )
@@ -13,18 +15,25 @@ import (
 func main() {
 	settings := config.ParseArgs()
 
+	repo, err := pg_arbeit.GetDatabaseHandle()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	defer repo.Close()
+	arbeit.Repo = repo
+
 	//storage.SetDefaultStorage(config.Root)
 
 	webserver := web.NewServer(config.Settings.Address.String())
 	for name, stor := range settings.Storages {
-		st := storage.Register(name, stor.Root, stor.Path, storage.GetGroupByID(stor.Group))
-		webserver.RegisterHandlerFunc("/serve"+stor.Path+"/", drivehandler.Serve(st))
-		webserver.RegisterHandlerFunc(stor.Path+"/", drivehandler.DispatchStorage(st))
+		st := storage.Register(name, stor.Root, stor.BaseURL, stor.ServeURL, storage.GetGroupByID(stor.Group), stor.Mode)
+		webserver.RegisterHandlerFunc(stor.ServeURL+"/", drivehandler.Serve(st))
+		webserver.RegisterHandlerFunc(stor.BaseURL+"/", drivehandler.DispatchStorage(st))
 
 	}
-	webserver.RegisterHandlerFunc("/alben/", drivehandler.AlbumHandler(storage.Get("home")))
+	webserver.RegisterHandlerFunc("/alben/", drivehandler.AlbumHandler(storage.Get("home"), "/alben"))
 	//drivehandler.RegisterHandlers(webserver.RegisterHandlerFunc)
-	arbeit.RegisterHandlers(webserver.RegisterHandlerFunc)
+	arbeit.RegisterSubRouter(webserver.RegisterHandlerFunc)
 	webserver.Run()
 }
 
@@ -44,28 +53,12 @@ func ShiftPath(p string) (head, tail string) {
 package import
 const var chan select
 type struct interface map
-
-
 defer
-
-
 if else
 switch case default fallthrough
 for range break continue
 goto
-
 func return go
-
-
-
-
-
-
-
-
-
-
-
 
 
 constants:

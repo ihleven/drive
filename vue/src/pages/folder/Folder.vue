@@ -4,6 +4,7 @@ import Parallax from '@/components/Parallax.vue';
 import NavigationOverlay from '@/components/NavigationOverlay.vue';
 import NavbarTop from '@/components/NavbarTop.vue';
 import FeatherIcon from '@/components/FeatherIcon.vue';
+import { mapState } from 'vuex';
 
 export default {
     name: 'Folder',
@@ -14,20 +15,15 @@ export default {
         NavbarTop,
         FeatherIcon,
     },
-    props: {
-        // kann als Root-Element keine Props mehr haben
-        //folder: Object,
-    },
     data() {
-        const data = JSON.parse(document.getElementById('data').innerHTML);
         return {
-            folder: data.Folder,
-            account: data.Account,
-            breadcrumbs: data.Breadcrumbs,
             blah: false,
             isModalVisible: false,
             menuOpen: false,
         };
+    },
+    computed: {
+        ...mapState(['folder', 'account', 'breadcrumbs']),
     },
     methods: {
         deleteFile(file) {
@@ -58,7 +54,7 @@ export default {
 
 <template>
   <div class="application-wrapper">
-    <upload-modal :visible.sync="isModalVisible" :url="folder.path"/>
+    <upload-modal :visible.sync="isModalVisible" :url="folder ? folder.path : ''"/>
 
     <navigation-overlay :open.sync="menuOpen">
       <h3 class="title is-spaced">
@@ -71,7 +67,7 @@ export default {
       <h2 class="subtitle">Fullheight subtitle</h2>
     </navigation-overlay>
 
-    <navbar-top account="account" @click:hamburger="overlayNavigationToggler()"/>
+    <navbar-top :account="account" @click:hamburger="overlayNavigationToggler()"/>
 
     <Parallax>
       <template #header>
@@ -151,7 +147,7 @@ export default {
           <tbody>
             <tr v-for="f in folder.entries" :key="f.name">
               <td>
-                <feather-icon :name="f.mime.Type == 'dir' ? 'folder' : 'file'" :size="small"/>
+                <feather-icon :name="f.mime.Type == 'dir' ? 'folder' : 'file'" :size="'small'"/>
               </td>
               <td>
                 <a :href="f.path" :title="f.path">{{ f.name }}</a>
@@ -210,7 +206,15 @@ export default {
   </div>
 </template>
 
-<style lang="scss"></style>
+<style lang="css">
+html,
+body,
+.application-wrapper {
+    max-height: 100vh;
+    height: 100vh;
+    overflow: hidden !important;
+}
+</style>
 <style lang="scss" scoped>
 .scrollwrapper {
     width: 100vw;

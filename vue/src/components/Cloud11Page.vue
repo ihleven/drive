@@ -43,4 +43,3 @@ body,
     overflow: hidden !important;
 }
 </style>
-            menuOpen:false,

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"syscall"
 	"unicode/utf8"
 )
@@ -15,7 +16,7 @@ import (
 type FileHandle struct {
 	os.FileInfo
 	storage drive.Storage
-	path    string // ???
+	path    string // Pfad relativ zur Storage-Wurzel
 	mode    os.FileMode
 }
 
@@ -42,7 +43,7 @@ func (fh *FileHandle) ToFile(account *domain.Account) (*drive.File, error) {
 
 	file := &drive.File{
 		Handle:      fh,
-		Path:        fh.path,
+		Path:        fh.URL(),
 		Name:        fh.Name(),
 		Size:        fh.Size(),
 		Mode:        fh.mode,
@@ -54,8 +55,20 @@ func (fh *FileHandle) ToFile(account *domain.Account) (*drive.File, error) {
 		Accessed:    statAtime(stat),
 		MIME:        fh.GuessMIME(),
 	}
-
 	return file, nil
+}
+
+func (fh *FileHandle) AsFile() *drive.File {
+
+	return &drive.File{
+		Handle:   fh,
+		Name:     fh.Name(),
+		Path:     fh.path,
+		Size:     fh.Size(),
+		Mode:     fh.mode,
+		Modified: fh.ModTime(),
+		//MIME:        fh.GuessMIME(),
+	}
 }
 
 func (fh *FileHandle) Storage() drive.Storage {
@@ -69,6 +82,12 @@ func (fh *FileHandle) Location() string {
 }
 
 func (fh *FileHandle) URL() string {
+	return path.Join(fh.Storage().URL(fh.path))
+}
+func (fh *FileHandle) ServeURL() string {
+	return path.Join(fh.Storage().GetServeURL(fh.path))
+}
+func (fh *FileHandle) StoragePath() string {
 	return fh.path
 }
 

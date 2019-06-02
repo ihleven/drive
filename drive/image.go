@@ -45,7 +45,7 @@ type Image2 struct {
 	Height     int         `json:"h"`
 	Ratio      float64     `json:"_"`
 	Format     string      `json:"_"`
-	Title      string      `json:"title"`
+	Title      string      `json:"title,omitempty"`
 	Caption    string      `json:"_"` // a “caption” is more like a title, while the “cutline” first describes what is happening in the picture, and then explains the significance of the event depicted.
 	Cutline    string      `json:"_"` // the “cutline” is text below a picture, explaining what the reader is looking at
 
@@ -55,8 +55,9 @@ type Image2 struct {
 	// Caption als allgemeingültige "standalone" Bildunterschrift und Cutline als Verbindung zum Album (ausgewählte Bilder in Reihe?)
 	Exif     *Exif  `json:"_"`
 	MetaFile *File  `json:"_"`
-	URL      string `json:"URL"`
+	Src      string `json:"src"`
 	Name     string `json:"name"`
+	Source   string `json:"source"`
 }
 type Exif struct {
 	Orientation int
@@ -83,8 +84,32 @@ func NewImageFromHandle(handle Handle) (*Image2, error) {
 		Height:     config.Height,
 		Ratio:      float64(config.Height) / float64(config.Width) * 100,
 		Format:     format,
-		URL:        handle.URL(),
+		Src:        handle.StoragePath(),
 		Name:       handle.Name(),
+	}
+	return i, nil
+}
+
+func NewImageFromHandle2(handle Handle, prefix string) (*Image2, error) {
+
+	fd := handle.Descriptor(0)
+	defer fd.Close()
+
+	config, format, err := image.DecodeConfig(fd)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error decoding image")
+	}
+
+	i := &Image2{
+		Handle:     handle,
+		ColorModel: config.ColorModel,
+		Width:      config.Width,
+		Height:     config.Height,
+		Ratio:      float64(config.Height) / float64(config.Width) * 100,
+		Format:     format,
+		Src:        handle.ServeURL(),
+		Name:       handle.Name(),
+		Source:     prefix,
 	}
 	return i, nil
 }
@@ -277,7 +302,7 @@ func MakeThumbs(handle Handle) error {
 			return errors.Wrap(err, "Could not create thumbs folder for format %v", format)
 		}
 	}
-	handles, err := handle.Storage().ReadDir(handle.URL())
+	handles, err := handle.Storage().ReadDir(handle.StoragePath())
 	if err != nil {
 		return errors.Wrap(err, "Could not read thumbs folder")
 	}

@@ -3,7 +3,7 @@ import Icon from '@/components/Icon';
 import { Editor, EditorContent, EditorMenuBubble, EditorMenuBar } from 'tiptap';
 import { HardBreak, Heading, Bold, Code, Italic, Link, Strike, Underline, History } from 'tiptap-extensions';
 import Image from './ImageNode';
-console.log(Image);
+
 import showdown from 'showdown';
 import ImageSelectModal from './imageSelectModal.vue';
 
@@ -97,60 +97,66 @@ export default {
 </script>
 
 <template>
-    <div class="container">
-        {{ metadata }}
-        <br />------- Meta
-        <br />
-        <editor-menu-bar :editor="editor">
-            <div slot-scope="{ commands, isActive }">
-                <div class="buttons has-addons is-centered">
-                    <span class="button is-outlined" :class="{ 'is-selected': isActive.bold() }" @click="commands.bold"
-                        >Bold</span
-                    >
-                    <span
-                        class="button is-outlined"
-                        :class="{ 'is-selected': isActive.italic() }"
-                        @click="commands.italic"
-                        >I</span
-                    >
-                    <span
-                        class="button is-outlined"
-                        :class="{ 'is-active': isActive.heading({ level: 2 }) }"
-                        @click="commands.heading({ level: 2 })"
-                        >H2</span
-                    >
-                    <button class="button is-outlined" @click="showImagePrompt(commands.image)">Image</button>
+  <div class="container">
+    {{ metadata }}
+    <br>------- Meta
+    <br>
+    <editor-menu-bar :editor="editor">
+      <div slot-scope="{ commands, isActive }">
+        <div class="buttons has-addons is-centered">
+          <span
+            class="button is-outlined"
+            :class="{ 'is-selected': isActive.bold() }"
+            @click="commands.bold"
+          >Bold</span>
+          <span
+            class="button is-outlined"
+            :class="{ 'is-selected': isActive.italic() }"
+            @click="commands.italic"
+          >I</span>
+          <span
+            class="button is-outlined"
+            :class="{ 'is-active': isActive.heading({ level: 2 }) }"
+            @click="commands.heading({ level: 2 })"
+          >H2</span>
+          <button class="button is-outlined" @click="showImagePrompt(commands.image)">Image</button>
 
-                    <button class="button is-outlined" @click="commands.undo">Undo</button>
+          <button class="button is-outlined" @click="commands.undo">Undo</button>
 
-                    <button class="button is-outlined" @click="commands.redo">Redo</button>
-                </div>
-            </div>
-        </editor-menu-bar>
-        <editor-menu-bubble :editor="editor">
-            <div
-                slot-scope="{ commands, isActive, menu }"
-                class="menububble"
-                :class="{ 'is-active': menu.isActive }"
-                :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`"
-            >
-                <button class="menububble__button" :class="{ 'is-active': isActive.bold() }" @click="commands.bold">
-                    B
-                </button>
+          <button class="button is-outlined" @click="commands.redo">Redo</button>
+        </div>
+      </div>
+    </editor-menu-bar>
+    <editor-menu-bubble :editor="editor">
+      <div
+        slot-scope="{ commands, isActive, menu }"
+        class="menububble"
+        :class="{ 'is-active': menu.isActive }"
+        :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`"
+      >
+        <button
+          class="menububble__button"
+          :class="{ 'is-active': isActive.bold() }"
+          @click="commands.bold"
+        >B</button>
 
-                <button class="menububble__button" :class="{ 'is-active': isActive.italic() }" @click="commands.italic">
-                    I
-                </button>
+        <button
+          class="menububble__button"
+          :class="{ 'is-active': isActive.italic() }"
+          @click="commands.italic"
+        >I</button>
 
-                <button class="menububble__button" :class="{ 'is-active': isActive.code() }" @click="commands.code">
-                    C
-                </button>
-            </div>
-        </editor-menu-bubble>
-        <editor-content class="content" :editor="editor" />
+        <button
+          class="menububble__button"
+          :class="{ 'is-active': isActive.code() }"
+          @click="commands.code"
+        >C</button>
+      </div>
+    </editor-menu-bubble>
+    <editor-content class="content" :editor="editor"/>
 
-        <image-select-modal :visible.sync="isImageSelectVisible" @selected="imagesSelected" />
-    </div>
+    <image-select-modal :visible.sync="isImageSelectVisible" @selected="imagesSelected"/>
+  </div>
 </template>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

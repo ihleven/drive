@@ -16,12 +16,20 @@ enabled = true
   # You can indent as you please. Tabs or spaces. TOML don't care.
   [storages.home]
   root = "/Users/mi/tmp"
-  path = "/home"
+  baseUrl = "/home"
+  serveUrl = "/serve/home"
   albumPath = "/alben"
   group = 20
+  
 
   [storages.public]
   root = "/Users/mi/Downloads"
-  path = "/public"
+  baseUrl = "/public"
+  serveUrl = "/serve"
+  albumPath = "/publicalben"
+  mode = 360
+  
 
+[accounts]
 
+    [accounts.matthias]

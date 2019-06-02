@@ -5,60 +5,41 @@ Vue.use(Vuex);
 
 const debug = process.env.NODE_ENV !== 'production';
 
-const album = {
-    state: {
-        file: {},
-        title: '',
-        subtitle: '',
-        description: '',
-        keywords: null,
-        images: null,
-        image: null,
-        from: null,
-        until: null,
-        diaryNames: [],
-        diaries: {},
-        sources: [],
-        pages: [],
-    },
-    mutations: {
-        setAlbum(state, album) {
-            state.file = album.file;
-            state.title = album.title;
-            state.subtitle = album.subtitle;
-            state.description = album.description;
-            state.keywords = album.keywords;
-            state.images = album.images;
-            state.image = album.image;
-            state.from = album.from;
-            state.until = album.until;
-            state.sources = album.sources;
-            state.pages = album.pages;
-            console.log(state.pages);
-            if (album.diaries) {
-                album.diaries.forEach(diary => {
-                    state.diaries[diary.name] = diary;
-                    state.diaryNames.push(diary.name);
-                });
-            }
-        },
-        diaryImage(state, payload) {
-            let diary = state.diaries[payload.diaryName];
-            if (payload.mode === 'remove') {
-                const index = diary.images.findIndex(img => img.name === payload.image.name);
-                console.log(index, payload.image.name);
-                diary.images.splice(index, 1);
-            } else {
-                diary.images.push(payload.image);
-            }
-        },
-    },
-};
+
+// diaryImage(state, payload) {
+//     let diary = state.diaries[payload.diaryName];
+//     if (payload.mode === 'remove') {
+//         const index = diary.images.findIndex(img => img.name === payload.image.name);
+//         console.log(index, payload.image.name);
+//         diary.images.splice(index, 1);
+//     } else {
+//         diary.images.push(payload.image);
+//     }
+// },
 
 export default new Vuex.Store({
-    modules: {
-        album: album,
+    state: {
+        baseURL: null,
+        serveURL: null,
+        image: {},
+        images: [],
+        meta: {},
+        sources: []
     },
+    mutations: {
 
+        setAlbum(state, album) {
+            state.images = album.images;
+            if (album.images && album.images.length) {
+                let index = Math.random() * album.images.length;
+                state.image = album.images[Math.floor(index)];
+            }
+            state.baseURL = album.baseURL;
+            state.serveURL = album.serveURL;
+            state.meta.title = album.title;
+            state.meta.subtitle = album.subtitle;
+            state.sources = Object.values(album.sources);
+        },
+    },
     strict: debug,
 });

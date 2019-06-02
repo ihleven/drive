@@ -23,8 +23,21 @@ func DispatchStorage(storage drive.Storage) func(w http.ResponseWriter, r *http.
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		//handle, err := storage.GetHandle(path.Clean(r.URL.Path))
+		//if err != nil {
+		//	errors.Error(w, r, errors.Wrap(err, "Could not get file handle"))
+		//}
+
+		//fmt.Println("DispachStorage", handle)
+
 		sessionUser, _ := session.GetSessionUser(r, w)
 
+		//rre := FileActionResponder2{Handle: handle, User: sessionUser}
+		//err = rre.GetAction(r, w)
+		//if err != nil {
+		//	errors.Error(w, r, err)
+		//}
+		//return
 		file, err := drive.GetFile(storage, path.Clean(r.URL.Path), sessionUser)
 		if err != nil {
 			errors.Error(w, r, err)
@@ -98,4 +111,8 @@ func Serve(storage drive.Storage) func(w http.ResponseWriter, r *http.Request) {
 
 		http.ServeContent(w, r, handle.Name(), handle.ModTime(), fd)
 	}
+}
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }

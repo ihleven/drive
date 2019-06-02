@@ -1,6 +1,7 @@
 package drivehandler
 
 import (
+	"drive/lib"
 	"drive/templates"
 	"fmt"
 	"net/http"
@@ -13,14 +14,14 @@ type Actioneer interface {
 	PostAction(*http.Request, http.ResponseWriter) error
 	PutAction(*http.Request, http.ResponseWriter) error
 	DeleteAction(*http.Request, http.ResponseWriter) error
-	//}
-	//type Responder interface {
-	Respond(http.ResponseWriter, *http.Request, map[string]interface{}) error
-	Render(http.ResponseWriter, int, string, map[string]interface{}) error
+	lib.Responder
+	//Respond(http.ResponseWriter, *http.Request, map[string]interface{}) error
+	//Render(http.ResponseWriter, int, string, map[string]interface{}) error
 }
 
-// Default impl
+// Default imp
 type ActionResponder struct {
+	lib.TemplateResponder
 	template string
 }
 
@@ -41,14 +42,14 @@ func (a *ActionResponder) PutAction(r *http.Request, w http.ResponseWriter) erro
 	fmt.Println("PutAction")
 	return errors.New(errors.NotImplemented, "Method Put not implemented")
 }
-func (a *ActionResponder) Respond(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (err error) {
+func (a *ActionResponder) Respond_unused(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (err error) {
 
 	switch r.Header.Get("Accept") {
 	case "application/json":
 		err = templates.SerializeJSON(w, http.StatusOK, data)
 	default:
 		//err = rnd.HTML(w, http.StatusOK, a.template, data)
-		err = a.Render(w, http.StatusOK, a.template, data)
+		err = a.Render_unused(w, http.StatusOK, a.template, data)
 	}
 
 	if err != nil {
@@ -56,9 +57,8 @@ func (a *ActionResponder) Respond(w http.ResponseWriter, r *http.Request, data m
 	}
 	return
 }
-func (a *ActionResponder) Render(w http.ResponseWriter, status int, template string, data map[string]interface{}) error {
+func (a *ActionResponder) Render_unused(w http.ResponseWriter, status int, template string, data map[string]interface{}) error {
 	fmt.Println("respond", data["File"])
 
-	//return rnd.HTML(w, status, template, data)
 	return templates.Render(w, status, template, data)
 }

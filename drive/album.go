@@ -11,11 +11,13 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/BurntSushi/toml"
 )
 
 // Album
 //
-// Album bettet *Directory und *File ein und wird über URLs wie "/alben/pfth/to/dir" erreicht.
+// Album bettet *Directory und *File ein und wird über URLs wie "/alben/path/to/dir" erreicht.
 //
 // Metadaten in Datei meta.json => wird von struct AlbumMeta geparst.
 type Album struct {
@@ -39,69 +41,127 @@ type Album struct {
 	Pages   []string `json:"pages"`
 }
 type Source struct {
-	Name         string   `json:"name"`
-	Path         string   `json:"path"`
-	Camera       string   `json:"camera"`
-	Photographer string   `json:"photographer"`
-	Images       []Image2 `json:"images"`
+	Name         string `json:"name"`
+	Path         string `json:"path"`
+	Camera       string `json:"camera"`
+	Photographer string `json:"photographer"`
 }
 
-func GetAlbum(storage Storage, path string, usr *domain.Account) (*Album, error) {
+type Album2 struct {
+	Title       string            `json:"title"`
+	Subtitle    string            `json:"subtitle"`
+	Description string            `json:"description"`
+	Image       string            `json:"image"`
+	From        string            `json:"from"`
+	Until       string            `json:"until"`
+	BaseURL     string            `json:"baseURL"`
+	ServeURL    string            `json:"serveURL"`
+	Images      []Image2          `json:"images"`
+	Sources     map[string]Source `json:"sources"`
+	//Sources []Source `json:"sources"`
+}
 
-	file, err := GetFile(storage, path, usr)
+func NewAlbum(folder *File, usr *domain.Account) (*Album2, error) {
+
+	storage := folder.Storage()
+	album := Album2{ServeURL: folder.ServeURL(), BaseURL: folder.URL(), Sources: make(map[string]Source)}
+
+	if _, err := toml.DecodeFile(filepath.Join(folder.Location(), "album.toml"), &album); err != nil {
+		fmt.Println(err)
+	}
+
+	entries, err := storage.ReadDir(folder.StoragePath())
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not get file for path %s", path)
+		return nil, errors.Wrap(err, "Could not list album folder")
+	}
+	for _, entry := range entries {
+		mime := entry.GuessMIME()
+
+		switch {
+		case mime.Type == "image":
+			image, _ := NewImageFromHandle2(entry, "")
+			album.Images = append(album.Images, *image)
+		case entry.IsDir() && entry.Name() != "thumbs":
+			if _, ok := album.Sources[entry.Name()]; !ok {
+				album.Sources[entry.Name()] = Source{Name: entry.Name()}
+			}
+			subentries, err := storage.ReadDir(entry.StoragePath())
+			if err != nil {
+				return nil, errors.Wrap(err, "Could not list source folder")
+			}
+			for _, subentry := range subentries {
+				submime := subentry.GuessMIME()
+				if submime.Type == "image" {
+					image, err := NewImageFromHandle2(subentry, entry.Name())
+					if err != nil {
+						return nil, errors.Wrap(err, "Could not create image")
+					}
+					album.Images = append(album.Images, *image)
+
+				}
+			}
+
+		}
+	}
+	return &album, nil
+}
+
+// GetAlbum
+func GetAlbum(handle Handle, usr *domain.Account) (*Album, error) {
+
+	file, err := handle.ToFile(usr)
+	if err != nil {
+		return nil, errors.Wrap(err, "Could not get file for path %s", handle.StoragePath())
 	}
 	if !file.HasReadPermission(usr.Uid, usr.Gid) {
-		return nil, errors.New(403, "user: %v has no read permission for %v", usr, path)
+		return nil, errors.New(403, "user: %v has no read permission for %v", usr, handle.StoragePath())
 	}
 
 	album := Album{File: file}
 
-	handles, err := storage.ReadDir(path)
+	handles, err := handle.Storage().ReadDir(handle.StoragePath())
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not list album folder")
 	}
 
-	for _, handle := range handles {
-		mime := handle.GuessMIME()
-		fmt.Println(handle.Name(), mime.Value)
+	for _, entry := range handles {
+		mime := entry.GuessMIME()
+
 		switch {
 		case mime.Type == "image":
-			image, _ := NewImageFromHandle(handle)
+			image, _ := NewImageFromHandle(entry)
 			album.Images = append(album.Images, *image)
-		case handle.Name() == "_meta.json":
-			err := json.NewDecoder(handle.Descriptor(0)).Decode(&album)
+		case entry.Name() == "_meta.json":
+			err := json.NewDecoder(entry.Descriptor(0)).Decode(&album)
 			if err != nil {
 				return nil, errors.Wrap(err, "Could not parse album file")
 			}
 		case mime.Value == "text/markdown":
-			fmt.Println("text/markdown")
-			md, err := handle.GetUTF8Content()
+
+			md, err := entry.GetUTF8Content()
 			if err != nil {
 				return nil, errors.Wrap(err, "Could not get content of md file")
 			}
 			album.Pages = append(album.Pages, md)
 		case mime.Value == "text/diary":
 			fmt.Println("DIARY")
-			album.parseDiary(handle)
+			album.parseDiary(entry)
 		//case strings.HasSuffix(file.Name, ".dia"):
 		//	album.parseDiary(file.AsTextfile())
 		//		album.parseMeta()
 		//		album.Title = fmt.Sprintf("%s | alben", dir.Name)
-		case handle.IsDir():
-			fmt.Println("dir:", handle.Name())
+		case entry.IsDir():
 
 			var source *Source
 			var subalbum *Album
 			var images []Image2
-			subhandles, err := storage.ReadDir(filepath.Join(path, handle.Name()))
+			subhandles, err := entry.Storage().ReadDir(entry.StoragePath())
 			if err != nil {
-				return nil, errors.Wrap(err, "Could not list album subfolder %s", handle.Name())
+				return nil, errors.Wrap(err, "Could not list album subfolder %s", entry.Name())
 			}
 			for _, subhandle := range subhandles {
 				if subhandle.Name() == "_meta.json" {
-					subalbum = &Album{Title: handle.Name()}
+					subalbum = &Album{Title: subhandle.Name()}
 					err := json.NewDecoder(subhandle.Descriptor(0)).Decode(subalbum)
 					if err != nil {
 						return nil, errors.Wrap(err, "Could not parse album file")
@@ -110,7 +170,7 @@ func GetAlbum(storage Storage, path string, usr *domain.Account) (*Album, error)
 				}
 				if subhandle.Name() == "_source.json" {
 					fmt.Println("subalbum", subhandle.Name())
-					source = &Source{Name: handle.Name(), Path: handle.URL()}
+					source = &Source{Name: entry.Name(), Path: entry.StoragePath()}
 					err := json.NewDecoder(subhandle.Descriptor(0)).Decode(source)
 					if err != nil {
 						return nil, errors.Wrap(err, "Could not parse album file")
@@ -130,14 +190,14 @@ func GetAlbum(storage Storage, path string, usr *domain.Account) (*Album, error)
 				subalbum.Images = images
 
 				if len(subalbum.Images) > 0 {
-					subalbum.Image = subalbum.Images[0].URL
+					subalbum.Image = subalbum.Images[0].Src
 				}
 				album.Moments = append(album.Moments, *subalbum)
 
 				fmt.Println("subalbum images =", subalbum.Images)
 			}
 			if source != nil {
-				source.Images = images
+				//source.Images = images
 				album.Sources = append(album.Sources, *source)
 			}
 		}
@@ -201,7 +261,7 @@ func NewDiary(handle Handle) (*Diary, error) {
 				fmt.Println(t)
 			}
 		case strings.HasPrefix(line, "I:"):
-			dir := filepath.Dir(handle.URL())
+			dir := filepath.Dir(handle.StoragePath())
 			img := filepath.Join(dir, strings.TrimSpace(line[2:]))
 			file, err := handle.Storage().GetHandle(img)
 			//			root, e := filepath.Rel(file.location, file.Path)

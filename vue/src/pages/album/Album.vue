@@ -9,11 +9,13 @@ import Parallax from '@/components/Parallax.vue';
 import NavigationOverlay from '@/components/NavigationOverlay.vue';
 import NavbarTop from '@/components/NavbarTop.vue';
 import Cloud11Page from '@/components/Cloud11Page.vue';
+import FeatherIcon from '@/components/FeatherIcon.vue';
 
 
 export default {
     name: "Album",
     components: {
+        FeatherIcon,
         UploadModal,
         PswpGallery,
         Cloud11Figure,
@@ -30,21 +32,31 @@ export default {
         return {
             account: {},
             isModalVisible: false,
-            selectedSource: null,
+            selectedSource: "",
             markdown: null,
+            isSourceDropdownOpen: false
         };
     },
+
     computed: {
+        ...mapState(["image", "images", "serveURL", "baseURL", "meta", "sources"]),
+        source() {
+            return this.selectedSource ? this.sources.filter(s => s.name == this.selectedSource)[0] : {photographer:null, camera:null}
+        },
+        filteredImages() {
+            return this.images.filter(image => {
+                return image.source == this.selectedSource;      
+            })
+        },
 
         appStyles() {
             return {}
         },
-        ...mapState({
-            album: state => state.album,
-            diaries: state => state.album.diaries,
-            pages: state => state.album.pages,
-            diaryNames: state => state.album.diaryNames,
-        }),
+
+    },
+    created() {
+        
+        console.log('Album.vue =>', this.serveURL);
     },
     methods: {
       handleSelect(i) {
@@ -57,18 +69,18 @@ export default {
             mode: i.selected ? 'add' : 'remove',
           })
       },
-      selectSource(source) {
-          if (source.name === this.selectedSource) {
-              this.selectedSource = null;
-          } else {
-              this.selectedSource=source.name
-          }
+      selectSource(name) {
+          this.isSourceDropdownOpen = !this.isSourceDropdownOpen
+          console.log("selectSource", name)
+          this.selectedSource = name;
       },
       onUpdateMarkdown(event) {
           console.log("onupdateMarkdown", event);
       },
       put(source) {
-          fetch(this.album.file.path + '/' + source.name, {
+          const url = this.baseURL + (source.name ? '/' + source.name : "");
+          console.log("put", url);
+          fetch(url, {
             method: 'put',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
@@ -81,10 +93,7 @@ export default {
 
       }
     },
-    created() {
-        this.markdown = this.pages[0]
-        console.log('Album.vue =>', this.menu);
-    },
+    
 };
 </script>
 
@@ -92,93 +101,77 @@ export default {
     
     <cloud11-page :account="account">
     
-        <Parallax :image="'/serve/home/14/' + album.image" :ratio="66" 
-                  :perspective="1" :translate-z="-1">
-
-           
+        <Parallax :image="image.src" :ratio="Math.floor(image.h / image.w * 100)">
 
             <template #attached>
 
-                <section class="hero attached" >
+                <section class="hero attached" style="z-index:1">
                     <div class="hero-body">
                         <div class="container">
-                            <h1 class="title outline4">{{ album.title }} kjh</h1>
-                            <h2 class="subtitle outline">{{ album.subtitle }}</h2>
+                            <h1 class="title outline4">{{ meta.title }}</h1>
+                            <h2 class="subtitle outline4">{{ meta.subtitle }}</h2>
                         </div>
                     </div>
                     <div class="hero-foot">
-                        <nav class="navbar">
-                            <a class="navbar-item" v-for="source in album.sources" :key="source.name" 
-                                                            :class="{'is-active': selectedSource==source.name}" 
-                                                            @click="selectSource(source)" >>
-                                {{source.name}}
+                        <nav class="navbar ">
+                            
+                            <a :href="baseURL" class="navbar-item" >
+                                <feather-icon name="folder"/> directory
                             </a>
-
                             <a class="navbar-item">
-                                ljhgjkhg
+                                <feather-icon name="activity"/>
                             </a>
+                            <a class="navbar-item">
+                                <feather-icon name="database"/>
+                            </a>
+                            <div class="navbar-item has-dropdown" :class="{'is-active': isSourceDropdownOpen}">
+                                <a class="navbar-link is-arrowless" @click="isSourceDropdownOpen=!isSourceDropdownOpen" >
+                                    <feather-icon name="database"/> {{selectedSource||"source"}}
+                                </a>
+
+                                <div class="navbar-dropdown">
+                                <a class="navbar-item" 
+                                    v-for="s in sources" :key="s.name" 
+                                    :class="{'is-active': selectedSource==s.name}" 
+                                    @click="selectedSource=s.name" >
+                                    {{s.name}}
+                                </a>
+                                <hr class="navbar-divider">
+                                <div class="navbar-item">
+                                    Version 0.7.5
+                                </div>
+                                </div>
+                            </div>
                         </nav>
                     </div>
                 </section>
             </template>
 
 
-            <section class="section has-background-white">
+
+            <section class="section has-background-light">
                 <div class="container">
-                    <div class="timeline is-centered">
-                        <header class="timeline-header">
-                            <a class="tag is-medium is-primary" href="/home/60/">Hotel Friday Attitude</a>
-                        </header>
-                        <div class="timeline-item is-primary" v-for="moment in album.moments" :key="moment.title">
-                            <div class="timeline-marker is-primary is-image is-64x64" 
-                            :style="{background: 'url( /serve/home' + moment.image + ')', 'background-size':'cover'}"
-                            ></div>
-                            <div class="timeline-content" :style="{'padding':'1.5rem 3rem 0 3rem'}">
-                                <p class="heading">{{moment.title}}</p>
-                                <p>Timeline content</p>
-                            </div>
-                        </div>
-                        <header class="timeline-header">
-                            <span class="tag is-primary">2017</span>
-                        </header>
-                        <div class="timeline-item is-danger">
-                            <div class="timeline-marker is-danger is-icon">
-                                <i class="fa fa-flag"></i>
-                            </div>
-                            <div class="timeline-content">
-                                <p class="heading">March 2017</p>
-                                <p>Timeline content - Can include any HTML element</p>
-                            </div>
-                        </div>
-                        <header class="timeline-header">
-                            <span class="tag is-medium is-primary">End</span>
-                        </header>
+                    <div class="tabs">
+                        <ul>
+                            <li :class="{'is-active':selectedSource==s.name}" @click="selectedSource=s.name"
+                                v-for="s in sources" :key="s.name">
+                                <a>{{s.name}}</a>
+                            </li>
+                        </ul>
                     </div>
-                </div>
-            </section>
-
-            <section class="section has-background-dark" v-if="!selectedSource">
-                <div class="container">
-                    <h1 class="title">Section</h1>
+                    <h1 class="title">{{selectedSource}}</h1>
                     <h2 class="subtitle">
-                        A simple container to divide your page into
-                        <strong>sections</strong>, like the one you're currently reading
+                       
                     </h2>
-                    <pswp-gallery :images="album.images"></pswp-gallery>
+                    <button @click="put(source)">put</button>
+                    <pswp-gallery :images="filteredImages" :src="serveURL" ></pswp-gallery>
                 </div>
             </section>
 
 
-            <section class="section has-background-light" v-for="moment in album.moments" :key="moment.title">
-                <div class="container">
-                    <h1 class="title">{{moment.title}}</h1>
-                    <h2 class="subtitle">
-                        {{moment.title}}
-                    </h2>
-                    <pswp-gallery :images="moment.images"></pswp-gallery>
-                </div>
-            </section>
-            <section class="section has-background-primary" v-for="name in diaryNames" :key="name">
+          
+            
+            <!-- <section class="section has-background-primary" v-for="name in diaryNames" :key="name">
                 <div class="container">
                     <h1 class="title">{{diaries[name].title}}</h1>
                     <h2 class="subtitle">
@@ -188,7 +181,7 @@ export default {
                     <img :src="'/serve/home' + i.URL" v-for="i in diaries[name].images" :key="i.name" style="width: 100px" />
                     <pswp-gallery :images="diaries[name].images"></pswp-gallery>
                 </div>
-            </section>
+            </section> 
 
             <section class="section has-background-light" >
                 <div class="container">
@@ -196,7 +189,7 @@ export default {
                     <textarea v-model="markdown"></textarea>
                     <tip-tap  v-model="markdown"></tip-tap>
                 </div>
-            </section>
+            </section>-->
 
             <footer class="footer is-dark has-text-white">
                 <div class="columns">
@@ -212,7 +205,7 @@ export default {
                     </ul>
                     <div class="column">Auto</div>
                     <div class="column">
-                        <div v-for="source in album.sources" :key="source.name">
+                        <!-- <div v-for="source in album.sources" :key="source.name">
                             <button @click="put(source)">thumbs</button>
                             <section class="section has-background-dark" v-if="selectedSource==source.name">
                                 <div class="container" >
@@ -233,7 +226,7 @@ export default {
                                     </div>
                                 </div>
                             </section>
-                        </div>
+                        </div> -->
 
                     </div>
                 </div>
@@ -247,11 +240,17 @@ export default {
                         .
                     </p>
                     <button type="button" class="button" @click="isModalVisible = true">Open Modal!</button>
-                    <upload-modal :visible.sync="isModalVisible" :url="album.file.path" />
+                    <!-- <upload-modal :visible.sync="isModalVisible" :url="album.file.path" /> -->
                 </div>
             </footer>
 
-        </Parallax>
+            <section class="section has-background-light" >
+                <div class="container">
+                    <pre>album</pre>
+                </div>
+            </section>
+
+       </Parallax>
 
         
 </cloud11-page>
@@ -259,6 +258,41 @@ export default {
 </template>
 
 
+    
+<style lang="scss">
+    .hero.attached { 
+        .title {
+            //display: inline-block;
+            float:left;
+            position: relative;
+            background-color: violet;
+            padding: .25rem .75rem;
+            z-index: 0;
+        }
+        .subtitle {
+            //display: inline-block;
+            float:left;
+            clear:left;
+            position: relative;
+            top:-.5rem;
+            background-color: yellow;
+            padding: .125rem .5rem;
+            margin: .5rem;
+        }
+        .navbar {
+        
+            .navbar-item, .navbar-link {
+                color: white;
+                //text-shadow: 1px 1px 0px black, 1px -1px 0px black, -1px 1px 0px black, -1px -1px 0px black;
+                &:hover, &.is-active, &.has-dropdown { background: rgba(206, 198, 198, 0.5); }
+                .icon {
+                    margin-left: 0.25rem;
+                    margin-right: 0.25rem;
+                }
+            }
+        }
+    }
+</style>
 
 <style lang="css">
 

@@ -40,7 +40,7 @@ export default {
         },
     },
     created() {
-        console.log('Parallax =>', this.perspective, this.translateZ, this.scale);
+        console.log('Parallax =>', this.perspective, this.translateZ, this.scale, this.ratio);
     },
 };
 </script>

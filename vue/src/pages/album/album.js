@@ -2,14 +2,35 @@ import Vue from 'vue';
 import store from './store';
 import Album from './Album.vue';
 import PhotoSwipePlugin from '@/plugins/PhotoSwipePlugin';
+import axios from 'axios';
 
-import '@/assets/bulma-customize.scss';
-
-const data = JSON.parse(document.getElementById('data').innerHTML);
+import './bulma.scss';
 
 Vue.use(PhotoSwipePlugin);
 
-store.commit('setAlbum', data.Album);
+const d = document.getElementById('data');
+let data = null;
+if (d) {
+    data = JSON.parse(d.innerHTML);
+    //store.commit('SET_FOLDER', data.folder);
+    //store.commit('SET_ACCOUNT', data.account);
+    store.commit('setAlbum', data.album);
+
+} else {
+    axios.get('http://localhost:3000/alben/' + location.hash.substring(1), {
+            headers: {
+                'Accept': 'application/json',
+            }
+        })
+        .then(function (response) {
+            // handle success
+            console.log(response.data.album, location.hash);
+            store.commit('setAlbum', response.data.album);
+        })
+    data = {}
+}
+
+
 
 new Vue({
     store,

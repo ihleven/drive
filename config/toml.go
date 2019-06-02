@@ -29,9 +29,11 @@ type database struct {
 
 type storage struct {
 	Root      string
-	Path      string
+	BaseURL   string
+	ServeURL  string
 	AlbumPath string
 	Group     uint32
+	Mode      os.FileMode
 }
 
 type clients struct {
@@ -51,6 +53,7 @@ func readConfigFile(configFilePath string) {
 	if _, err := toml.DecodeFile(configFilePath, &fileConfig); err != nil {
 		log.Fatal(err)
 	}
+	//fmt.Println(fileConfig)
 	Settings.Storages = fileConfig.Storages
 	Settings.Address.port = fileConfig.Server.Port
 }

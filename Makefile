@@ -1,26 +1,34 @@
+SHELL := /bin/bash
 
 VERSION         :=      0.7
-IMAGE_NAME      :=      cirocosta/l7
+BINARY_NAME     :=      cloud11
 
 
-# As a call to `make` without any arguments leads to the execution
-# of the first target found I really prefer to make sure that this
-# first one is a non-destructive one that does the most simple 
-# desired installation. 
-default: install
+
+default: backend
+
+backend:
+	gin --all
+
+serve:
+	cd vue && echo "entering vue subdir" && \
+    yarn serve
+
+build:
+	cd vue && yarn build
+	go build -o cloud11
 
 
-# Install just performs a normal `go install` which builds the source
-# files from the package at `./` (I like to keep a `main.go` in the root
-# that imports other subpackages). 
-#
-# As I always commit `vendor` to `git`, a `go install` will typically 
-# always work - except if there's an OS limitation in the build flags 
-# (e.g, a linux-only project).
 deploy:
 	GOOS=linux GOARCH=amd64 go build -o drive-unix
 	scp drive-unix ihle@web569.webfaction.com:~ihle/webapps/drive/
 	scp -r _static ihle@web569.webfaction.com:~ihle/webapps/drive/
+
+clean:
+	rm -f gin-bin
+	rm -rf _static
+	bash -c "[ -e $(BINARY_NAME) ] && rm $(BINARY_NAME) || true"
+	bash -c "[ -e $(BINARY_NAME)-unix ] && rm $(BINARY_NAME)-unix || true"
 
 
 # Keeping `./main.go` with just a `cli` and `./lib/*.go` with actual 

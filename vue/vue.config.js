@@ -47,6 +47,16 @@ module.exports = {
             minify: false,
             chunks: ['chunk-vendors', 'chunk-common', 'album'],
         },
+        arbeit: {
+            entry: './src/pages/arbeit/arbeit.js',
+            template: './public/templates/arbeit/arbeit.html',
+            filename: 'templates/arbeit.html',
+            minify: false,
+            //chunks: ['chunk-vendors', 'chunk-common', 'album'],
+        },
     },
     runtimeCompiler: true,
+    devServer: {
+        proxy: 'http://localhost:3000'
+    }
 };

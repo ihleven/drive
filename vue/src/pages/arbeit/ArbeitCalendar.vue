@@ -1,0 +1,1 @@
+https://github.com/Wikiki/bulma-calendar/issues/93

@@ -57,7 +57,7 @@
 export default {
     name: 'pswp-gallery',
 
-    props: ['images'],
+    props: ['images', 'src'],
 
     data() {
         return {};
@@ -66,38 +66,21 @@ export default {
         items() {
             if (!this.images) return [];
             return this.images.map(item => {
-                if (typeof item == 'string') {
-                    return this.imageMetaFromFilename(item);
-                }
                 return {
-                    msrc: '/serve/home/' + item.URL.replace(item.Name, 'thumbs/' + item.Name),
-                    src: '/serve/home/' + item.URL,
-                    w: item.Width,
-                    h: item.Height,
-                    title: item.Title,
+                    msrc: this.src + '/' + item.source + '/thumbs/x100/' + item.name,
+                    src: item.src,
+                    w: item.w,
+                    h: item.h,
+                    title: item.name,
                 };
             });
         },
     },
     created() {
-        console.log('images:', this.images);
+        console.log('images:', this.src);
     },
 
     methods: {
-        imageMetaFromFilename(filename) {
-            let regex = /^hochzeit_(\d+)_(\d+)x(\d+).jpg$/,
-                match = filename.match(regex),
-                thumb = match ? '/media/hochzeit-1800/thumbs/hochzeit_' + match[1] + '_x100.jpg' : filename;
-
-            return {
-                msrc: thumb,
-                src: '/media/hochzeit-1800/' + filename,
-                w: match ? parseInt(match[2]) : 0,
-                h: match ? parseInt(match[3]) : 0,
-                title: `Bild ${filename}`,
-            };
-        },
-
         imageErrorHandler(event) {
             //window.location.href = '/hello'
             console.log('imageErrorHandler(', event, ')');

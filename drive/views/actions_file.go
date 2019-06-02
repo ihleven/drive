@@ -13,6 +13,37 @@ import (
 	"drive/errors"
 )
 
+type FileActionResponder2 struct {
+	ActionResponder
+	Handle drive.Handle
+	User   *domain.Account
+}
+
+func (a *FileActionResponder2) GetAction(r *http.Request, w http.ResponseWriter) error {
+	a.template = "file"
+	handle, user := a.Handle, a.User
+
+	fmt.Printf("GetAction => File %s\n", handle.Name())
+	if !handle.HasReadPermission(user.Uid, user.Gid) {
+		return errors.New(403, "uid: %v, gid %v has not read permission for %v", user.Uid, user.Gid, handle)
+	}
+
+	content, err := handle.GetUTF8Content()
+	if err != nil {
+		return errors.Wrap(err, "File init")
+	}
+	file, err := handle.ToFile(user)
+	a.Respond(w, r, map[string]interface{}{
+		"storage": handle.Storage(),
+		"File":    file,
+		"User":    user,
+		"Content": content,
+		"Title":   strings.TrimSuffix(handle.Name(), filepath.Ext(handle.Name())),
+	})
+
+	return nil
+}
+
 /*  **************
 Files
 **************

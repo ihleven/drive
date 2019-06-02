@@ -1,20 +1,19 @@
 import Vue from 'vue';
+
 import Folder from './Folder.vue';
+import store from './folderStore.js';
 
 import '@/assets/bulma-customize.scss';
 
-//Vue.config.productionTip = false;
+
+store.dispatch("loadInitialData")
 
 new Vue({
-  data() {
-    return {
-      //folder: JSON.parse(document.getElementById('data').innerHTML),
-    };
-  },
+  store,
   mounted() {
     console.log('mounted', this);
   },
-  render: h => h(Folder),
+  render: h => h(Folder)
 }).$mount('#app');
 
 // new Vue({

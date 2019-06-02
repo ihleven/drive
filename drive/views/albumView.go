@@ -5,9 +5,10 @@ import (
 	"drive/errors"
 	"drive/session"
 	"drive/templates"
+	"fmt"
 	"net/http"
 	"path"
-	"path/filepath"
+	"strings"
 )
 
 func AlbumListHandler(w http.ResponseWriter, r *http.Request) {
@@ -20,27 +21,46 @@ func AlbumListHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func AlbumHandler(storage drive.Storage) func(w http.ResponseWriter, r *http.Request) {
+func AlbumHandler(storage drive.Storage, prefix string) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		//func AlbumHandler(w http.ResponseWriter, r *http.Request) {
-
+		enableCors(&w)
 		sessionUser, _ := session.GetSessionUser(r, w)
 
-		path, _ := filepath.Rel("/alben", path.Clean(r.URL.Path))
-
-		if path == "." {
-			AlbumListHandler(w, r)
+		folder, err := drive.GetFile(storage, strings.TrimPrefix(path.Clean(r.URL.Path), prefix), sessionUser)
+		if err != nil {
+			errors.Error(w, r, err)
 			return
 		}
-		album, err := drive.GetAlbum(storage, path, sessionUser)
+		//if handle.Path() == "." {
+		//	AlbumListHandler(w, r)
+		//	return
+		//}
+		album, err := drive.NewAlbum(folder, sessionUser)
 		if err != nil {
 			errors.Error(w, r, err)
 			return
 		}
 
-		err = templates.Render(w, http.StatusOK, "album", map[string]interface{}{"Album": album})
+		data := map[string]interface{}{
+			"album":   album,
+			"folder":  folder,
+			"account": sessionUser,
+			"storage": storage,
+		}
+		fmt.Println("/////////", r.Header.Get("Accept"))
+		switch r.Header.Get("Accept") {
+		case "application/json":
+			err = templates.SerializeJSON(w, http.StatusOK, data)
+		default:
+			err = templates.Render(w, http.StatusOK, "album", data)
+		}
+
+		if err != nil {
+			errors.Error(w, r, errors.Wrap(err, "render error"))
+		}
+		return
+
 		if err != nil {
 			errors.Error(w, r, err)
 		}
