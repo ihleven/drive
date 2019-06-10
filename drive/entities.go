@@ -38,6 +38,8 @@ type Storage interface {
 	//PermOpen(string, uint32, uint32) (*os.File, *time.Time, error)
 	URL(string) string
 	GetServeURL(string) string
+	CleanPath(string) string
+	CleanServePath(string) string
 }
 
 type Mimer interface {
@@ -49,12 +51,14 @@ type Mimer interface {
 	Charset() string
 }
 type Locator interface {
+	Storage() Storage // liefert Storage, fuer die der Pfad gilt
+	Location() string // Absoluter Pfad im Dateisystem
+	Descriptor(int) *os.File
+
+	StoragePath() string // Pfad ab storage root
+
 	URL() string
 	ServeURL() string
-	StoragePath() string // Pfad ab storage root
-	Storage() Storage    // liefert Storage, fuer die der Pfad gilt
-	Location() string    // Absoluter Pfad im Dateisystem
-	Descriptor(int) *os.File
 }
 
 type Handle interface {

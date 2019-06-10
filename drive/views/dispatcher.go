@@ -5,6 +5,7 @@ import (
 	"drive/drive"
 	"drive/errors"
 	"drive/session"
+	"fmt"
 
 	"net/http"
 	"path"
@@ -38,7 +39,7 @@ func DispatchStorage(storage drive.Storage) func(w http.ResponseWriter, r *http.
 		//	errors.Error(w, r, err)
 		//}
 		//return
-		file, err := drive.GetFile(storage, path.Clean(r.URL.Path), sessionUser)
+		file, err := drive.GetFile(storage, r.URL.Path, sessionUser)
 		if err != nil {
 			errors.Error(w, r, err)
 			return
@@ -67,6 +68,7 @@ func DispatchStorage(storage drive.Storage) func(w http.ResponseWriter, r *http.
 }
 
 func GetActioneer(file *drive.File, sessionUser *domain.Account) Actioneer {
+	fmt.Println("Actioneer:", file)
 	switch {
 	case file.IsDir():
 		return &DirActionResponder{File: file, User: sessionUser}
@@ -92,7 +94,7 @@ func Serve(storage drive.Storage) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		cleanedPath := path.Clean(r.URL.Path)[6:] // strip "/serve"-prefix
+		cleanedPath := storage.CleanServePath(r.URL.Path) //path.Clean(r.URL.Path)[6:] // strip "/serve"-prefix
 
 		handle, err := drive.GetReadHandle(storage, cleanedPath, authuser.Uid, authuser.Gid)
 		if err != nil {

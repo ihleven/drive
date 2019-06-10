@@ -56,9 +56,9 @@ type FileActionResponder struct {
 }
 
 func (a *FileActionResponder) GetAction(r *http.Request, w http.ResponseWriter) error {
-	a.template = "file"
-	file, user := a.File, a.User
 
+	a.ActionResponder.TemplateResponder.Template = "file"
+	file, user := a.File, a.User
 	fmt.Printf("GetAction => File %s\n", file.Name)
 
 	if !file.Permissions.Read {

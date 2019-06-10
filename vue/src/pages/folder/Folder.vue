@@ -150,6 +150,7 @@ export default {
                 <feather-icon :name="f.mime.Type == 'dir' ? 'folder' : 'file'" :size="'small'"/>
               </td>
               <td>
+                <!--<a :href="folder.name + '/' + f.name" :title="f.path">{{ f.name }}</a>-->
                 <a :href="f.path" :title="f.path">{{ f.name }}</a>
               </td>
 

@@ -91,7 +91,11 @@ export default {
             .then(res=>res.json())
             .then(res => console.log(res));
 
+      },
+      src(image) {
+        return this.serveURL + ( image.source ? "/" + image.source + "/" : "/" ) + image.name
       }
+
     },
     
 };
@@ -101,7 +105,7 @@ export default {
     
     <cloud11-page :account="account">
     
-        <Parallax :image="image.src" :ratio="Math.floor(image.h / image.w * 100)">
+        <Parallax :image="src(image)" :ratio="Math.floor(image.h / image.w * 100)">
 
             <template #attached>
 

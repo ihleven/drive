@@ -68,7 +68,7 @@ export default {
             return this.images.map(item => {
                 return {
                     msrc: this.src + '/' + item.source + '/thumbs/x100/' + item.name,
-                    src: item.src,
+                    src: this.src + '/' + item.source + '/' + item.name,  // item.src,
                     w: item.w,
                     h: item.h,
                     title: item.name,

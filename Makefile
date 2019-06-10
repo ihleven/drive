@@ -15,7 +15,7 @@ serve:
     yarn serve
 
 build:
-	cd vue && yarn build
+	cd vue && yarn build -- --mode=development
 	go build -o cloud11
 
 

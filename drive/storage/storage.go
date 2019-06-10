@@ -45,12 +45,32 @@ type FileSystemStorage struct {
 	Account        *domain.Account `json:"-"` //
 }
 
-func (st *FileSystemStorage) trimPath(path string) string {
-	if p := strings.TrimPrefix(path, st.BaseURL); p != "" {
-		return p
+func (st *FileSystemStorage) CleanPath(path string) string {
+
+	cleanedPath := strings.TrimPrefix(filepath.Clean(path), st.BaseURL)
+	if cleanedPath != path {
+		fmt.Printf("CleanPath(%s) => %s, BaseURL: %s \n", path, cleanedPath, st.BaseURL)
+		//return trimmedPath, errors.New(errors.PathError, "Path was trimmed")
+	}
+	if cleanedPath != "" {
+		return cleanedPath
 	}
 	return "/"
 }
+
+func (st *FileSystemStorage) CleanServePath(path string) string {
+
+	cleanedPath := strings.TrimPrefix(filepath.Clean(path), st.ServeURL)
+	if cleanedPath != path {
+		fmt.Printf("CleanPath(%s) => %s, BaseURL: %s \n", path, cleanedPath, st.ServeURL)
+		//return trimmedPath, errors.New(errors.PathError, "Path was trimmed")
+	}
+	if cleanedPath != "" {
+		return cleanedPath
+	}
+	return "/"
+}
+
 func (st *FileSystemStorage) URL(path string) string {
 	return filepath.Join(st.BaseURL, path)
 }
@@ -60,29 +80,17 @@ func (st *FileSystemStorage) GetServeURL(path string) string {
 
 func (st *FileSystemStorage) Location(path string) string {
 
-	trimmedPath := strings.TrimPrefix(path, st.BaseURL)
-	//if trimmedPath == "" {
-	//	trimmedPath = "/"
-	//}
-	if trimmedPath != path {
-		fmt.Printf("trimmed (%s): %s => %s, location: %s \n", st.BaseURL, path, trimmedPath, filepath.Join(st.Root, trimmedPath))
-	} else {
-		//fmt.Printf("not trimmed: %s => %s\n", path, filepath.Join(st.Root, trimmedPath))
-	}
-	return filepath.Join(st.Root, trimmedPath)
+	return filepath.Join(st.Root, path)
 }
 
-func (st *FileSystemStorage) GetHandle(url string) (drive.Handle, error) {
+func (st *FileSystemStorage) GetHandle(path string) (drive.Handle, error) {
 
-	path := strings.TrimPrefix(url, st.BaseURL)
-	location := filepath.Join(st.Root, path)
-
-	info, err := os.Stat(location)
+	info, err := os.Stat(filepath.Join(st.Root, path))
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, errors.Augment(err, errors.NotFound, "os.Stat failed for %s (location: %s)", url, location)
+			return nil, errors.Augment(err, errors.NotFound, "os.Stat failed for %s (location: %s)", path, filepath.Join(st.Root, path))
 		}
-		return nil, errors.Wrap(err, "os.Stat failed for %s (location: %s)", url, location)
+		return nil, errors.Wrap(err, "os.Stat failed for %s (location: %s)", path, filepath.Join(st.Root, path))
 	}
 
 	handle := &FileHandle{

@@ -19,12 +19,12 @@ module.exports = {
             minify: false,
             chunks: ['chunk-vendors', 'chunk-common', 'error'],
         },
-        file: {
-            entry: './src/pages/file/file.js',
+        drive: {
+            entry: './src/pages/drive/drive.js',
             template: './public/templates/file.html',
             filename: 'templates/file.html',
             minify: false,
-            chunks: ['chunk-vendors', 'chunk-common', 'file'],
+//            chunks: ['chunk-vendors', 'chunk-common', 'drive'],
         },
         folder: {
             entry: './src/pages/folder/folder.js',

@@ -55,7 +55,7 @@ type Image2 struct {
 	// Caption als allgemeingültige "standalone" Bildunterschrift und Cutline als Verbindung zum Album (ausgewählte Bilder in Reihe?)
 	Exif     *Exif  `json:"_"`
 	MetaFile *File  `json:"_"`
-	Src      string `json:"src"`
+	Src      string `json:"-"` // `json:"src"`
 	Name     string `json:"name"`
 	Source   string `json:"source"`
 }
@@ -107,9 +107,9 @@ func NewImageFromHandle2(handle Handle, prefix string) (*Image2, error) {
 		Height:     config.Height,
 		Ratio:      float64(config.Height) / float64(config.Width) * 100,
 		Format:     format,
-		Src:        handle.ServeURL(),
-		Name:       handle.Name(),
-		Source:     prefix,
+		//Src:        handle.ServeURL(),
+		Name:   handle.Name(),
+		Source: prefix,
 	}
 	return i, nil
 }

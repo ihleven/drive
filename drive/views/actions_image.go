@@ -32,7 +32,7 @@ type ImageHandler struct {
 }
 
 func (v *ImageView) GetAction(r *http.Request, w http.ResponseWriter) error {
-	v.template = "image2"
+	v.ActionResponder.TemplateResponder.Template = "image2"
 	file, user := v.File, v.User
 
 	fmt.Printf("GetAction => Image %s\n", file.Name)

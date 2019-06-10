@@ -1,10 +1,10 @@
 import Vue from 'vue';
-import store from './store';
+import store from './album-store';
 import Album from './Album.vue';
 import PhotoSwipePlugin from '@/plugins/PhotoSwipePlugin';
 import axios from 'axios';
 
-import './bulma.scss';
+import './album-bulma.scss';
 
 Vue.use(PhotoSwipePlugin);
 

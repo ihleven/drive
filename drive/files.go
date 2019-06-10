@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// GetReadHandle bekommt einen bereinigten Pfad
 func GetReadHandle(storage Storage, path string, uid, gid uint32) (Handle, error) {
 
 	handle, err := storage.GetHandle(path)
@@ -23,7 +24,8 @@ func GetReadHandle(storage Storage, path string, uid, gid uint32) (Handle, error
 
 func GetFile(storage Storage, path string, usr *domain.Account) (*File, error) {
 	fmt.Println("GetFile", path)
-	handle, err := storage.GetHandle(path)
+
+	handle, err := storage.GetHandle(storage.CleanPath(path))
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not get file handle for %s", path)
 	}
@@ -51,8 +53,7 @@ func DeleteFile(file *File) error {
 func GetFolder(file *File, usr *domain.Account) (*Folder, error) {
 
 	folder := &Folder{File: file}
-	//handles, err := file.ReadDirHandle()
-	handles, err := file.Storage().ReadDir(file.Path)
+	handles, err := file.Storage().ReadDir(file.StoragePath())
 	if err != nil {
 		return nil, err
 	}

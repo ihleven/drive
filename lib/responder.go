@@ -3,6 +3,7 @@ package lib
 import (
 	"drive/errors"
 	"drive/templates"
+	"fmt"
 	"net/http"
 )
 
@@ -14,16 +15,16 @@ type Responder interface {
 
 // Default impl to embed in
 type TemplateResponder struct {
-	template string
+	Template string
 }
 
 func (resp *TemplateResponder) Respond(w http.ResponseWriter, r *http.Request, data map[string]interface{}) (err error) {
-
+	fmt.Println("TemplateResponder", resp.Template)
 	switch r.Header.Get("Accept") {
 	case "application/json":
 		err = templates.SerializeJSON(w, http.StatusOK, data)
 	default:
-		err = templates.Render(w, http.StatusOK, resp.template, data)
+		err = templates.Render(w, http.StatusOK, resp.Template, data)
 	}
 
 	if err != nil {

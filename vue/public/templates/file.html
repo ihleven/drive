@@ -18,23 +18,27 @@
 
         {{template "partials/hero" .}}
 
+
+        <section class="section">
+            <div class="container" v-cloak style="border:1px solid goldenrod">
+                <prism-editor :code="content" lang="js" @update="onChange"></prism-editor>
+            </div>
+        </section>
         <section class="section">
             <div class="container" v-cloak style="border:1px solid black">
-                {{ if eq .File.MIME.Type "text"}}
-                {{ if eq .File.MIME.Subtype "markdown" }}
-                <markdown-editor :readonly="{{ not .File.Permissions.Write}}">{{.Content}}</markdown-editor>
-                {{else}}
-                {{ if eq .File.MIME.Subtype "markup" }}
-                <code-highlighter language="{{.File.MIME.Subtype}}" :readonly="false">{{.Content}}
-                </code-highlighter>
-                {{ else }}
-                <pre class="text"><code class="language-go" v-highlight>{{.Content}}</code></pre>
-                {{ end }}
-                {{ end }}
+               
+                    <!--  <markdown-editor :readonly="{{ not .File.Permissions.Write}}">{{.Content}}</markdown-editor>
+                    
+                    <code-highlighter language="{{.File.MIME.Subtype}}" :readonly="false">{{.Content}}
+                    </code-highlighter>
+                    
+                  <pre class="text"><code class="language-go" v-highlight>{{.Content}}</code></pre>-->
+                   
+             
 
 
-                <div class="content"></div>
-                {{ end }}
+                <div class="content" v-text="content"></div>
+              
 
 
 
@@ -42,24 +46,10 @@
 
             </div>
         </section>
-        <section class="section">
-            <button @click="edit=!edit">edit</button>
-
-            <div class="container">
-                <form method="post">
-                    <textarea class="textarea has-fixed-size box" name="content" v-if="edit">{{.Content}}</textarea>
-
-                    <div class="box content" v-else>{{.Content}}</div>
-                    <button type="submit">save</button>
-                </form>
-            </div>
-
-        </section>
-
-        {{template "partials/footer"}}
+       
+        
 
     </div>
-
 </body>
 
 </html>
