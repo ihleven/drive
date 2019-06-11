@@ -1,19 +1,30 @@
 import Vue from 'vue';
+import store from '../drive/drive-store.js';
 
-//import '@/assets/bulma.scss';
+import Image from './Image.vue';
 
-//const data = JSON.parse(document.getElementById('data').innerHTML);
+import '@/assets/bulma.scss';
+
 
 //import(/* webpackPreload: true */ 'typeface-clear-sans/index.css');
-//import 'typeface-clear-sans/index.css';
+import 'typeface-clear-sans/index.css';
+
+store.dispatch('loadInitialData');
+
 
 new Vue({
-    el: '#app',
+    store,
     components: {},
     data() {
         return {};
     },
     mounted() {
-        console.log('file =>', document.documentElement.clientWidth);
+      console.log('mounted image.js', this);
     },
-});
+    render: h => h(Image)
+  }).$mount('#app');
+
+  
+    
+
+  

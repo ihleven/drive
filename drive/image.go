@@ -60,10 +60,10 @@ type Image2 struct {
 	Source   string `json:"source"`
 }
 type Exif struct {
-	Orientation int
-	Taken       time.Time
+	Orientation *int
+	Taken       *time.Time
 	Lat,
-	Lng float64
+	Lng *float64
 	Model string
 }
 
@@ -118,7 +118,6 @@ func NewImage(file *File, usr *domain.Account) (*Image, error) {
 
 	fd := file.Descriptor(0)
 	defer fd.Close()
-
 	config, format, err := image.DecodeConfig(fd)
 	if err != nil {
 		log.Fatal("NewImage", err)
@@ -133,6 +132,7 @@ func NewImage(file *File, usr *domain.Account) (*Image, error) {
 		Ratio:      float64(config.Height) / float64(config.Width) * 100,
 		Format:     format,
 	}
+
 	metafile, err := GetFile(file.Storage(), i.getMetaFilename(), usr)
 	if err == nil {
 		i.metaFile = metafile
@@ -141,17 +141,18 @@ func NewImage(file *File, usr *domain.Account) (*Image, error) {
 			fmt.Println("Error parsing meta =>", err)
 		}
 	}
+	fmt.Println("NewImage", i.getMetaFilename(), fd.Name())
 
 	//img.MakeThumbnail()
 	if err = i.GoexifDecode(fd); err != nil {
 		fmt.Println("Error Decoding Exif with Goexif =>", err)
 	}
-	fmt.Println("asdf3", i.Exif)
+	fmt.Println("asdf3", i.Exif, err)
 	return i, nil
 }
 
 func (i *Image) getMetaFilename() string {
-	base := strings.TrimSuffix(i.File.Path, filepath.Ext(i.File.Path))
+	base := strings.TrimSuffix(i.File.StoragePath(), filepath.Ext(i.File.StoragePath()))
 	filename := fmt.Sprintf("%s.txt", base)
 	return filename
 }
@@ -219,7 +220,7 @@ func (i *Image) GoexifDecode(fd *os.File) error {
 	if err != nil {
 		return err
 	}
-	i.Exif.Orientation = o
+	i.Exif.Orientation = &o
 
 	focal, _ := x.Get(exif.FocalLength)
 	numer, denom, err := focal.Rat2(0) // retrieve first (only) rat. value
@@ -233,14 +234,14 @@ func (i *Image) GoexifDecode(fd *os.File) error {
 	if err != nil {
 		return err
 	}
-	i.Exif.Taken = tm
+	i.Exif.Taken = &tm
 
 	lat, long, err := x.LatLong()
 	if err != nil {
 		return err
 	}
-	i.Exif.Lat = lat
-	i.Exif.Lng = long
+	i.Exif.Lat = &lat
+	i.Exif.Lng = &long
 
 	//j := x.String()
 	//fmt.Printf("json: %s", j)

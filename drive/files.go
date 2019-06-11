@@ -110,7 +110,7 @@ func (f *File) ParentsWithFiles() []File {
 }
 
 func (f *File) ParentPath() string {
-	parent := path.Dir(f.Path)
+	parent := path.Dir(f.StoragePath())
 	if parent == "." {
 		return ""
 	}
@@ -133,7 +133,7 @@ func (f *File) Siblings() (*Siblings, error) {
 	parentPath := f.ParentPath()
 	infos, err := f.Storage().ReadDir(parentPath)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Could not read dir %s", parentPath)
 	}
 	for _, info := range infos {
 

@@ -11,6 +11,7 @@ export default new Vuex.Store({
 
     state: {
         file: {},
+        image: {},
         content: '',
         account: {},
         breadcrumbs: [],
@@ -19,9 +20,11 @@ export default new Vuex.Store({
     mutations: {
         setData(state, data) {
             state.file = data.File;
+            state.image = data.Image;
             state.content = data.Content;
             state.account = data.User;
             //state.breadcrumbs = data.Breadcrumbs;
+            console.log("data:", data)
         },
         updateContent(state, content) {
             state.content = content;

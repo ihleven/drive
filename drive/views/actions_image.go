@@ -32,7 +32,8 @@ type ImageHandler struct {
 }
 
 func (v *ImageView) GetAction(r *http.Request, w http.ResponseWriter) error {
-	v.ActionResponder.TemplateResponder.Template = "image2"
+	enableCors(&w)
+	v.ActionResponder.TemplateResponder.Template = "drive"
 	file, user := v.File, v.User
 
 	fmt.Printf("GetAction => Image %s\n", file.Name)
@@ -43,6 +44,7 @@ func (v *ImageView) GetAction(r *http.Request, w http.ResponseWriter) error {
 
 	image, err := drive.NewImage(v.File, v.User)
 	if err != nil {
+
 		return errors.Wrap(err, "NewImage")
 	}
 	siblings, err := v.File.Siblings()

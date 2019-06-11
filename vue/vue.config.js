@@ -35,10 +35,10 @@ module.exports = {
         },
         image: {
             entry: './src/pages/image/image.js',
-            template: './public/templates/image.html',
-            filename: 'templates/image.html',
+            template: './public/templates/drive.html',
+            filename: 'templates/drive.html',
             minify: false,
-            chunks: ['chunk-vendors', 'chunk-common', 'image'],
+//            chunks: ['chunk-vendors', 'chunk-common', 'image'],
         },
         album: {
             entry: './src/pages/album/album.js',
