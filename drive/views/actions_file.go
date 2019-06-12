@@ -56,6 +56,7 @@ type FileActionResponder struct {
 }
 
 func (a *FileActionResponder) GetAction(r *http.Request, w http.ResponseWriter) error {
+	enableCors(&w)
 
 	a.ActionResponder.TemplateResponder.Template = "file"
 	file, user := a.File, a.User

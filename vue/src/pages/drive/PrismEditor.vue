@@ -31,8 +31,17 @@ export default {
     components: {
         VuePrismEditor
     },
-    props: ['code', 'lang'],
-    mounted() {},
+    props: ['code', 'mime'],
+    computed: {
+        lang() {
+            if (this.mime==="text/javascript") {
+                return "js";
+            }
+        }
+    },
+    mounted() {
+        console.log(this.mime)
+    },
     methods: {
         onChange(e) {
             this.$emit("update", e)

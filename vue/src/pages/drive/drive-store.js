@@ -14,6 +14,7 @@ export default new Vuex.Store({
         image: {},
         content: '',
         account: {},
+        siblings: {},
         breadcrumbs: [],
     },
 
@@ -23,8 +24,9 @@ export default new Vuex.Store({
             state.image = data.Image;
             state.content = data.Content;
             state.account = data.User;
+            state.siblings = data.Siblings;
             //state.breadcrumbs = data.Breadcrumbs;
-            console.log("data:", data)
+            console.log('data:', data);
         },
         updateContent(state, content) {
             state.content = content;
@@ -38,7 +40,8 @@ export default new Vuex.Store({
                 commit('setData', JSON.parse(d.innerHTML));
             } else {
                 axios
-                    .get('http://localhost:3000/' + location.hash.substring(1), {
+                    .get('http://localhost:3000' + location.pathname, {
+                        //location.hash.substring(1), {
                         headers: {
                             Accept: 'application/json',
                         },
@@ -47,6 +50,18 @@ export default new Vuex.Store({
                         commit('setData', response.data);
                     });
             }
+        },
+        loadData({ commit }, payload) {console.log("loaddata", payload.path)
+            axios
+                .get('http://localhost:3000' + payload.path, {
+                    //location.hash.substring(1), {
+                    headers: {
+                        Accept: 'application/json',
+                    },
+                })
+                .then(function(response) {
+                    commit('setData', response.data);
+                });
         },
     },
 });

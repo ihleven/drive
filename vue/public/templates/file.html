@@ -15,41 +15,15 @@
     {{  marshalJSON "data" . }}
 
     <div id="app">
-
-        {{template "partials/hero" .}}
-
-
-        <section class="section">
-            <div class="container" v-cloak style="border:1px solid goldenrod">
-                <prism-editor :code="content" lang="js" @update="onChange"></prism-editor>
-            </div>
-        </section>
-        <section class="section">
-            <div class="container" v-cloak style="border:1px solid black">
-               
-                    <!--  <markdown-editor :readonly="{{ not .File.Permissions.Write}}">{{.Content}}</markdown-editor>
-                    
-                    <code-highlighter language="{{.File.MIME.Subtype}}" :readonly="false">{{.Content}}
-                    </code-highlighter>
-                    
-                  <pre class="text"><code class="language-go" v-highlight>{{.Content}}</code></pre>-->
-                   
-             
-
-
-                <div class="content" v-text="content"></div>
-              
-
-
-
-
-
-            </div>
-        </section>
-       
-        
-
+            vc: {{ViewComponent}}
+            
+              <!--  {{template "partials/hero" .}} -->
+              <!-- specify the link by passing the `to` prop. -->
+              <!-- `<router-link>` will be rendered as an `<a>` tag by default -->
+            <router-view></router-view>
     </div>
+
+   
 </body>
 
 </html>

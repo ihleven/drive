@@ -22,6 +22,8 @@
                             <a class="navbar-item">
                                 <feather-icon name="database"/>
                             </a>
+                             <router-link :to="prev" class="navbar-item"><feather-icon name="chevron-left"/></router-link>
+                             <router-link :to="next" class="navbar-item"><feather-icon name="chevron-right"/></router-link>
                         </nav>
                     </div>
                 </section>
@@ -155,10 +157,16 @@ export default {
     },
 
     computed: {
-        ...mapState(['file', 'image']),
+        ...mapState(['file', 'image', 'siblings']),
         imageSrc() {
             console.log(this.file);
             return '/serve' + this.file.path
+        },
+        prev() {
+            return "/home" + this.siblings.Prev
+        },
+        next() {
+            return "/home" + this.siblings.Next
         }
     },
     

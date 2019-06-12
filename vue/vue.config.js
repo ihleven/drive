@@ -22,7 +22,8 @@ module.exports = {
         drive: {
             entry: './src/pages/drive/drive.js',
             template: './public/templates/file.html',
-            filename: 'templates/file.html',
+            //filename: 'templates/file.html',
+            filename: 'index.html',
             minify: false,
 //            chunks: ['chunk-vendors', 'chunk-common', 'drive'],
         },

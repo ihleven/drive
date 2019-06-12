@@ -9,33 +9,25 @@ sans-serif;
 
 
 // Set your brand colors
-$purple: #8A4D76;
-$pink: #FA7C91;
-$brown: #757763;
-$beige-light: #D0D1CD;
-$beige-lighter: #EFF0EB;
+//$purple: #8A4D76;
+//$pink: #FA7C91;
+//$brown: #757763;
+//$beige-light: #D0D1CD;
+//$beige-lighter: #EFF0EB;
 //$black: #000000;
 //$color: #000000;
 
-// Update Bulma's global variables
-//$family-sans-serif: "Nunito", sans-serif;
-$grey-dark: $brown;
-$grey-light: $beige-light;
-$primary: $purple;
-$link: $pink;
-$grey-darker: #000;
+//$grey-dark: $brown;
+//$grey-light: $beige-light;
+//$primary: $purple;
+//$link: $pink;
+//$grey-darker: #000;
 
 // Update some of Bulma's component variables
 $control-border-width: 1px;
-$input-background-color: $beige-lighter;
+//$input-background-color: $beige-lighter;
 $input-border-color: transparent;
 $input-shadow: none;
-
-//$navbar-height : 2rem;
-
-
-$navbar-breakpoint: 60px;
-
 
 
 [contenteditable]:focus {
