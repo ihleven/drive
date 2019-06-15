@@ -1,12 +1,11 @@
-import PhotoSwipeComponent from './PhotoSwipeComponent.vue'
+import Vue from 'vue';
+import PhotoSwipeComponent from './PhotoSwipeComponent.vue';
 
-let $vm
+let $vm;
 
-export default {
-    
+const PhotoSwipePlugin = {
     install(Vue) {
-
-        const PhotoSwipe = Vue.extend(PhotoSwipeComponent)
+        const PhotoSwipe = Vue.extend(PhotoSwipeComponent);
 
         if (!$vm) {
             //$vm = new PhotoSwipe({el: document.createElement('div')})
@@ -24,19 +23,20 @@ export default {
                 $vm.close()
             }
         } */
-        
-      
+
         Vue.mixin({
             methods: {
                 $pswp_open(index, items, options) {
-                    $vm.open(index, items, options)
+                    $vm.open(index, items, options);
                 },
-                $pswp_close () {
-                    $vm.close()
-                }
+                $pswp_close() {
+                    $vm.close();
+                },
             },
-            
-        })
-    }
-  };
-  
+        });
+    },
+};
+
+Vue.use(PhotoSwipePlugin);
+
+export default PhotoSwipePlugin;

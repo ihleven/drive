@@ -4,13 +4,18 @@ import PswpGallery from '@/components/PswpGallery.vue';
 import Cloud11Figure from '@/components/Cloud11Figure.vue';
 import TipTap from './TipTap.vue';
 import { mapState, mapActions } from 'vuex'
-import AlbumImage from './AlbumImage.vue';
+//import AlbumImage from './AlbumImage.vue';
 import Parallax from '@/components/Parallax.vue';
 import NavigationOverlay from '@/components/NavigationOverlay.vue';
 import NavbarTop from '@/components/NavbarTop.vue';
 import Cloud11Page from '@/components/Cloud11Page.vue';
 import FeatherIcon from '@/components/FeatherIcon.vue';
+import PhotoSwipePlugin from '@/plugins/PhotoSwipePlugin';
 
+// PhotoAlbum
+// Photobook
+// Storybook
+// Slideshow
 
 export default {
     name: "Album",
@@ -20,7 +25,7 @@ export default {
         PswpGallery,
         Cloud11Figure,
         TipTap,
-        AlbumImage,
+        //AlbumImage,
         Parallax, NavigationOverlay, NavbarTop, Cloud11Page
     },
     provide: {
@@ -122,9 +127,10 @@ export default {
                             <a :href="baseURL" class="navbar-item" >
                                 <feather-icon name="folder"/> directory
                             </a>
-                            <a class="navbar-item">
+                            <router-link :to="baseURL" class="navbar-item">
                                 <feather-icon name="activity"/>
-                            </a>
+                            </router-link>
+
                             <a class="navbar-item">
                                 <feather-icon name="database"/>
                             </a>

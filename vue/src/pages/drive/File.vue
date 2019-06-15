@@ -84,7 +84,7 @@ import { mapState, mapActions } from 'vuex'
 import Cloud11Page from '@/components/Cloud11Page.vue';
 import Parallax from '@/components/Parallax.vue';
 import PrismEditor from './PrismEditor';
-import TipTap from '../album/TipTap';
+import TipTap from './TipTap';
 
 
 

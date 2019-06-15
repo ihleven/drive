@@ -2,8 +2,9 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import store from './drive-store.js';
 import File from './File.vue';
-import Image from './Image.vue';
 import Folder from './Folder.vue';
+import PhotoAlbum from './PhotoAlbum.vue';
+import Image from './Image.vue';
 import { mapState } from 'vuex';
 
 import './drive-styles.scss';
@@ -16,13 +17,16 @@ store.dispatch('loadInitialData');
 
 const Drive = {
     computed: {
-        ...mapState(['account', 'file', 'content', 'folder']),
+        ...mapState(['account', 'file', 'content', 'folder', 'type']),
     },
     mounted() {
         console.log('Drive mounted');
     },
     render(h) {
         let c = null;
+        // if (this.type=='album') {
+        //     c = Album;
+        // }
         if (this.folder) {
             c = Folder;
         }
@@ -45,23 +49,27 @@ const router = new VueRouter({
             component: { template: '<div>bar</div>' },
         },
         {
+            path: '/alben*',
+            component: PhotoAlbum,
+        },
+        {
             path: '*',
             component: Drive,
         },
     ],
 });
 
-router.beforeEach((to, from, next) => {
-    store.dispatch('loadData', to);
-    next();
-});
-
 new Vue({
     el: '#app',
     router,
     store,
+    mounted() {
+        this.$router.beforeEach((to, from, next) => {
+            store.dispatch('loadData', to);
+            next();
+        });
+    },
     template: '<router-view></router-view>',
 });
 
-
-    //render: h => h(Image)
+//render: h => h(Image)

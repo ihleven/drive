@@ -142,9 +142,18 @@ import NavbarTop from '@/components/NavbarTop.vue';
 import Cloud11Page from '@/components/Cloud11Page.vue';
 import FeatherIcon from '@/components/FeatherIcon.vue';
 
+// So to sum it up. I love taking photographs and the pictures you see above are the result of this hobby of mine and are uploaded as images on Quora.
+
+//  image is the root or universal term and is used for any kind of 2 dimensional visual presentation that can be on paper, canvas, display screen or simply what is in front of your eyes.
+
+// picture implies that a person has made it, but doesn't specify how while 
+// photo means a camera captured an image in the real world at a specific time and place.
+//Photos are always images, but there are many images that are not photos.  An image is what you see; a photograph is one example of an image.
+// https://www.quora.com/Whats-the-difference-between-a-picture-an-image-and-a-photo
+// PICTURE IS A PAINTING OR DRAWING. 
 
 export default {
-    name: "Album",
+    name: "Image",
     components: {
         FeatherIcon,
         Cloud11Figure,

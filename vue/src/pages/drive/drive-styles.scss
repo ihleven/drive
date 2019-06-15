@@ -3,6 +3,22 @@
 // Import a Google Font
 @import url('https://fonts.googleapis.com/css?family=Nunito:400,700');
 
+
+$body-family: "Clear Sans",
+"Cooper Hewitt",
+"Segoe UI",
+"Roboto",
+"Helvetica Neue",
+sans-serif;
+$body-weight:200;
+$body-line-height: 1.2;
+
+
+$input-shadow: none;
+
+$navbar-breakpoint: 60px;
+
+
 // Set your brand colors
 $purple: #8A4D76;
 $pink: #FA7C91;
@@ -41,11 +57,34 @@ $input-shadow: none;
 @import 'bulma/bulma.sass';
 
 
+//@import 'node_modules/bulma-timeline/src/sass/index.sass';
+
 svg {
     width: 100%;
     height: 100%;
     fill: currentColor;
 }
+
+
+
+
+[v-cloak]>* {
+    display: none
+}
+
+[v-cloak]::before {
+    content: "loading…"
+}
+
+
+.feather {
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 
 
 

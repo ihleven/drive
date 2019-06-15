@@ -53,7 +53,7 @@ func AlbumHandler(storage drive.Storage, prefix string) func(w http.ResponseWrit
 		case "application/json":
 			err = templates.SerializeJSON(w, http.StatusOK, data)
 		default:
-			err = templates.Render(w, http.StatusOK, "album", data)
+			err = templates.Render(w, http.StatusOK, "drive", data)
 		}
 
 		if err != nil {
