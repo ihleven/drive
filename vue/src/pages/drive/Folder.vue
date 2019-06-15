@@ -79,7 +79,8 @@ export default {
                 <nav class="breadcrumb" aria-label="breadcrumbs">
                   <ul>
                     <li v-for="item in breadcrumbs" :key="item.Path">
-                      <a :href="item.Path" v-text="item.Name"></a>
+                      <router-link :to="item.Path" class="navbar-item" v-text="item.Name"></router-link>
+
                     </li>
                   </ul>
                 </nav>
@@ -151,7 +152,8 @@ export default {
               </td>
               <td>
                 <!--<a :href="folder.name + '/' + f.name" :title="f.path">{{ f.name }}</a>-->
-                <a :href="f.path" :title="f.path">{{ f.name }}</a>
+                                      <router-link :to="f.path" class="navbar-item" :title="f.path" v-text="f.name"></router-link>
+
               </td>
 
               <td class="has-text-right" style="padding-right:0">{{ f.mime.Type }}</td>

@@ -135,7 +135,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .modal-fade-enter,
 .modal-fade-leave-active {
     opacity: 0;
@@ -147,7 +147,7 @@ export default {
 }
 </style>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .dropbox {
     outline: 2px dashed grey; /* the dash box */
     outline-offset: -10px;

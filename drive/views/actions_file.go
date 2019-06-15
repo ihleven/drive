@@ -20,7 +20,7 @@ type FileActionResponder2 struct {
 }
 
 func (a *FileActionResponder2) GetAction(r *http.Request, w http.ResponseWriter) error {
-	a.template = "file"
+	a.template = "drive"
 	handle, user := a.Handle, a.User
 
 	fmt.Printf("GetAction => File %s\n", handle.Name())
@@ -58,7 +58,7 @@ type FileActionResponder struct {
 func (a *FileActionResponder) GetAction(r *http.Request, w http.ResponseWriter) error {
 	enableCors(&w)
 
-	a.ActionResponder.TemplateResponder.Template = "file"
+	a.ActionResponder.TemplateResponder.Template = "drive"
 	file, user := a.File, a.User
 	fmt.Printf("GetAction => File %s\n", file.Name)
 
@@ -72,10 +72,11 @@ func (a *FileActionResponder) GetAction(r *http.Request, w http.ResponseWriter) 
 	}
 
 	a.Respond(w, r, map[string]interface{}{
-		"File":    file,
-		"User":    user,
-		"Content": content,
-		"Title":   strings.TrimSuffix(file.Name, filepath.Ext(file.Name)),
+		"File":        file,
+		"User":        user,
+		"Content":     content,
+		"Title":       strings.TrimSuffix(file.Name, filepath.Ext(file.Name)),
+		"Breadcrumbs": file.Breadcrumbs(),
 	})
 
 	return nil

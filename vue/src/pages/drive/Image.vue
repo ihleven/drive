@@ -32,10 +32,10 @@
 
             <section class="section has-background-light">
 
-
+                <form method="POST">
                 <div class="columns">
                     <div class="column">
-                        <form method="POST">
+                        
                             <div class="field">
                                 <label class="label">Title</label>
                                 <div class="control">
@@ -56,7 +56,7 @@
                                     <textarea name="cutline" class="textarea" placeholder="Cutline">{{image.Cutline}}</textarea>
                                 </div>
                             </div>
-                        </form>
+                        
                     </div>
 
 
@@ -87,7 +87,7 @@
                                 </div>
                             </div>
                             <footer class="card-footer">
-                                <a href="#" class="card-footer-item">Save</a>
+                                <button type="submit" href="#" class="card-footer-item">Save</button>
                                 <a href="#" class="card-footer-item">Edit</a>
                                 <a href="#" class="card-footer-item">Delete</a>
                             </footer>
@@ -124,6 +124,7 @@
                     </div>
 
                 </div>
+                </form>
             </section>
        </Parallax>    
     </cloud11-page>
@@ -153,6 +154,7 @@ export default {
     data() {
         return {
             account: {},
+            //form: Object.assign({}, src);
         };
     },
 

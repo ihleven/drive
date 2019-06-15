@@ -2,7 +2,8 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import store from './drive-store.js';
 import File from './File.vue';
-import Image from '../image/Image.vue';
+import Image from './Image.vue';
+import Folder from './Folder.vue';
 import { mapState } from 'vuex';
 
 import './drive-styles.scss';
@@ -13,8 +14,29 @@ Vue.use(VueRouter);
 
 store.dispatch('loadInitialData');
 
-//  const comp = {template: '<div><component :is="$route.params.tab"></component></div>'}
-console.log('Vue.config.errorHandler', Vue.config.errorHandler);
+const Drive = {
+    computed: {
+        ...mapState(['account', 'file', 'content', 'folder']),
+    },
+    mounted() {
+        console.log('Drive mounted');
+    },
+    render(h) {
+        let c = null;
+        if (this.folder) {
+            c = Folder;
+        }
+        if (this.file && this.file.mime) {
+            if (this.file.mime.Type == 'image') {
+                c = Image;
+            } else {
+                c = File;
+            }
+        }
+        return h(c);
+    },
+};
+
 const router = new VueRouter({
     mode: 'history',
     routes: [
@@ -24,30 +46,22 @@ const router = new VueRouter({
         },
         {
             path: '*',
-            component: File,
+            component: Drive,
         },
     ],
 });
+
 router.beforeEach((to, from, next) => {
-        store.dispatch("loadData", to)
-        next()
-  })
+    store.dispatch('loadData', to);
+    next();
+});
+
 new Vue({
     el: '#app',
     router,
     store,
-    computed: {
-        ...mapState(['account', 'file', 'content']),
-        ViewComponent() {
-            if (this.file.mime && this.file.mime.Type == 'image') {
-                return Image;
-            }
-            return File;
-        },
-    },
-    
-    mounted() {
-        console.log('drive mounted');
-    },
-    render (h) { return h(this.ViewComponent) }
+    template: '<router-view></router-view>',
 });
+
+
+    //render: h => h(Image)

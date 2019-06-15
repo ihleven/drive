@@ -76,9 +76,11 @@ func (v *ImageView) PostAction(r *http.Request, w http.ResponseWriter) error {
 	image.Caption = r.FormValue("caption")
 	image.Cutline = r.FormValue("cutline")
 	if err := image.WriteMeta(v.User); err != nil {
+		fmt.Println("image.Post", err)
+
 		return errors.Wrap(err, "Image.WriteMeta")
 	}
-	fmt.Println("POST: no error")
+	fmt.Println("POST: no error", image)
 	http.Redirect(w, r, v.File.Path, http.StatusFound)
 	return nil
 }

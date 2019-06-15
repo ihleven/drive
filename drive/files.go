@@ -38,6 +38,15 @@ func GetFile(storage Storage, path string, usr *domain.Account) (*File, error) {
 	return file, nil
 }
 
+func CreateFile(storage Storage, path string, usr *domain.Account) (*File, error) {
+
+	err := storage.Create(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "File '%s' could not be created!", path)
+	}
+	return GetFile(storage, path, usr)
+}
+
 func DeleteFile(file *File) error {
 
 	if !file.Permissions.Write {

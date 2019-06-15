@@ -12,6 +12,7 @@ export default new Vuex.Store({
     state: {
         file: {},
         image: {},
+        folder: {},
         content: '',
         account: {},
         siblings: {},
@@ -23,9 +24,11 @@ export default new Vuex.Store({
             state.file = data.File;
             state.image = data.Image;
             state.content = data.Content;
-            state.account = data.User;
+            state.account = data.Account;
             state.siblings = data.Siblings;
             //state.breadcrumbs = data.Breadcrumbs;
+            state.folder = data.Folder;
+            state.breadcrumbs = data.Breadcrumbs;
             console.log('data:', data);
         },
         updateContent(state, content) {
@@ -51,7 +54,8 @@ export default new Vuex.Store({
                     });
             }
         },
-        loadData({ commit }, payload) {console.log("loaddata", payload.path)
+        loadData({ commit }, payload) {
+            console.log('loaddata', payload.path);
             axios
                 .get('http://localhost:3000' + payload.path, {
                     //location.hash.substring(1), {
@@ -60,7 +64,31 @@ export default new Vuex.Store({
                     },
                 })
                 .then(function(response) {
+                    console.log('loaded', response.data);
                     commit('setData', response.data);
+                });
+        },
+
+        submitFileForm({ commit }, content) {
+            // console.log("submitFileForm", content)
+            let formData = new FormData();
+            formData.set(
+                'file',
+                new Blob([content], {
+                    type: 'text/plain',
+                })
+            );
+            axios({
+                method: 'post',
+                url: location.pathname,
+                data: formData,
+                config: { headers: { 'Content-Type': 'multipart/form-data' } },
+            })
+                .then(() => {
+                    commit('updateContent', content);
+                })
+                .catch(function(response) {
+                    console.log('ERROR submitFileForm =>', response);
                 });
         },
     },

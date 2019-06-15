@@ -1,7 +1,7 @@
 <template>
     <div class="prism-editor">
         <vue-prism-editor 
-            :code="code"
+            :code="value"
             :language="lang" 
             :readonly="false"
             :line-numbers="true"
@@ -31,7 +31,7 @@ export default {
     components: {
         VuePrismEditor
     },
-    props: ['code', 'mime'],
+    props: ['value', 'mime'],
     computed: {
         lang() {
             if (this.mime==="text/javascript") {
@@ -44,7 +44,7 @@ export default {
     },
     methods: {
         onChange(e) {
-            this.$emit("update", e)
+            this.$emit("input", e) // v-model: value / input
         },
         keyup(e) {
             console.log("event keyup => ", e);

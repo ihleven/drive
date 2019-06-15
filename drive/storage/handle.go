@@ -95,9 +95,11 @@ func (fh *FileHandle) Descriptor(flag int) *os.File { // , perm os.FileMode
 
 	fd, err := os.OpenFile(fh.Location(), flag, 0755)
 	if err != nil {
+		panic("fd")
 		log.Fatal("error gettting descriptor", err.Error(), fh.Location())
 		return nil
 	}
+	fmt.Println("fd:", fd.Name())
 	return fd
 }
 

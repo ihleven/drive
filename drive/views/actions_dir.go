@@ -24,7 +24,7 @@ type DirActionResponder struct {
 func (a *DirActionResponder) GetAction(r *http.Request, w http.ResponseWriter) error {
 	enableCors(&w)
 
-	a.ActionResponder.TemplateResponder.Template = "folder"
+	a.ActionResponder.TemplateResponder.Template = "drive"
 	fmt.Printf("GetAction => Directory '%s'\n", a.File.Path)
 
 	folder, err := drive.GetFolder(a.File, a.User)

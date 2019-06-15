@@ -250,21 +250,34 @@ func (i *Image) GoexifDecode(fd *os.File) error {
 }
 
 func (i *Image) WriteMeta(usr *domain.Account) error {
+	fmt.Println("writemata1", i.metaFile)
+
+	if i.metaFile == nil {
+		filename := i.getMetaFilename()
+		file, err := CreateFile(i.File.Storage(), filename, usr)
+		if err != nil {
+			return errors.Errorf("Could not create meta file: %s", filename)
+		}
+		i.metaFile = file
+	}
 
 	if !i.metaFile.Permissions.Write {
 		return errors.Errorf("Missing write permission for %s", i.metaFile.Name)
 	}
-	fd := i.metaFile.Descriptor(0)
-	fd.Close()
+	fd := i.metaFile.Descriptor(os.O_CREATE | os.O_WRONLY | os.O_TRUNC)
+	defer fd.Close()
+	fmt.Println("writemeta", fd.Name())
 
 	tmpl, err := template.New("txt").Parse("{{.Title}}\n=====\n{{.Caption}}\n-----\n{{.Cutline}}\n------\n")
 	if err != nil {
 		return err
 	}
+
 	err = tmpl.Execute(fd, i)
 	if err != nil {
 		return err
 	}
+	fmt.Println("writemeta", fd.Name())
 	return nil
 }
 
