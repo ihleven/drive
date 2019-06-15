@@ -16,14 +16,15 @@
                     <div class="hero-foot">
                         <nav class="navbar ">
                             
+                             <router-link :to="href(siblings.parent)" class="navbar-item"><feather-icon name="arrow-left"/></router-link>
                             <a class="navbar-item">
                                 <feather-icon name="activity"/>
                             </a>
                             <a class="navbar-item">
                                 <feather-icon name="database"/>
                             </a>
-                             <router-link :to="prev" class="navbar-item"><feather-icon name="chevron-left"/></router-link>
-                             <router-link :to="next" class="navbar-item"><feather-icon name="chevron-right"/></router-link>
+                             <router-link :to="href(siblings.prev)" class="navbar-item"><feather-icon name="chevron-left"/></router-link>
+                             <router-link :to="href(siblings.next)" class="navbar-item"><feather-icon name="chevron-right"/></router-link>
                         </nav>
                     </div>
                 </section>
@@ -164,19 +165,17 @@ export default {
             console.log(this.file);
             return '/serve' + this.file.path
         },
-        prev() {
-            return "/home" + this.siblings.Prev
-        },
-        next() {
-            return "/home" + this.siblings.Next
-        }
+        
+        
     },
     
     created() {   
         console.log('Image.vue 2 =>', this.image.path);
      },
     methods: {
-
+        href(path) {
+            return "/home" + path
+        }
     },
     
 };

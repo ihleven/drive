@@ -127,22 +127,25 @@ func (f *File) ParentPath() string {
 }
 
 type Siblings struct {
-	Count, CurrentIndex, PrevIndex, NextIndex int
-	First,
-	Last,
-	Prev,
-	Current,
-	Next string
-	All []string
+	Count        int
+	CurrentIndex int
+	PrevIndex    int
+	NextIndex    int
+	First        string `json:"first"`
+	Last         string `json:"last"`
+	Prev         string `json:"prev"`
+	Current      string `json:"current"`
+	Next         string `json:"next"`
+	Parent       string `json:"parent"`
+	All          []string
 }
 
 func (f *File) Siblings() (*Siblings, error) {
 	var currentIndex int
-	siblings := &Siblings{}
-	parentPath := f.ParentPath()
-	infos, err := f.Storage().ReadDir(parentPath)
+	siblings := &Siblings{Parent: f.ParentPath()}
+	infos, err := f.Storage().ReadDir(siblings.Parent)
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not read dir %s", parentPath)
+		return nil, errors.Wrap(err, "Could not read dir %s", siblings.Parent)
 	}
 	for _, info := range infos {
 
@@ -151,10 +154,10 @@ func (f *File) Siblings() (*Siblings, error) {
 		}
 		currentIndex++
 		if info.Name() == f.Name {
-			siblings.Current = path.Join(parentPath, info.Name())
+			siblings.Current = path.Join(siblings.Parent, info.Name())
 			siblings.CurrentIndex = currentIndex
 		}
-		siblings.All = append(siblings.All, path.Join(parentPath, info.Name()))
+		siblings.All = append(siblings.All, path.Join(siblings.Parent, info.Name()))
 	}
 
 	siblings.Count = len(siblings.All)

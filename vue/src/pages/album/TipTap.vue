@@ -2,10 +2,10 @@
 import Icon from '@/components/Icon';
 import { Editor, EditorContent, EditorMenuBubble, EditorMenuBar } from 'tiptap';
 import { HardBreak, Heading, Bold, Code, Italic, Link, Strike, Underline, History } from 'tiptap-extensions';
-import Image from './ImageNode';
+import Image from '@/pages/album/ImageNode';
 
 import showdown from 'showdown';
-import ImageSelectModal from './imageSelectModal.vue';
+import ImageSelectModal from '@/pages/album/imageSelectModal.vue';
 
 export default {
     name: 'TipTap',
@@ -98,8 +98,8 @@ export default {
 
 <template>
   <div class="container">
-    {{ metadata }}
-    <br>------- Meta
+    
+    <br>--- {{ metadata }} ---
     <br>
     <editor-menu-bar :editor="editor">
       <div slot-scope="{ commands, isActive }">

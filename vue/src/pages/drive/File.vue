@@ -22,7 +22,6 @@
 
         <div id="navbarBasicExample" class="navbar-menu" :class="{'is-active': menuOpen}">
             <div class="navbar-start">
-                <a class="navbar-item">Home</a>
                 <div class="navbar-item">
 <nav class="breadcrumb" aria-label="breadcrumbs">
                   <ul>
@@ -38,10 +37,10 @@
             <div class="navbar-end">
                 <div class="navbar-item">
                     <div class="buttons">
-                        <a class="button is-primary" @click="save">
+                        <a class="button is-primary" @click="save" :disabled="pristine">
                             <strong>save</strong>
                         </a>
-                        <a class="button is-light"  @click="reset">
+                        <a class="button is-light"  @click="reset" :disabled="pristine">
                             reset
                         </a>
                         <a class="button is-light"  :href="'/serve' + file.path" target="_blank">
@@ -54,9 +53,9 @@
     </nav>
     <div class="wrapper">
         
-        <section class="section">
-            <div class="container" v-cloak style="border:1px solid black">
-                           <prism-editor v-model="fileContent" :mime="'text/javascript'" @update="updateContent"></prism-editor>
+            <div class="container is-fullhd">
+                           
+                <prism-editor v-model="fileContent" :mime="'text/javascript'" @update="updateContent"></prism-editor>
 
                     <!--  <markdown-editor :readonly="{{ not .File.Permissions.Write}}">{{.Content}}</markdown-editor>
                     
@@ -67,8 +66,13 @@
                    
             
             </div>
-        </section>
-       
+            <section class="section has-background-light" v-if="mimeType=='markdown'">
+                <div class="container">
+                    <h1 class="title"></h1>
+                    <textarea v-model="fileContent"></textarea>
+                    <tip-tap  v-model="fileContent"></tip-tap>
+                </div>
+            </section>
      </div>  
    </div>
 </template>
@@ -80,6 +84,7 @@ import { mapState, mapActions } from 'vuex'
 import Cloud11Page from '@/components/Cloud11Page.vue';
 import Parallax from '@/components/Parallax.vue';
 import PrismEditor from './PrismEditor';
+import TipTap from '../album/TipTap';
 
 
 
@@ -89,6 +94,7 @@ export default {
         Cloud11Page,
         Parallax,
         PrismEditor,
+        TipTap
     },
     
     data() {
@@ -99,7 +105,13 @@ export default {
     },
 
     computed: {
-        ...mapState(['account', 'file', 'content', 'breadcrumbs']),  
+        ...mapState(['account', 'file', 'content', 'breadcrumbs']), 
+        pristine() {
+            return this.fileContent == this.content;
+        },
+        mimeType() {
+            return this.file && this.file.mime && this.file.mime.Value == "text/markdown" ? "markdown" : "";
+        }
     },
     
     created() {   

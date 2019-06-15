@@ -52,8 +52,8 @@ export default class Image extends Node {
             computed: {
                 src: {
                     get() {
-                        //return this.node.attrs.src;
-                        return this.prefix + '/' + this.album + '/' + this.node.attrs.src;
+                        return this.node.attrs.src;
+                        //return this.prefix + '/' + this.album + '/' + this.node.attrs.src;
                     },
                     set(src) {
                         // we cannot update `src` itself because `this.node.attrs` is immutable
