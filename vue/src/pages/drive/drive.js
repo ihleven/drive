@@ -11,6 +11,9 @@ import './drive-styles.scss';
 
 import 'typeface-clear-sans/index.css';
 
+
+
+
 Vue.use(VueRouter);
 
 store.dispatch('loadInitialData');
@@ -21,6 +24,12 @@ const Drive = {
     },
     mounted() {
         console.log('Drive mounted');
+        this.removeBodyTextNodes()
+    },
+    methods: {
+        removeBodyTextNodes() {
+            Array.from(document.body.childNodes).filter(n => n.nodeType==3).map(n => n.remove());
+        }
     },
     render(h) {
         let c = null;

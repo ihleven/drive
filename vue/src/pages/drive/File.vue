@@ -55,7 +55,7 @@
         
             <div class="container is-fullhd">
                            
-                <prism-editor v-model="fileContent" :mime="'text/javascript'" @update="updateContent"></prism-editor>
+                <prism-editor v-model="fileContent" :mime="'text/javascript'"></prism-editor>
 
                     <!--  <markdown-editor :readonly="{{ not .File.Permissions.Write}}">{{.Content}}</markdown-editor>
                     

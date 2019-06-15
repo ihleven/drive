@@ -100,7 +100,7 @@ export default {
           <a class="navbar-item">
             <feather-icon name="activity"/>
           </a>
-          <router-link :to="folder.path.replace('home', 'alben')" class="navbar-item">
+          <router-link :to="folder.path ? folder.path.replace('home', 'alben') : ''" class="navbar-item">
             <feather-icon name="camera"/>
           </router-link>
           <div class="navbar-item has-dropdown" :class="{'is-active':blah}" @click="blah=!blah">

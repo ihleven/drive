@@ -6,6 +6,7 @@ Vue.use(Vuex);
 
 const debug = process.env.NODE_ENV !== 'production';
 
+
 export default new Vuex.Store({
     strict: debug,
 
@@ -83,7 +84,7 @@ export default new Vuex.Store({
             }
         },
         loadData({ commit }, payload) {
-            console.log('loaddata', payload.path);
+            console.log('loaddata', payload);
             axios
                 .get('http://localhost:3000' + payload.path, {
                     //location.hash.substring(1), {
