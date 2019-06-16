@@ -2,6 +2,7 @@ package pg_arbeit
 
 import (
 	"database/sql"
+	"drive/config"
 	"drive/errors"
 	"fmt"
 )
@@ -14,17 +15,12 @@ func (db database) Close() {
 	db.DB.Close()
 }
 
-const (
-	DB_USER = "mi"
-	DB_NAME = "cloud11"
-)
-
 var repo database
 
 // GetDatabaseHandle creates and verifies a database handle, returning it to the caller
-func GetDatabaseHandle() (*database, error) {
+func GetDatabaseHandle(conf config.DatabaseConfiguration) (*database, error) {
 
-	dbinfo := fmt.Sprintf("user=%s dbname=%s sslmode=disable", DB_USER, DB_NAME)
+	dbinfo := fmt.Sprintf("host=localhost port=5432 user=%s password=%s dbname=%s sslmode=disable", conf.User, conf.Password, conf.Name)
 	db, err := sql.Open("postgres", dbinfo)
 	if err != nil {
 		return nil, errors.Augment(err, errors.BadCredentials, "Could not get database handle '%s'", dbinfo)

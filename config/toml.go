@@ -8,11 +8,12 @@ import (
 )
 
 type tomlConfig struct {
-	Title    string `toml:"title"`
-	Server   server
-	DB       database `toml:"database"`
-	Storages map[string]storage
-	Clients  clients
+	Title     string `toml:"title"`
+	Server    server
+	DB        database                         `toml:"database"`
+	Databases map[string]DatabaseConfiguration `toml:"databases"`
+	Storages  map[string]storage
+	Clients   clients
 }
 
 type server struct {
@@ -56,4 +57,5 @@ func readConfigFile(configFilePath string) {
 	//fmt.Println(fileConfig)
 	Settings.Storages = fileConfig.Storages
 	Settings.Address.port = fileConfig.Server.Port
+	databases["default"] = fileConfig.Databases["default"]
 }

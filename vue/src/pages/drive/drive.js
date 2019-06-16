@@ -74,8 +74,8 @@ new Vue({
     store,
     mounted() {
         this.$router.beforeEach((to, from, next) => {
-            store.dispatch('loadData', to);
-            next();
+            store.dispatch('loadData', {to: to, next: next});
+            //next();
         });
     },
     template: '<router-view></router-view>',

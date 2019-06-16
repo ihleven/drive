@@ -12,7 +12,7 @@ var Repo Repository
 func GetArbeitstag(year, month, day int, accountID int) (*Arbeitstag, error) {
 
 	a, err := Repo.RetrieveArbeitstag(year, month, day, accountID)
-
+	fmt.Println("arbeitstag", a)
 	return a, err
 }
 

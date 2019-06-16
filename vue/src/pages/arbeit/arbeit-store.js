@@ -111,7 +111,7 @@ export default new Vuex.Store({
             state
         }) {
             commit(SET_LOADING, true);
-            axios('http://localhost:3000/arbeit/' + state.activeDate.year, {
+            axios('/arbeit/' + state.activeDate.year, {
                 headers: {
                     Accept: 'application/json',
                 },
@@ -125,7 +125,7 @@ export default new Vuex.Store({
             state
         }) {
             commit(SET_LOADING, true);
-            axios('http://localhost:3000/arbeit/' + state.activeDate.year + '/' + state.activeDate.month, {
+            axios('/arbeit/' + state.activeDate.year + '/' + state.activeDate.month, {
                 headers: {
                     Accept: 'application/json',
                 },
@@ -142,7 +142,7 @@ export default new Vuex.Store({
             let year = state.activeDate.year,
                 month = state.activeDate.month,
                 day = state.activeDate.day;
-            axios('http://localhost:3000/arbeit/' + year + '/' + month + '/' + day, {
+            axios('/arbeit/' + year + '/' + month + '/' + day, {
                 headers: {
                     Accept: 'application/json',
                 },

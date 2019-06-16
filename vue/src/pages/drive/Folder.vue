@@ -23,7 +23,7 @@ export default {
         };
     },
     computed: {
-        ...mapState(['folder', 'account', 'breadcrumbs']),
+        ...mapState(['folder', 'account', 'breadcrumbs', "error"]),
     },
     methods: {
         deleteFile(file) {
@@ -45,6 +45,9 @@ export default {
         overlayNavigationToggler() {
             this.menuOpen = !this.menuOpen;
         },
+        errorClear() {
+            this.$store.commit("error", null);
+        }
     },
     mounted() {
         console.log('Folder.vue =>', this.folder);
@@ -84,49 +87,55 @@ export default {
                     </li>
                   </ul>
                 </nav>
+                <div class="notification is-danger" v-if="error">
+                    <button class="delete" @click="errorClear"></button>
+                    <strong>{{error.status}}: {{error.statusText}}</strong><br>
+                    <small style="white-space: pre;">{{error.data}}</small>
+                </div>
               </h3>
             </div>
           </div>
         </section>
       </template>
 
-      <template #attached>
-        <nav class="navbar attached">
-          <a class="navbar-item">
-            <feather-icon name="upload-cloud"/>&nbsp;
-            <span>upload</span>
-          </a>
+        <template #attached>
+            <nav class="navbar attached">
+                <a class="navbar-item">
+                    <feather-icon name="upload-cloud"/>&nbsp;
+                    <span>upload</span>
+                </a>
 
-          <a class="navbar-item">
-            <feather-icon name="activity"/>
-          </a>
-          <router-link :to="folder.path ? folder.path.replace('home', 'alben') : ''" class="navbar-item">
-            <feather-icon name="camera"/>
-          </router-link>
-          <div class="navbar-item has-dropdown" :class="{'is-active':blah}" @click="blah=!blah">
-            <a class="navbar-link is-arrowless">
-              <feather-icon name="more-horizontal"/>
-            </a>
+                <a class="navbar-item">
+                    <feather-icon name="activity"/>
+                </a>
 
-            <div class="navbar-dropdown">
-              <a class="navbar-item">
-                <div class="dropdown-content">
-                  <div class="dropdown-item">
-                    <p>
-                      You can insert
-                      <strong>any type of content</strong> within the dropdown menu.
-                    </p>
-                  </div>
+                <router-link :to="folder.path ? folder.path.replace('home', 'alben') : ''" class="navbar-item">
+                    <feather-icon name="camera"/>
+                </router-link>
+
+                <div class="navbar-item has-dropdown" :class="{'is-active':blah}" @click="blah=!blah">
+                    <a class="navbar-link">
+                        <feather-icon name="more-horizontal"/>
+                    </a>
+                    <div class="navbar-dropdown is-boxed">
+                        <a class="navbar-item">
+                            Overview
+                        </a>
+                        <a class="navbar-item">
+                            Elements
+                        </a>
+                        <a class="navbar-item">
+                            Components
+                        </a>
+                        <hr class="navbar-divider">
+                        <div class="navbar-item">
+                            Version 0.7.5
+                        </div>
+                    </div>
+                    
                 </div>
-              </a>
-              <a class="navbar-item">Elements</a>
-              <a class="navbar-item">Components</a>
-              <hr class="navbar-divider">
-              <div class="navbar-item">Version 0.7.4</div>
-            </div>
-          </div>
-        </nav>
-      </template>
+            </nav>
+        </template>
 
       <section class="section has-background-white"></section>
 
@@ -229,20 +238,26 @@ body,
 .navbar.attached {
     min-height: 2.5rem;
     background: transparent;
-}
-.navbar.attached .navbar-item,
-.navbar.attached .navbar-link {
-    background: transparent;
-    color: rgb(187, 176, 176);
-}
-.navbar.attached .navbar-item:hover,
-.navbar.attached .navbar-item.is-active {
-    background-color: #ffffff32;
-    color: rgb(248, 248, 248);
-}
-.navbar.attached .navbar-link:hover,
-.navbar.attached .navbar-link.is-active {
-    background-color: transparent;
-    color: rgb(248, 248, 248);
+   .navbar-item, .navbar-link {
+        background-color: transparent;
+        color: white;
+        &:hover, &:active, &:focus, &.is-active {
+        background-color: #fafafa;;
+        color: black;
+    }
+    }
+    .navbar-dropdown {
+        .navbar-item {
+            color: black;
+            background-color: white;
+        
+            &:hover, &.is-active {
+                background-color: grey;
+                color: dark;
+            }
+        }
+    }
+    
+    
 }
 </style>

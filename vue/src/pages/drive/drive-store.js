@@ -6,7 +6,6 @@ Vue.use(Vuex);
 
 const debug = process.env.NODE_ENV !== 'production';
 
-
 export default new Vuex.Store({
     strict: debug,
 
@@ -20,7 +19,7 @@ export default new Vuex.Store({
         breadcrumbs: [],
         baseURL: null,
         serveURL: null,
-
+        error: null,
         images: [],
         meta: {},
         sources: [],
@@ -29,8 +28,6 @@ export default new Vuex.Store({
     },
 
     mutations: {
-        
-        
         setData(state, data) {
             state.file = data.File;
             state.image = data.Image;
@@ -55,11 +52,13 @@ export default new Vuex.Store({
             }
             state.storage = data.storage;
             console.log('data:', data);
-
         },
         updateContent(state, content) {
             state.content = content;
         },
+        error(state, error) {
+            state.error = error;
+        }
     },
 
     actions: {
@@ -69,32 +68,55 @@ export default new Vuex.Store({
                 commit('setData', JSON.parse(d.innerHTML));
             } else {
                 axios
-                    .get('http://localhost:3000' + location.pathname, {
+                    .get(location.pathname, {
                         //location.hash.substring(1), {
                         headers: {
                             Accept: 'application/json',
                         },
                     })
                     .then(function(response) {
-                        
-                        
-                            commit('setData', response.data);
-                        
+                        commit('setData', response.data);
                     });
             }
         },
         loadData({ commit }, payload) {
             console.log('loaddata', payload);
+            commit('error', null);
             axios
-                .get('http://localhost:3000' + payload.path, {
+                .get(payload.to.path, {
                     //location.hash.substring(1), {
                     headers: {
                         Accept: 'application/json',
                     },
                 })
                 .then(function(response) {
-                    console.log('loaded', response.data);
+                    console.log('loaded', response.status);
                     commit('setData', response.data);
+                    payload.next();
+                })
+                .catch(error => {
+                    // Error 😨
+                    if (error.response) {
+                        /*
+                         * The request was made and the server responded with a
+                         * status code that falls out of the range of 2xx
+                         */
+                        //console.log(error.response.data);
+                        //console.log(error.response.status);
+                        //console.log(error.response.headers);
+                        commit('error', error.response);
+                    } else if (error.request) {
+                        /*
+                         * The request was made but no response was received, `error.request`
+                         * is an instance of XMLHttpRequest in the browser and an instance
+                         * of http.ClientRequest in Node.js
+                         */
+                        console.log(error.request);
+                    } else {
+                        // Something happened in setting up the request and triggered an Error
+                        console.log('Error', error.message);
+                    }
+                    console.log(error.config);
                 });
         },
 

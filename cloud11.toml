@@ -5,6 +5,15 @@ title = "TOML Example"
 [server]
 port = 3000
 
+[databases]
+  [databases.default]
+  Driver   = "postgres"
+  Name     = "cloud11"
+  User     = "mi"
+  Password = "dummy"
+  Host     = "localhost"
+  Port     = 5432
+
 [database]
 server = "192.168.1.1"
 ports = [ 8001, 8001, 8002 ]

@@ -17,7 +17,7 @@ if (d) {
     store.commit('setAlbum', data.album);
 
 } else {
-    axios.get('http://localhost:3000/alben/' + location.hash.substring(1), {
+    axios.get('/alben/' + location.hash.substring(1), {
             headers: {
                 'Accept': 'application/json',
             }

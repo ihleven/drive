@@ -15,7 +15,7 @@ import (
 func main() {
 	settings := config.ParseArgs()
 
-	repo, err := pg_arbeit.GetDatabaseHandle()
+	repo, err := pg_arbeit.GetDatabaseHandle(config.GetDatabaseConfiguration("default"))
 	if err != nil {
 		fmt.Println(err.Error())
 	}
