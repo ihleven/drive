@@ -15,9 +15,8 @@ func init() {
 
 	opts := renderer.Options{
 		FuncMap:          []template.FuncMap{FuncMap},
-		ParseGlobPattern: "./_static/templates/*.html",
+		ParseGlobPattern: "./_static/*.html",
 	}
-
 	rnd = renderer.New(opts)
 }
 

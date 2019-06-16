@@ -25,6 +25,9 @@ export default {
     computed: {
         ...mapState(['folder', 'account', 'breadcrumbs', "error"]),
     },
+    mounted() {
+        console.log('Folder.vue =>', this.folder);
+    },
     methods: {
         deleteFile(file) {
             fetch(
@@ -49,8 +52,10 @@ export default {
             this.$store.commit("error", null);
         }
     },
-    mounted() {
-        console.log('Folder.vue =>', this.folder);
+    filters: {
+        timestamp(v) {
+            return v;
+        }
     },
 };
 </script>
@@ -114,7 +119,7 @@ export default {
                 </router-link>
 
                 <div class="navbar-item has-dropdown" :class="{'is-active':blah}" @click="blah=!blah">
-                    <a class="navbar-link">
+                    <a class="navbar-link is-arrowless">
                         <feather-icon name="more-horizontal"/>
                     </a>
                     <div class="navbar-dropdown is-boxed">
@@ -139,13 +144,14 @@ export default {
 
       <section class="section has-background-white"></section>
 
-      <div class="scrollwrapper">
-        <table class="table is-striped is-hoverable is-fullwidth">
+      <div class="entries">
+        <table class="table is-striped is-fullwidth ">
           <thead>
             <tr>
               <th></th>
               <th>Name</th>
 
+              <th></th>
               <th colspan="2" class="has-text-centered">MIME</th>
               <th>Mode</th>
               <th class="has-text-right">Owner</th>
@@ -159,55 +165,51 @@ export default {
           </thead>
           <tbody>
             <tr v-for="f in folder.entries" :key="f.name">
-              <td>
-                <feather-icon :name="f.mime.Type == 'dir' ? 'folder' : 'file'" :size="'small'"/>
+              <td class="">
+                <feather-icon :name="f.mime.Type == 'dir' ? 'folder' : 'file'"/>
               </td>
-              <td>
+              <td class="name">
                 <!--<a :href="folder.name + '/' + f.name" :title="f.path">{{ f.name }}</a>-->
-                                      <router-link :to="f.path" class="navbar-item" :title="f.path" v-text="f.name"></router-link>
+                <router-link :to="f.path" class="navbar-item" :title="f.path" v-text="f.name"></router-link>
 
               </td>
-
-              <td class="has-text-right" style="padding-right:0">{{ f.mime.Type }}</td>
-              <td class="nowrap">{{ f.mime.Subtype }}</td>
-              <td class="nowrap">{{ f.Mode }}</td>
-              <td
-                class="has-text-right"
-                :class="f.permissions.IsOwner ? 'is-user-group' : 'is-not-user-group'"
-              >{{ f.owner.name }}</td>
-              <td
-                :class="f.permissions.IsOwner ? 'is-user-group' : 'is-not-user-group'"
-              >{{ f.group.Name }}</td>
-              <td>
-                <span class="icon is-small">
-                  <svg class="feather" v-if="f.permissions.Read">
-                    <use xlink:href="/feather.svg#eye"></use>
-                  </svg>
-                  <svg class="feather" v-else>
-                    <use xlink:href="/feather.svg#eye-off"></use>
-                  </svg>
-                </span>
-                <span class="icon is-small">
-                  <svg class="feather" v-if="f.permissions.Write">
-                    <use xlink:href="/feather.svg#edit"></use>
-                  </svg>
-                  <svg class="feather" v-else>
-                    <use xlink:href="/feather.svg#lock"></use>
-                  </svg>
+              <td class="icons">
+                <span class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link is-arrowless">
+                    <svg><use xlink:href="/feather.svg#more-vertical"></use></svg>
+                    </a>
+                    <div class="navbar-dropdown is-boxed">
+                        <a class="navbar-item" @click="deleteFile(f)">
+                            <svg><use xlink:href="/feather.svg#trash"></use></svg>
+                            <span class="menu-entry">delete</span>
+                        </a>
+                        <hr class="navbar-divider">
+                        <div class="navbar-item">Version 0.7.5</div>
+                    </div>
                 </span>
               </td>
 
-              <td class="nowrap" :title="f.size + 'Bytes'">{{ f.size }}</td>
-              <td class="overflow">
-                <span class="icon is-small" @click="deleteFile(f)">
-                  <svg class="feather">
-                    <use xlink:href="/feather.svg#trash"></use>
-                  </svg>
-                </span>
+              <td class="mime" v-text="f.mime.Type"></td>
+              <td class="mime-sub">{{ f.mime.Subtype }}</td>
+              <td class="mode">{{ f.Mode }}</td>
+              <td class="has-text-right" :class="f.permissions.IsOwner ? 'is-user-group' : 'is-not-user-group'">
+                  {{ f.owner.name }}
               </td>
-              <td class="overflow">{{ f.created }}</td>
-              <td class="overflow">{{ f.modified }}</td>
-              <td class="overflow" :title="f.accessed">{{ f.accessed }}</td>
+              <td :class="f.permissions.IsOwner ? 'is-user-group' : 'is-not-user-group'">
+                {{ f.group.Name }}
+            </td>
+              <td class="icons">
+                  <span class="navbar-item">
+                  <svg><use :xlink:href="'/feather.svg#' + (f.permissions.Read ? 'eye' : 'eye-off')"></use></svg>
+                  <svg><use :xlink:href="'/feather.svg#' + (f.permissions.Write ? 'edit' : 'lock')"></use></svg>
+                  </span>
+              </td>
+              <td class="nowrap" :title="f.size + 'Bytes'">
+                  {{ f.size | bytes }}
+              </td>
+              <td class="ts">{{ f.created | timeformat }}</td>
+              <td class="ts">{{ f.modified | timeformat }}</td>
+              <td class="ts" :title="f.accessed">{{ f.accessed | timeformat }}</td>
             </tr>
           </tbody>
         </table>
@@ -231,20 +233,18 @@ body,
 }
 </style>
 <style lang="scss" scoped>
-.scrollwrapper {
-    width: 100vw;
-    overflow: auto;
-}
+
 .navbar.attached {
     min-height: 2.5rem;
     background: transparent;
-   .navbar-item, .navbar-link {
+   .navbar-item {
         background-color: transparent;
         color: white;
         &:hover, &:active, &:focus, &.is-active {
-        background-color: #fafafa;;
+        background-color: #fafafa;
         color: black;
-    }
+        }
+        .navbar-link { color: inherit; background-color: inherit;}
     }
     .navbar-dropdown {
         .navbar-item {
@@ -257,7 +257,69 @@ body,
             }
         }
     }
-    
-    
+}
+
+
+.entries {
+    width: 100vw;
+    overflow-x: auto;
+    overflow-y: visible;
+    margin-bottom: 1rem;
+
+    tr {
+        cursor: pointer;
+        &:hover {
+            background-color: #f0f0f0!important;
+        }
+        .name {
+            padding: 0;
+        }
+        .mime {
+            
+            text-align: right;
+            padding-right: .375rem;
+            
+        }
+        .mime-sub {
+            position: relative;
+            padding-left: .25rem;
+            &::before {
+                position: absolute;
+                left: -.275rem;
+                content: "/"
+            }
+            &:empty {
+                &::before {
+                content: ""
+            }
+            }
+        }
+        .icons {
+            padding: 0;
+            vertical-align: middle;
+            svg {
+                width: 1.25rem;
+                height: 1.25rem;
+                fill: none;
+                stroke: currentcolor;
+                stroke-width: 1;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
+            .menu-entry { 
+                padding-left: .5rem;
+                font-size: 1rem; 
+            }
+        }
+        .ts {
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: .875rem;
+            color: #bdbdbd;
+            &:hover {
+                color: #aaaaaa;
+            }
+        }
+    }
 }
 </style>

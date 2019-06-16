@@ -4,6 +4,19 @@ module.exports = {
     outputDir: '../_static',
     assetsDir: 'assets',
     pages: {
+        drive: {
+            entry: './src/pages/drive/drive.js',
+            template: '../templates/drive.html',
+            //filename: 'templates/drive.html',
+            filename: 'index.html',
+            minify: false,
+        },
+        arbeit: {
+            entry: './src/pages/arbeit/arbeit.js',
+            template: './public/templates/arbeit/arbeit.html',
+            filename: 'templates/arbeit.html',
+            minify: false,
+        },
         //index: './src/pages/Home/main.js',
         
         
@@ -14,25 +27,15 @@ module.exports = {
         //     minify: false,
         //     chunks: ['chunk-vendors', 'chunk-common', 'error'],
         // },
-        drive: {
-            entry: './src/pages/drive/drive.js',
-            template: './public/templates/drive.html',
-            //filename: 'templates/drive.html',
-            filename: 'index.html',
-            minify: false,
-//            chunks: ['chunk-vendors', 'chunk-common', 'drive'],
-        },
+        
 
-        arbeit: {
-            entry: './src/pages/arbeit/arbeit.js',
-            template: './public/templates/arbeit/arbeit.html',
-            filename: 'templates/arbeit.html',
-            minify: false,
-            //chunks: ['chunk-vendors', 'chunk-common', 'album'],
-        },
+       
     },
     runtimeCompiler: true,
     devServer: {
         proxy: 'http://localhost:3000'
+    },
+    css: {
+        sourceMap: true
     }
 };

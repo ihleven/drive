@@ -6,7 +6,7 @@ import Folder from './Folder.vue';
 import PhotoAlbum from './PhotoAlbum.vue';
 import Image from './Image.vue';
 import { mapState } from 'vuex';
-
+import '@/filters';
 import './drive-styles.scss';
 
 import 'typeface-clear-sans/index.css';
