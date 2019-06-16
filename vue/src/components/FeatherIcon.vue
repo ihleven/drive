@@ -1,7 +1,7 @@
 <template functional>
   <span class="icon" :class="[data.class, data.staticClass, 'is-' + props.size]">
-    <svg class="feather">
-      <use :xlink:href="'/feather.svg#' + props.name"></use>
+    <svg :class="props.sprite">
+      <use :xlink:href="'/' + props.sprite + '.svg#' + props.name"></use>
     </svg>
   </span>
 </template>
@@ -10,6 +10,11 @@
 export default {
     name: 'FeatherIcon',
     props: {
+      sprite: {
+            required: false,
+            type: String,
+            default: 'feather',
+        },
         name: {
             required: true,
             type: String,

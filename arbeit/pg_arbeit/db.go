@@ -1,14 +1,15 @@
 package pg_arbeit
 
 import (
-	"database/sql"
 	"drive/config"
 	"drive/errors"
 	"fmt"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type database struct {
-	DB *sql.DB
+	DB *sqlx.DB
 }
 
 func (db database) Close() {
@@ -21,7 +22,7 @@ var repo database
 func GetDatabaseHandle(conf config.DatabaseConfiguration) (*database, error) {
 
 	dbinfo := fmt.Sprintf("host=localhost port=5432 user=%s password=%s dbname=%s sslmode=disable", conf.User, conf.Password, conf.Name)
-	db, err := sql.Open("postgres", dbinfo)
+	db, err := sqlx.Open("postgres", dbinfo)
 	if err != nil {
 		return nil, errors.Augment(err, errors.BadCredentials, "Could not get database handle '%s'", dbinfo)
 	}

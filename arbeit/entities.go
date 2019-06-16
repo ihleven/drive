@@ -66,19 +66,29 @@ type Arbeitsjahr struct {
 	userID                sql.NullInt64
 }
 
+type Zeitspanne struct {
+	Nr                                int
+	Typ                               string
+	Von, Bis                          *time.Time
+	Dauer                             *float64
+	Titel, Story, Beschreibung, Grund *string
+	Arbeitszeit                       bool
+}
+
 type Arbeitstag struct {
-	ID        int
-	Account   domain.Account
-	Job       Job
-	Tag       Kalendertag
-	Status    *string
-	Typ       *string
-	Soll      *float64
-	Start     *time.Time
-	Ende      *time.Time
-	Brutto    *float64
-	Pausen    *float64
-	Netto     *float64
-	Differenz *float64
-	Saldo     *float64
+	ID          int
+	Account     domain.Account
+	Job         Job
+	Tag         Kalendertag
+	Status      *string
+	Typ         *string
+	Soll        *float64
+	Start       *time.Time
+	Ende        *time.Time
+	Brutto      *float64
+	Pausen      *float64
+	Netto       *float64
+	Differenz   *float64
+	Saldo       *float64
+	Zeitspannen []Zeitspanne
 }

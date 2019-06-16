@@ -21,7 +21,9 @@ build:
 
 deploy:
 	GOOS=linux GOARCH=amd64 go build -o drive-unix
+	ssh ihle@web569.webfaction.com 'rm -f ~ihle/webapps/drive/drive-unix'
 	scp drive-unix ihle@web569.webfaction.com:~ihle/webapps/drive/
+	ssh ihle@web569.webfaction.com 'rm -rf ~ihle/webapps/drive/_static'
 	scp -r _static ihle@web569.webfaction.com:~ihle/webapps/drive/
 
 clean:

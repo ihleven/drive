@@ -20,10 +20,32 @@ export default {
             blah: false,
             isModalVisible: false,
             menuOpen: false,
+            sortedBy: ['type', 'name'],
         };
     },
     computed: {
         ...mapState(['folder', 'account', 'breadcrumbs', "error"]),
+        entries() {
+            
+            const sortBy = (keysarray) => {
+                let ret = 0;
+                return (a, b) => {
+                    for (let key of keysarray) {
+                        if (key.charAt(0) == '-') {
+                            key = key.substring(1)
+                            ret = (a[key] > b[key]) ? -1 : ((b[key] > a[key]) ? 1 : 0);
+                        } else {
+                            ret = (a[key] > b[key]) ? 1 : ((b[key] > a[key]) ? -1 : 0);
+                        }
+                        if (ret != 0) return ret;
+                    }
+                    return 0;
+                }
+            };
+            const addType = entry => Object.assign(entry, { type: entry.mime.Type == 'dir' ? 'D' : 'F' })
+            if (!this.folder.entries) return [];
+            return this.folder.entries.concat().map(addType).sort(sortBy(this.sortedBy));;
+        }
     },
     mounted() {
         console.log('Folder.vue =>', this.folder);
@@ -123,7 +145,7 @@ export default {
                         <feather-icon name="more-horizontal"/>
                     </a>
                     <div class="navbar-dropdown is-boxed">
-                        <a class="navbar-item">
+                        <a class="navbar-item" @click="sorting=['']">
                             Overview
                         </a>
                         <a class="navbar-item">
@@ -164,9 +186,9 @@ export default {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="f in folder.entries" :key="f.name">
+            <tr v-for="f in entries" :key="f.name">
               <td class="">
-                <feather-icon :name="f.mime.Type == 'dir' ? 'folder' : 'file'"/>
+                <feather-icon :sprite="f.type == 'D' ? 'entypo-icons' : 'feather'" :name="f.type == 'D' ? 'icon-folder' : 'file'"/>
               </td>
               <td class="name">
                 <!--<a :href="folder.name + '/' + f.name" :title="f.path">{{ f.name }}</a>-->
@@ -264,8 +286,9 @@ body,
     width: 100vw;
     overflow-x: auto;
     overflow-y: visible;
-    margin-bottom: 1rem;
-
+    /*margin-top: 1rem;*/
+margin-bottom: 1rem;
+    .table {overflow: hidden;}
     tr {
         cursor: pointer;
         &:hover {
