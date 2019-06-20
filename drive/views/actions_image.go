@@ -89,12 +89,6 @@ func (v *ImageView) DeleteAction(r *http.Request, w http.ResponseWriter) error {
 
 	fmt.Printf("DeleteAction => File %s\n", v.File.Name)
 
-	err := drive.DeleteFile(v.File)
-	if err != nil {
-		return errors.Wrap(err, "Could not delete file")
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-
-	return nil
+	far := &FileActionResponder{File: v.File, User: v.User}
+	return far.DeleteAction(r, w)
 }

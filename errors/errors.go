@@ -218,11 +218,16 @@ func formatBrief(st *stacktrace) string {
 
 func RootCause(err error) error {
 	for {
+		//fmt.Println("/////////RootCause")
+
 		st, ok := err.(*stacktrace)
+		//fmt.Println("/////////", st.message, "///", ok, "//////////")
 		if !ok {
 			return err
 		}
+		//fmt.Println("/////////", st.cause, "//////////")
 		if st.cause == nil {
+			// return Errorf(st.message)
 			return errors.New(st.message)
 		}
 		err = st.cause

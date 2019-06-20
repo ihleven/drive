@@ -58,7 +58,7 @@ export default new Vuex.Store({
         },
         error(state, error) {
             state.error = error;
-        }
+        },
     },
 
     actions: {
@@ -120,27 +120,23 @@ export default new Vuex.Store({
                 });
         },
 
-        submitFileForm({ commit }, content) {
+        submitFileForm({ commit }, payload) {
             // console.log("submitFileForm", content)
             let formData = new FormData();
-            formData.set(
-                'file',
-                new Blob([content], {
-                    type: 'text/plain',
-                })
-            );
+            if (payload.content) {
+                formData.set('file', new Blob([payload.content])); //, {type: 'text/plain',})
+            }
+            if (payload.name) {
+                formData.set('name', payload.name);
+            }
             axios({
                 method: 'post',
-                url: location.pathname,
+                url: payload.url || location.pathname,
                 data: formData,
                 config: { headers: { 'Content-Type': 'multipart/form-data' } },
             })
-                .then(() => {
-                    commit('updateContent', content);
-                })
-                .catch(function(response) {
-                    console.log('ERROR submitFileForm =>', response);
-                });
+                .then(() => commit('updateContent', payload.content))
+                .catch(response => console.log('ERROR submitFileForm =>', response));
         },
     },
 });

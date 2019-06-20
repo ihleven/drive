@@ -46,33 +46,29 @@ func (a *DirActionResponder) PostAction(r *http.Request, w http.ResponseWriter) 
 	file, user := a.File, a.User
 	fmt.Printf("PostAction => Directory \"%s/\"\n", file.Name)
 
-	folder, err := drive.GetFolder(file, user)
-	if err != nil {
-		return errors.Wrap(err, "Error getFolder()")
-	}
-
 	if !file.Permissions.Write {
-		return errors.Errorf("no write permissions")
+		return errors.New(errors.PermissionDenied, "Missing write permissions for %s", file.Path)
 	}
 
-	formfile, multipart, err := r.FormFile("file")
+	handle, err := drive.UploadFile(file.Storage(), file.StoragePath(), r)
 	if err != nil {
-		return errors.Wrap(err, "Failed to parse form "+multipart.Filename)
+		return errors.Wrap(err, "Could not upload to folder '%v'", file.StoragePath())
 	}
-	defer formfile.Close()
-	_ = multipart.Header.Get("Content-Type")
+	//formfile, multipart, err := r.FormFile("file")
+	//if err != nil {
+	//	return errors.Wrap(err, "Failed to parse form ")
+	//}
+	//defer formfile.Close()
 
-	err = file.Storage().Save(file.Path+"/"+multipart.Filename, formfile) //os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		return errors.Wrap(err, "Failed to open file")
-		errors.Error(w, r, err)
-	}
-	//return nil
+	//filename := filepath.Join(file.StoragePath(), multipart.Filename)
+	//err = file.Storage().Save(filename, formfile, false)
+	//if err != nil {
+	//	return errors.Wrap(err, "Failed to save uploaded file %s", filename)
+	//}
 
 	a.Respond(w, r, map[string]interface{}{
-		"File":   file,
-		"User":   user,
-		"Folder": folder,
+		"File": handle.AsFile(),
+		"User": user,
 	})
 
 	return nil

@@ -34,9 +34,16 @@ export default {
     props: ['value', 'mime'],
     computed: {
         lang() {
-            if (this.mime==="text/javascript") {
-                return "js";
-            }
+            switch (this.mime) {
+                case "text/javascript":
+                    return "js";
+                case "text/html":
+                    return "html";
+                case "text/markdown":
+                    return "md";
+                default:
+                    return "js";
+                }
         }
     },
     mounted() {
@@ -59,17 +66,29 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 
 /* 
     https://github.com/jgthms/bulma/issues/1708 
     Bulma conflicts with Prism.js syntax highlighting plugin
 */
 
-.token.number {
+
+
+.token.comment {
+    font-size: .875rem;
+}
+code{
+    --font-size: .875rem;
+    font-size: var(--font-size)!important;
+
+.token {
+    
+    font-size: var(--font-size)!important;
+    &.tag {
     display: inline;
     padding: inherit;
-    font-size: inherit;
+    font-size: var(--font-size);
     line-height: inherit;
     text-align: inherit;
     vertical-align: inherit;
@@ -78,6 +97,34 @@ export default {
     white-space: inherit;
     background: inherit;
     margin: inherit;
+    }
+    &.comment {
+    display: inline;
+    padding: inherit;
+    font-size: var(--font-size);
+    line-height: inherit;
+    text-align: inherit;
+    vertical-align: inherit;
+    border-radius: inherit;
+    font-weight: inherit;
+    white-space: inherit;
+    background: inherit;
+    margin: inherit;
+    }
+    &.number {
+    display: inline;
+    padding: inherit;
+    font-size: var(--font-size);
+    line-height: inherit;
+    text-align: inherit;
+    vertical-align: inherit;
+    border-radius: inherit;
+    font-weight: inherit;
+    white-space: inherit;
+    background: inherit;
+    margin: inherit;
+    }
+}
 }
 
 

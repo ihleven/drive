@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"drive/arbeit"
 	"drive/errors"
-	"log"
 
 	_ "github.com/lib/pq"
 )
@@ -66,28 +65,4 @@ func (d database) RetrieveArbeitstag(year, month, day int, accountID int) (*arbe
 	// }
 
 	return &a, nil
-}
-
-//20151226001
-func (d database) Asdf() {
-	var (
-		id   int
-		name string
-	)
-	rows, err := d.DB.Query("select id, status from arbeitstag where id = $1", 20151226001)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		err := rows.Scan(&id, &name)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Println(id, name)
-	}
-	err = rows.Err()
-	if err != nil {
-		log.Fatal(err)
-	}
 }

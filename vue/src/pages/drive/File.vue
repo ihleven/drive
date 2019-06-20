@@ -55,7 +55,7 @@
         
             <div class="container is-fullhd">
                            
-                <prism-editor v-model="fileContent" :mime="'text/javascript'"></prism-editor>
+                <prism-editor v-model="fileContent" :mime="file.mime.Value"></prism-editor>
 
                     <!--  <markdown-editor :readonly="{{ not .File.Permissions.Write}}">{{.Content}}</markdown-editor>
                     
@@ -120,7 +120,7 @@ export default {
      },
     methods: {
         save() {
-            this.$store.dispatch("submitFileForm", this.fileContent);
+            this.$store.dispatch("submitFileForm", {content: this.fileContent});
         },
         reset() {
             this.fileContent = this.content;

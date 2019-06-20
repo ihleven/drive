@@ -10,7 +10,13 @@ import (
 )
 
 func Error(w http.ResponseWriter, r *http.Request, err error) {
-	//_ = fmt.Sprintf("ERROR: %+v", err)
+	//fmt.Printf("ERROR: %+v\n", err)
+
+	var txt string
+	st, ok := err.(*stacktrace)
+	if ok {
+		txt = st.message
+	}
 	msg := fmt.Sprintf("%+v", err)
 	rootCause := RootCause(err)
 	code := GetCode(err)
@@ -20,19 +26,25 @@ func Error(w http.ResponseWriter, r *http.Request, err error) {
 	}
 	status := code.HTTPStatusCode()
 
+	data := map[string]interface{}{
+		"status":    status,
+		"message":   txt,
+		"msg":       msg[len(txt)+1:],
+		"rootCause": rootCause,
+	}
+	//data["msg"] = msg
+	//data["subtitle"] = ""
+	//data["errno"] = status
+	//data["rootCause"] = rootCause
+	//fmt.Printf("ERROR: %+v\n", data)
 	accept := r.Header.Get("Accept")
 
 	switch {
 	case accept == "application/json":
-		err = templates.SerializeJSON(w, status, msg)
+		err = templates.SerializeJSON(w, status, data)
 	case strings.Contains(accept, "text/html"):
 		//session.Set(r, w, "debug", true)
 
-		data := make(map[string]interface{})
-		data["msg"] = msg
-		data["subtitle"] = ""
-		data["errno"] = status
-		data["rootCause"] = rootCause
 		debug, err := session.Get(r, "debug")
 		if err == nil {
 			if debugBool, ok := debug.(bool); ok {

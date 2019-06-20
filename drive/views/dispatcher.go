@@ -5,40 +5,17 @@ import (
 	"drive/drive"
 	"drive/errors"
 	"drive/session"
-	"fmt"
 
 	"net/http"
 	"path"
 )
 
-//func RegisterHandlers(register func(string, func(http.ResponseWriter, *http.Request))) {
-
-//register("/serve/home/", Serve(storage.Get("home")))
-//register("/serve/", Serve(storage.Get("public")))
-//register("/public/", DispatchStorage(storage.Get("public")))
-//register("/home/", DispatchStorage(storage.Get("home")))
-
-//}
-
 func DispatchStorage(storage drive.Storage) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		//handle, err := storage.GetHandle(path.Clean(r.URL.Path))
-		//if err != nil {
-		//	errors.Error(w, r, errors.Wrap(err, "Could not get file handle"))
-		//}
-
-		//fmt.Println("DispachStorage", handle)
-
 		sessionUser, _ := session.GetSessionUser(r, w)
 
-		//rre := FileActionResponder2{Handle: handle, User: sessionUser}
-		//err = rre.GetAction(r, w)
-		//if err != nil {
-		//	errors.Error(w, r, err)
-		//}
-		//return
 		file, err := drive.GetFile(storage, r.URL.Path, sessionUser)
 		if err != nil {
 			errors.Error(w, r, err)
@@ -68,7 +45,7 @@ func DispatchStorage(storage drive.Storage) func(w http.ResponseWriter, r *http.
 }
 
 func GetActioneer(file *drive.File, sessionUser *domain.Account) Actioneer {
-	fmt.Println("Actioneer:", file)
+	//fmt.Println("Actioneer:", file)
 	switch {
 	case file.IsDir():
 		return &DirActionResponder{File: file, User: sessionUser}

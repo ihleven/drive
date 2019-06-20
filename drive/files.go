@@ -4,6 +4,7 @@ import (
 	"drive/domain"
 	"drive/errors"
 	"fmt"
+	"net/http"
 	"path"
 	"path/filepath"
 	"strings"
@@ -23,7 +24,7 @@ func GetReadHandle(storage Storage, path string, uid, gid uint32) (Handle, error
 }
 
 func GetFile(storage Storage, path string, usr *domain.Account) (*File, error) {
-	fmt.Println("GetFile", path)
+	//fmt.Println("GetFile", path)
 
 	handle, err := storage.GetHandle(storage.CleanPath(path))
 	if err != nil {
@@ -34,17 +35,48 @@ func GetFile(storage Storage, path string, usr *domain.Account) (*File, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not transform handle %v to File", file)
 	}
-	fmt.Println("file:", file)
+
 	return file, nil
 }
 
 func CreateFile(storage Storage, path string, usr *domain.Account) (*File, error) {
 
-	err := storage.Create(path)
+	fd, err := storage.Create(path, false)
 	if err != nil {
 		return nil, errors.Wrap(err, "File '%s' could not be created!", path)
 	}
+	defer fd.Close()
 	return GetFile(storage, path, usr)
+}
+
+func UploadFile(storage Storage, foldername string, r *http.Request) (Handle, error) {
+
+	fmt.Println("File Upload Endpoint Hit")
+
+	// Parse our multipart form, 10 << 20 specifies a maximum upload of 10 MB files.
+	r.ParseMultipartForm(10 << 20)
+
+	// FormFile returns the first file for the given key `file`.
+	// It also returns the FileHeader so we can get the Filename, the Header and the size of the file
+	formfile, handler, err := r.FormFile("file")
+	if err != nil {
+		return nil, errors.Wrap(err, "Could not parse file form")
+	}
+	defer formfile.Close()
+	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	fmt.Printf("File Size: %+v\n", handler.Size)
+	fmt.Printf("MIME Header: %+v\n", handler.Header)
+
+	filename := filepath.Join(foldername, handler.Filename)
+	err = storage.Save(filename, formfile, false)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to save uploaded file %s", filename)
+	}
+	handle, err := storage.GetHandle(filename)
+	if err != nil {
+		return nil, errors.Wrap(err, "Could not get handle for uploaded file %s", filename)
+	}
+	return handle, nil
 }
 
 func DeleteFile(file *File) error {

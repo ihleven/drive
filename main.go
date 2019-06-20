@@ -7,7 +7,7 @@ import (
 	"drive/drive/storage"
 	drivehandler "drive/drive/views"
 	"drive/web"
-	"fmt"
+	"log"
 	"path"
 	"strings"
 )
@@ -17,12 +17,10 @@ func main() {
 
 	repo, err := pg_arbeit.GetDatabaseHandle(config.GetDatabaseConfiguration("default"))
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Fatal(err.Error())
 	}
 	defer repo.Close()
 	arbeit.Repo = repo
-
-	//storage.SetDefaultStorage(config.Root)
 
 	webserver := web.NewServer(config.Settings.Address.String())
 	for name, stor := range settings.Storages {

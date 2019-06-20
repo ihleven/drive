@@ -1,7 +1,6 @@
 package arbeit
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -18,7 +17,7 @@ func RegisterSubRouter(register func(string, func(http.ResponseWriter, *http.Req
 
 	arbeitRoutingFunc := func(w http.ResponseWriter, r *http.Request) {
 		r.URL.Path = r.URL.Path[len(arbeitRoutingPrefix)-1:]
-		fmt.Println("routing arbeitsroute => ", r.URL.Path)
+		//fmt.Println("routing arbeitsroute => ", r.URL.Path)
 		router.ServeHTTP(w, r)
 	}
 	register(arbeitRoutingPrefix, arbeitRoutingFunc)

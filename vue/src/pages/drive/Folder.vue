@@ -21,6 +21,7 @@ export default {
             isModalVisible: false,
             menuOpen: false,
             sortedBy: ['type', 'name'],
+            clonedFile: null,
         };
     },
     computed: {
@@ -51,13 +52,22 @@ export default {
         console.log('Folder.vue =>', this.folder);
     },
     methods: {
+        renameFile(file) {
+            this.clonedFile = Object.assign({}, file);
+            console.log("renameFile", this.clonedFile);
+            this.clonedFile.rename = newName => {
+                this.$store.dispatch("submitFileForm", {url: file.path, name: newName});
+
+            }
+        },
+        
         deleteFile(file) {
             fetch(
                 new Request(file.path, {
                     method: 'DELETE',
                 })
             )
-                //.then(response => response.json())
+                .then(response => console.log(response))
                 //.then(body => console.log(body))
                 .catch(function(foo) {
                     console.log('FAILURE!!', foo);
@@ -127,13 +137,13 @@ export default {
 
         <template #attached>
             <nav class="navbar attached">
-                <a class="navbar-item">
-                    <feather-icon name="upload-cloud"/>&nbsp;
+                <a class="navbar-item" @click="showModal">
+                    <feather-icon name="upload-cloud" />&nbsp;
                     <span>upload</span>
                 </a>
 
                 <a class="navbar-item">
-                    <feather-icon name="activity"/>
+                    <feather-icon name="activity" />
                 </a>
 
                 <router-link :to="folder.path ? folder.path.replace('home', 'alben') : ''" class="navbar-item">
@@ -191,9 +201,9 @@ export default {
                 <feather-icon :sprite="f.type == 'D' ? 'entypo-icons' : 'feather'" :name="f.type == 'D' ? 'icon-folder' : 'file'"/>
               </td>
               <td class="name">
-                <!--<a :href="folder.name + '/' + f.name" :title="f.path">{{ f.name }}</a>-->
-                <router-link :to="f.path" class="navbar-item" :title="f.path" v-text="f.name"></router-link>
-
+                <input v-if="clonedFile && f.name==clonedFile.name"
+                        :value="clonedFile.name" @change="clonedFile.rename($event.target.value)" />
+                <router-link v-else :to="f.path" class="navbar-item" :title="f.path" v-text="f.name"></router-link>
               </td>
               <td class="icons">
                 <span class="navbar-item has-dropdown is-hoverable">
@@ -201,6 +211,19 @@ export default {
                     <svg><use xlink:href="/feather.svg#more-vertical"></use></svg>
                     </a>
                     <div class="navbar-dropdown is-boxed">
+                        <a class="navbar-item" @click="renameFile(f)">
+                            <svg><use xlink:href="/feather.svg#edit-2"></use></svg>
+                            <span class="menu-entry">rename</span>
+                        </a>
+                        <a class="navbar-item">
+                            <svg><use xlink:href="/feather.svg#sliders"></use></svg>
+                            <span class="menu-entry">permissions</span>
+                        </a>
+                        <hr class="navbar-divider">
+                        <a class="navbar-item">
+                            <svg><use xlink:href="/feather.svg#git-branch"></use></svg>
+                            <span class="menu-entry">move</span>
+                        </a>
                         <a class="navbar-item" @click="deleteFile(f)">
                             <svg><use xlink:href="/feather.svg#trash"></use></svg>
                             <span class="menu-entry">delete</span>
@@ -213,17 +236,18 @@ export default {
 
               <td class="mime" v-text="f.mime.Type"></td>
               <td class="mime-sub">{{ f.mime.Subtype }}</td>
-              <td class="mode">{{ f.Mode }}</td>
-              <td class="has-text-right" :class="f.permissions.IsOwner ? 'is-user-group' : 'is-not-user-group'">
+              <td class="mode">{{f.permissions.Notation}}</td>
+              <td class="has-text-right" 
+              :class="f.permissions.IsOwner ? 'is-user-group' : 'is-not-user-group'">
                   {{ f.owner.name }}
               </td>
               <td :class="f.permissions.IsOwner ? 'is-user-group' : 'is-not-user-group'">
-                {{ f.group.Name }}
+                {{ f.group.name }}
             </td>
               <td class="icons">
                   <span class="navbar-item">
-                  <svg><use :xlink:href="'/feather.svg#' + (f.permissions.Read ? 'eye' : 'eye-off')"></use></svg>
-                  <svg><use :xlink:href="'/feather.svg#' + (f.permissions.Write ? 'edit' : 'lock')"></use></svg>
+                  <svg><use :xlink:href="'/entypo-icons.svg#' + (f.permissions.Read ? 'icon-eye' : 'eye-with-line')"></use></svg>
+                  <svg><use :xlink:href="'/feather.svg#' + (f.permissions.Write ? 'edit-3' : 'minus')"></use></svg>
                   </span>
               </td>
               <td class="nowrap" :title="f.size + 'Bytes'">
@@ -256,6 +280,7 @@ body,
 </style>
 <style lang="scss" scoped>
 
+
 .navbar.attached {
     min-height: 2.5rem;
     background: transparent;
@@ -282,6 +307,14 @@ body,
 }
 
 
+.is-user-group {
+    text-decoration: underline;
+    font-weight: 400;
+}
+
+.is-not-user-group {
+    text-decoration: line-through;
+}
 .entries {
     width: 100vw;
     overflow-x: auto;
@@ -293,6 +326,9 @@ margin-bottom: 1rem;
         cursor: pointer;
         &:hover {
             background-color: #f0f0f0!important;
+        }
+        td {
+            vertical-align: middle;
         }
         .name {
             padding: 0;
@@ -342,6 +378,12 @@ margin-bottom: 1rem;
             &:hover {
                 color: #aaaaaa;
             }
+        }
+        .mode {
+            white-space: nowrap;
+            font-family: monospace;
+            font-size: 1rem;
+            vertical-align: middle;
         }
     }
 }

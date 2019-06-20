@@ -126,8 +126,10 @@ func (a *FileActionResponder) DeleteAction(r *http.Request, w http.ResponseWrite
 	if !file.Permissions.Write {
 		return errors.Wrap(nil, "Failed to delete file")
 	}
-	_ = storage.Delete(file.Path)
-
+	err := storage.Delete(file.StoragePath())
+	if err != nil {
+		return errors.Wrap(err, "Could not delete %v", file.Name)
+	}
 	w.WriteHeader(http.StatusNoContent)
 
 	return nil

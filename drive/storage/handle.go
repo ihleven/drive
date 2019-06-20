@@ -134,7 +134,7 @@ func (fh *FileHandle) HasReadPermission(uid, gid uint32) bool {
 
 func (fh *FileHandle) GetPermissions(owner uint32, group uint32, account *domain.Account) *drive.Permissions { // => handle
 
-	perm := &drive.Permissions{IsOwner: account.Uid == owner, InGroup: account.Gid == group}
+	perm := &drive.Permissions{Notation: fh.Mode().String(), IsOwner: account.Uid == owner, InGroup: account.Gid == group}
 
 	rr, wr, xr := OS_OTH_R, OS_OTH_W, OS_OTH_X
 	if perm.InGroup {

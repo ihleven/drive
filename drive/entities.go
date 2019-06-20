@@ -31,10 +31,10 @@ type Storage interface {
 	Location(string) string
 	GetHandle(string) (Handle, error)
 	Open(string) (*os.File, error)
-	Create(string) error
+	Create(string, bool) (*os.File, error)
 	Delete(string) error
 	ReadDir(string) ([]Handle, error)
-	Save(string, io.Reader) error
+	Save(string, io.Reader, bool) error
 	//PermOpen(string, uint32, uint32) (*os.File, *time.Time, error)
 	URL(string) string
 	GetServeURL(string) string
@@ -66,6 +66,7 @@ type Handle interface {
 	Locator
 
 	ToFile(*domain.Account) (*File, error)
+	AsFile() *File
 	GuessMIME() types.MIME
 
 	//Read(b []byte) (n int, err error)
@@ -111,6 +112,7 @@ type Permissions struct {
 	Account *domain.Account `json:"-"`
 	//Type              Permtype
 	//Mode              os.FileMode
+	Notation          string
 	IsOwner           bool
 	InGroup           bool
 	Read, Write, Exec bool

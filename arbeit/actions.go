@@ -21,12 +21,12 @@ func arbeitsjahr(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	enableCors(&w)
 	year, err := strconv.Atoi(ps.ByName("year"))
 	if err != nil {
-		fmt.Println(err)
+		errors.Error(w, r, err)
 	}
 	//sessionUser, _ := session.GetSessionUser(r, w)
 	arbeitsjahr, err := GetArbeitsjahr(year, 1)
 	if err != nil {
-		fmt.Println(err)
+		errors.Error(w, r, err)
 	}
 	//fmt.Fprintf(w, "arbeitstag, %s!\n")
 	respond(w, r, "arbeit", map[string]interface{}{
@@ -40,12 +40,12 @@ func arbeitstag(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	month, err := strconv.Atoi(ps.ByName("month"))
 	day, err := strconv.Atoi(ps.ByName("day"))
 	if err != nil {
-		fmt.Println(err)
+		errors.Error(w, r, err)
 	}
 	//sessionUser, _ := session.GetSessionUser(r, w)
 	arbeitstag, err := GetArbeitstag(year, month, day, 1)
 	if err != nil {
-		fmt.Println(err)
+		errors.Error(w, r, err)
 	}
 	//fmt.Fprintf(w, "arbeitstag, %s!\n")
 	respond(w, r, "arbeit", map[string]interface{}{

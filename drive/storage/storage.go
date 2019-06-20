@@ -107,6 +107,53 @@ func (st *FileSystemStorage) GetHandle(path string) (drive.Handle, error) {
 	return handle, nil
 }
 
+// Create creates the named file with mode 0666 (before umask), truncating it if it already exists.
+// If successful, methods on the returned File can be used for I/O;
+// the associated file descriptor has mode O_RDWR. If there is an error, it will be of type *PathError.
+func (st *FileSystemStorage) Create(path string, overwrite bool) (*os.File, error) {
+
+	location := st.Location(path)
+
+	if !overwrite {
+		// check if file exists
+		if exists, err := st.Exists(path); err != nil && exists {
+			return nil, errors.Errorf("File cannot be created because it already exists %s", location)
+		}
+		// file existiert nicht oder keine Berechtigung oder ...
+		// jedenfalls kann os.Create aufgerufen werden
+
+		if _, err := os.Stat(location); err == nil {
+			// pfad zu location exists
+			return nil, errors.Errorf("File cannot be created because it already exists %s", location)
+		}
+	}
+	fd, err := os.Create(location)
+	if err != nil {
+		return nil, errors.Wrap(err, "Could not create file %v", location)
+	}
+	return fd, nil
+}
+func (st *FileSystemStorage) Exists(path string) (bool, error) {
+
+	if _, err := os.Stat(st.Location(path)); err == nil {
+		return true, nil
+	} else if os.IsNotExist(err) {
+		return false, nil
+	} else {
+		// Schrodinger: file may or may not exist. See err for details.
+		// Therefore, do *NOT* use !os.IsNotExist(err) to test for file existence
+		return false, errors.Wrap(err, "Schrödinger: file '%s' may or may not exist.", path)
+	}
+}
+
+// os.Open:
+// Open opens the named file for reading. If successful, methods on
+// the returned file can be used for reading; the associated file
+// descriptor has mode O_RDONLY.
+// If there is an error, it will be of type *PathError.
+//func Open(name string) (*File, error) {
+//	return OpenFile(name, O_RDONLY, 0)
+//}
 func (st *FileSystemStorage) Open(path string) (*os.File, error) {
 
 	location := st.Location(path)
@@ -140,47 +187,28 @@ func (st *FileSystemStorage) ReadDir(path string) ([]drive.Handle, error) {
 	return entries, nil
 }
 
-func (st *FileSystemStorage) Save(path string, src io.Reader) error { // content []byte
+func (st *FileSystemStorage) Save(path string, content io.Reader, overwrite bool) error { // content []byte
 
-	location := st.Location(path)
-	// detect if file exists
-	var _, err = os.Stat(location)
-	if err != nil && !os.IsNotExist(err) {
-		return errors.Wrap(err, "os.Stat error for: %s", path)
-	}
-	if err == nil {
-		return errors.Errorf("File cannot be created because it already exists %s", location)
-	}
+	name := st.Location(path)
+	var file *os.File
+	var err error
 
-	dest, err := os.Create(location)
-	defer dest.Close()
+	if overwrite {
+		// create a new file if none exists, truncate existing file when opened.
+		file, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	} else {
+		// create a new file, file must not exist.
+		file, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
+	}
 	if err != nil {
-		return errors.Wrap(err, "Failed to create file: %s", location)
+		return errors.Wrap(err, "Could not create file: %s (overwrite: %v)", path, overwrite)
 	}
-	_, err = io.Copy(dest, src)
-	if err != nil {
-		return errors.Wrap(err, "Failed to copy content to file")
-	}
-	return nil
-}
-
-func (st *FileSystemStorage) Create(path string) error {
-	fmt.Println("storage create", path)
-	location := st.Location(path)
-	var _, err = os.Stat(location)
-	if err != nil && !os.IsNotExist(err) {
-		return errors.Wrap(err, "os.Stat error for: %s", path)
-	}
-	if err == nil {
-		return errors.Errorf("File cannot be created because it already exists %s", location)
-	}
-
-	file, err := os.Create(location)
 	defer file.Close()
-	if err != nil {
-		return errors.Wrap(err, "Failed to create file: %s", path)
-	}
 
+	_, err = io.Copy(file, content)
+	if err != nil {
+		return errors.Wrap(err, "Failed to save content to file %v", path)
+	}
 	return nil
 }
 

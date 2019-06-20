@@ -20,6 +20,7 @@ build:
 
 
 deploy:
+	cd vue && yarn build
 	GOOS=linux GOARCH=amd64 go build -o drive-unix
 	ssh ihle@web569.webfaction.com 'rm -f ~ihle/webapps/drive/drive-unix'
 	scp drive-unix ihle@web569.webfaction.com:~ihle/webapps/drive/
