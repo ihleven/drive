@@ -5,6 +5,7 @@ import (
 	"drive/drive"
 	"drive/errors"
 	"drive/session"
+	"strings"
 
 	"net/http"
 	"path"
@@ -16,7 +17,7 @@ func DispatchStorage(storage drive.Storage) func(w http.ResponseWriter, r *http.
 
 		sessionUser, _ := session.GetSessionUser(r, w)
 
-		file, err := drive.GetFile(storage, r.URL.Path, sessionUser)
+		file, err := drive.GetFile(storage, strings.Replace(r.URL.Path, "|", ".", -1), sessionUser)
 		if err != nil {
 			errors.Error(w, r, err)
 			return

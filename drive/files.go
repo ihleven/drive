@@ -66,6 +66,7 @@ func UploadFile(storage Storage, foldername string, r *http.Request) (Handle, er
 	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
 	fmt.Printf("File Size: %+v\n", handler.Size)
 	fmt.Printf("MIME Header: %+v\n", handler.Header)
+	fmt.Printf("name: %+v\n", r.FormValue("name"))
 
 	filename := filepath.Join(foldername, handler.Filename)
 	err = storage.Save(filename, formfile, false)

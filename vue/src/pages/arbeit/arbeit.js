@@ -7,6 +7,7 @@ import {
     Timepicker
 } from 'buefy/dist/components/timepicker';
 Vue.component('b-timepicker', Timepicker);
+import '@/filters';
 
 import './arbeit.scss';
 

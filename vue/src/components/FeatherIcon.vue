@@ -1,10 +1,12 @@
 <template functional>
-  <span class="icon" :class="[data.class, data.staticClass, 'is-' + props.size]">
-    <svg :class="props.sprite">
-      <use :xlink:href="'/' + props.sprite + '.svg#' + props.name"></use>
-    </svg>
-  </span>
+    <span class="icon" :class="[data.class, data.staticClass, 'is-' + props.size]">
+        <svg :class="props.sprite">
+            <use :xlink:href="'/' + props.sprite + '.svg#' + props.name"></use>
+        </svg>
+    </span>
 </template>
+
+
 
 <script>
 export default {

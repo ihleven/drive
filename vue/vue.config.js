@@ -37,5 +37,8 @@ module.exports = {
     },
     css: {
         sourceMap: true
-    }
+    },
+    configureWebpack: (config) => {
+        config.devtool = 'source-map'
+    },
 };

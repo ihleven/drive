@@ -59,6 +59,9 @@ export default new Vuex.Store({
         error(state, error) {
             state.error = error;
         },
+        newFile(state, file) {
+            state.folder.entries.push(file)
+        }
     },
 
     actions: {

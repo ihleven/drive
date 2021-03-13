@@ -7,6 +7,7 @@ Vue.use(Vuex);
 const debug = true; //process.env.NODE_ENV !== 'production';
 
 const SET_ARBEITSJAHR = 'SET_ARBEITSJAHR';
+const SET_ARBEITSMONAT = 'SET_ARBEITSMONAT';
 const SET_ARBEITSTAG = 'SET_ARBEITSTAG';
 //const SET_DATE = 'SET_DATE';
 const SET_LOADING = 'SET_LOADING';
@@ -43,6 +44,7 @@ export default new Vuex.Store({
         activeDate: {},
         arbeitsjahr: {},
         arbeitstag: {},
+        arbeitstage: [],
         date: null,
         year: null,
         month: null,
@@ -89,55 +91,50 @@ export default new Vuex.Store({
             console.log('COMMIT_ARBEITSJAHR', payload);
             state.arbeitsjahr = payload;
         },
+        [SET_ARBEITSMONAT](state, payload) {
+            console.log('COMMIT_ARBEITSMONAT', payload);
+            state.arbeitstage = payload.map(a => Object.assign(a, {beginn: a.beginn ? new Date(a.beginn) : null, ende: a.ende ? new Date(a.ende) : null}));
+        },
         [SET_ARBEITSTAG](state, payload) {
             console.log('COMMIT_ARBEITSTAG', payload);
-            payload.ende = new Date(payload.Ende);
+            payload.beginn = payload.beginn ? new Date(payload.beginn) : null;
+            payload.ende = new Date(payload.ende);
             state.arbeitstag = payload;
             //state.date = new Date(payload.year, payload.month, payload.day);
             //state.year = payload.year;
             //state.month = payload.month;
             //state.day = payload.day;
         },
-        updateArbeitstag(state, {
-            field,
-            value
-        }) {
+        updateArbeitstag(state, { field, value }) {
+            console.log("updateArbeitstag", state.arbeitstag)
             state.arbeitstag[field] = value;
+            console.log("updateArbeitstag", state.arbeitstag)
         },
     },
     actions: {
-        loadArbeitJahr({
-            commit,
-            state
-        }) {
+        loadArbeitJahr({ commit, state }) {
             commit(SET_LOADING, true);
             axios('/arbeit/' + state.activeDate.year, {
                 headers: {
                     Accept: 'application/json',
                 },
-            }).then(function (response) {
+            }).then(function(response) {
                 commit(SET_ARBEITSJAHR, response.data.arbeitsjahr);
                 commit(SET_LOADING, false);
             });
         },
-        loadArbeitMonat({
-            commit,
-            state
-        }) {
+        loadArbeitMonat({ commit, state }) {
             commit(SET_LOADING, true);
             axios('/arbeit/' + state.activeDate.year + '/' + state.activeDate.month, {
                 headers: {
                     Accept: 'application/json',
                 },
-            }).then(function () {
-                //commit(SET_ARBEITSJAHR, response.data.arbeitstag);
+            }).then(function(response) {
+                commit(SET_ARBEITSMONAT, response.data.arbeitstage);
                 commit(SET_LOADING, false);
             });
         },
-        loadArbeitstag({
-            commit,
-            state
-        }) {
+        loadArbeitstag({ commit, state }) {
             commit(SET_LOADING, true);
             let year = state.activeDate.year,
                 month = state.activeDate.month,
@@ -146,9 +143,27 @@ export default new Vuex.Store({
                 headers: {
                     Accept: 'application/json',
                 },
-            }).then(function (response) {
+            }).then(function(response) {
                 // handle success
 
+                commit(SET_ARBEITSTAG, response.data.arbeitstag);
+                commit(SET_LOADING, false);
+            });
+        },
+        saveArbeitstag({ commit, state }) {console.log(".", state.arbeitstag.beginn)
+            commit(SET_LOADING, true);
+            let url = '/arbeit/' + state.activeDate.year + '/' + state.activeDate.month + '/' + state.activeDate.day,
+                params = new URLSearchParams();
+            //params.append('param1', 'value1');
+            //params.append('param2', 'value2');
+            axios(url, {
+                method:"PUT",
+                data:state.arbeitstag,
+                headers: {
+                    Accept: 'application/json',
+                },
+            }).then(function(response) {
+                // handle success
                 commit(SET_ARBEITSTAG, response.data.arbeitstag);
                 commit(SET_LOADING, false);
             });

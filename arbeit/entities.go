@@ -16,21 +16,20 @@ type Job struct {
 }
 
 type Kalendertag struct {
-	id       int
-	jahr     int16
-	monat    uint8
-	tag      uint8
-	datum    time.Time
-	feiertag string
-	//kw
-	kw_jahr int
-	kw_nr   uint8
-	kw_tag  uint8
+	//id    int
+	Jahr     int16 `db:"jahr_id" json:"year"`
+	Monat    uint8 `db:"monat" json:"month"`
+	Tag      uint8 `db:"tag" json:"day"`
+	Datum    time.Time
+	Feiertag *string
+	KwJahr   int   `db:"kw_jahr" json:"kw_jahr"`
+	KwNr     uint8 `db:"kw_nr" json:"kw_nr"`
+	KwTag    uint8 `db:"kw_tag" json:"kw_tag"`
 
-	yearday    uint16
-	ordinal    int
-	monatsname string
-	tagesname  string
+	Jahrtag uint16 `db:"jahrtag" json:"jahrtag"`
+	Ordinal int
+	//monatsname string
+	//tagesname  string
 }
 
 func (t Kalendertag) String() string {
@@ -45,7 +44,7 @@ func (t Kalendertag) Morgen() {
 
 type Arbeitsjahr struct {
 	ID                    int
-	Account               *domain.Account
+	Account               *domain.Account `json:"-"`
 	Job                   *Job
 	UrlaubVorjahr         sql.NullFloat64
 	UrlaubAnspruch        sql.NullFloat64
@@ -76,19 +75,22 @@ type Zeitspanne struct {
 }
 
 type Arbeitstag struct {
-	ID          int
-	Account     domain.Account
-	Job         Job
-	Tag         Kalendertag
-	Status      *string
-	Typ         *string
-	Soll        *float64
-	Start       *time.Time
-	Ende        *time.Time
-	Brutto      *float64
-	Pausen      *float64
-	Netto       *float64
-	Differenz   *float64
-	Saldo       *float64
-	Zeitspannen []Zeitspanne
+	ID           int `db:"id" json:"id"`
+	Account      domain.Account
+	Job          Job
+	Status       string `db:"status" json:"status"`
+	Kategorie    string `db:"kategorie" json:"kategorie"`
+	Krankmeldung bool
+	Urlaubstage  float64
+	Soll         float64
+	Start        *time.Time `db:"beginn" json:"beginn"`
+	Ende         *time.Time `db:"ende" json:"ende"`
+	Brutto       float64
+	Pausen       float64
+	Extra        float64
+	Netto        float64
+	Differenz    float64
+	Saldo        *float64
+	Zeitspannen  []Zeitspanne
+	Kalendertag  ` json:"kalendertag"`
 }

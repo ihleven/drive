@@ -105,6 +105,7 @@ export default {
         upload(file) {
             let formData = new FormData();
             formData.append('file', file);
+            formData.append('name', 'HansVanBreukelen')
             const request = new Request(this.url, {
                 method: 'POST',
                 body: formData,

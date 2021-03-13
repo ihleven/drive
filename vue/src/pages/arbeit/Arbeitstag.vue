@@ -3,7 +3,7 @@
         <div class="container">
             <div class="field is-grouped">
                 <div class="control">
-                    <button class="button is-link">Submit</button>
+                    <button class="button is-link" @click=save>Submit</button>
                 </div>
                 <div class="control">
                     <button class="button is-text">Cancel</button>
@@ -13,15 +13,14 @@
             <div class="columns">
                 <div class="column is-one-third">
                 <div class="field">
-                    <label class="label">Status:</label>
+                    <label class="label">Status: {{status}}</label>
                     <div class="control">
                     <div class="select">
                         <select :value="status" @input="updateStatus">
-                        <option value>---</option>
+                        <option value="">W</option>
                         <option value="A">Arbeitstag</option>
-                        <option value="U">Urlaub</option>
-                        <option value="K">Krank</option>
-                        <option value="W">Wochenende</option>
+                        <option value="H">Arbeitstag (halb)</option>
+                        <option value="S">Sonntag</option>
                         <option value="F">Feiertag</option>
                         </select>
                     </div>
@@ -38,6 +37,8 @@
                         <option value="B">Büro</option>
                         <option value="H">Homeoffice</option>
                         <option value="D">Dienstreise</option>
+                        <option value="Z">Zeitausgleich</option>
+                        <option value="U">Urlaub</option>
                         <option value="K">Krank</option>
                         </select>
                     </div>
@@ -70,20 +71,23 @@
 
             <div class="columns">
                 <div class="column is-one-third">
-                <div class="field">
-                    <label class="label">Arbeitsbeginn:</label>
-                    <div class="control has-icons-left">
-                    <input class="input" type="text" placeholder="Arbeitsbeginn" v-model.lazy="start">
-                    <feather-icon name="clock" size="small" class="is-small is-left"/>
+                    <div class="field">
+                        <label class="label">Arbeitsbeginn: {{arbeitstag.beginn}}</label>
+                        <div class="control has-icons-left">
+                            <!--<input class="input" type="text" placeholder="Arbeitsbeginn" v-model.lazy="start">-->
+                            <b-timepicker  editable v-model="start"></b-timepicker>
+                            <feather-icon name="clock" size="small" class="is-small is-left"/>
+                        </div>
                     </div>
                 </div>
-                </div>
                 <div class="column is-one-third">
-                <div class="field">
-                    <label class="label">Feierabend:</label>
-                    <b-timepicker placeholder="Type or select a date..." editable v-model="ende"></b-timepicker>
-                    <feather-icon name="clock" size="small" class="is-small is-left"/>
-                </div>
+                    <div class="field">
+                        <label class="label">Feierabend: {{arbeitstag.ende}}</label>
+                        <div class="control has-icons-left">
+                            <b-timepicker  editable v-model="end"></b-timepicker>
+                            <feather-icon name="clock" size="small" class="is-small is-left"/>
+                        </div>
+                    </div>
                 </div>
                 <div class="column is-one-third">
                 <div class="field">
@@ -95,6 +99,7 @@
             <div class="columns">
                 <div class="column is-one-third">
                 <h3 class="title is-3">Pausen</h3>
+                <button @click="addPause"></button>
                 </div>
                 <div class="column is-one-third">
                 <div class="field">
@@ -149,7 +154,7 @@
                         <label class="label">Ende:</label>
                         <div class="field has-addons">
                             <div class="control has-icons-left">
-                                <input class="input" type="text" placeholder="Text input">
+                                <input class="input" type="text" v-model.lazy="z.Bis">
                                 <feather-icon name="clock" size="small" class="is-left"/>
                             </div>
                             <p class="control">
@@ -201,14 +206,14 @@ export default {
             return this.$store.state.activeDate;
         },
         ...mapState({
-            status: state => state.arbeitstag.Status,
+            status: state => state.arbeitstag.status,
         }),
         typ: {
             get() {
-                return this.$store.state.arbeitstag.Typ;
+                return this.$store.state.arbeitstag.kategorie;
             },
             set(value) {
-                this.$store.commit('updateArbeitstag', { field: 'Typ', value: value });
+                this.$store.commit('updateArbeitstag', { field: 'kategorie', value: value });
             },
         },
         soll: {
@@ -219,7 +224,7 @@ export default {
                 this.$store.commit('updateArbeitstag', { field: 'Soll', value: value });
             },
         },
-        start: {
+        startalt: {
             get() {
                 let start = this.$store.state.arbeitstag.Start;
 
@@ -247,24 +252,22 @@ export default {
                 }
             },
         },
-        ende: {
+        start: {
             get() {
-                return new Date(this.$store.state.arbeitstag.Ende);
+                return this.$store.state.arbeitstag.beginn; // new Date(this.$store.state.arbeitstag.beginn);
             },
             set(value) {
-                this.$store.commit('updateArbeitstag', { field: 'Ende', value: value });
+                this.$store.commit('updateArbeitstag', { field: 'beginn', value: value });
             },
         },
-    },
-
-    methods: {
-        clear() {
-            console.log('clear');
-        },
-
-        updateStatus(e) {
-            //this.$store.commit('updateStatus', e.target.value);
-            this.$store.commit('updateArbeitstag', { field: 'Status', value: e.target.value });
+        end: {
+            get() {
+                return this.$store.state.arbeitstag.ende; //new Date(this.$store.state.arbeitstag.ende);
+            },
+            set(value) {
+                console.log("ende:", value);
+                this.$store.commit('updateArbeitstag', { field: 'ende', value: value });
+            },
         },
     },
 
@@ -274,6 +277,43 @@ export default {
         this.$store.dispatch('loadArbeitstag');
         next();
     },
+
+    methods: {
+        clear() {
+            console.log('clear');
+        },
+        save() {
+            if (typeof this.$store.state.arbeitstag.beginn === 'object' && this.$store.state.arbeitstag.beginn) {
+                let b = this.$store.state.arbeitstag.beginn;
+                    b.setFullYear(this.$store.state.arbeitstag.kalendertag.year);
+                    b.setMonth(this.$store.state.arbeitstag.kalendertag.month);
+                    b.setDate(this.$store.state.arbeitstag.kalendertag.day);
+            }
+            if (typeof this.$store.state.arbeitstag.ende === 'object' && this.$store.state.arbeitstag.ende) {
+                let e = this.$store.state.arbeitstag.ende;
+                    e.setFullYear(this.$store.state.arbeitstag.kalendertag.year);
+                    e.setMonth(this.$store.state.arbeitstag.kalendertag.month);
+                    e.setDate(this.$store.state.arbeitstag.kalendertag.day);
+            }
+            console.log("save:", this.$store.state.arbeitstag, typeof this.$store.state.arbeitstag.beginn);
+            this.$store.dispatch('saveArbeitstag');
+        },
+        updateStatus(e) {
+            //this.$store.commit('updateStatus', e.target.value);
+            this.$store.commit('updateArbeitstag', { field: 'Status', value: e.target.value });
+        },
+        addPause() {
+            //this.$store.commit('updateStatus', e.target.value);
+            //let zeitspannen = [{Nr: 1, id: 20180506001}]
+            this.$store.commit('updateArbeitstag', { 
+                field: 'zeitspannen', 
+                value: this.$store.state.arbeitstag.Zeitspannen.push({
+                    Nr: this.$store.state.arbeitstag.Zeitspannen.length + 1
+                })
+            });
+        },
+    },
+
 };
 </script>
 

@@ -3,7 +3,7 @@
 title = "TOML Example"
 
 [server]
-port = 3000
+port = 3333
 
 [databases]
   [databases.default]

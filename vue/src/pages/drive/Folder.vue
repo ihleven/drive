@@ -82,6 +82,11 @@ export default {
         },
         errorClear() {
             this.$store.commit("error", null);
+        },
+        newFolder(event) {
+            console.log("newFolder:", event.target.value)
+            this.$store.commit("newFile", {name: event.target.value, mime: {Type: "dir"}, permissions: {},
+            group: {}, owner: {}, path: event.target.value})
         }
     },
     filters: {
@@ -110,30 +115,61 @@ export default {
     <navbar-top :account="account" @click:hamburger="overlayNavigationToggler()"/>
 
     <Parallax>
-      <template #header>
-        <section class="hero is-medium is-dark is-bold">
-          <div class="hero-body">
-            <div class="container">
-              <h1 class="title">{{ folder.name }}</h1>
-              <h3 class="subtitle">
-                <nav class="breadcrumb" aria-label="breadcrumbs">
-                  <ul>
-                    <li v-for="item in breadcrumbs" :key="item.Path">
-                      <router-link :to="item.Path" class="navbar-item" v-text="item.Name"></router-link>
+        <template #header>
+            <section class="hero is-medium is-dark is-bold">
+                <div class="hero-body">
+                    <nav class="breadcrumb" aria-label="breadcrumbs" style="margin-bottom: .25rem">
+                        <ul>
+                            <li>
+                                <router-link to="/" class="navbar-item">
+                                    <feather-icon sprite="entypo" name="database"/>
+                                </router-link>
+                            </li>
+                            <li v-for="item in breadcrumbs" :key="item.Path">
+                            <router-link :to="item.Path" class="navbar-item" v-text="item.Name"></router-link>
 
-                    </li>
-                  </ul>
-                </nav>
-                <div class="notification is-danger" v-if="error">
-                    <button class="delete" @click="errorClear"></button>
-                    <strong>{{error.status}}: {{error.statusText}}</strong><br>
-                    <small style="white-space: pre;">{{error.data}}</small>
+                            </li>
+                        </ul>
+                    </nav>
+                    <div class="columns">
+                        <div class="column is-three-fifths">
+
+                            <h1 class="title">{{ folder.name }}</h1>
+                            <h4 class="subtitle">{{folder.mime.Type}}  {{entries.length}} items</h4>
+                        </div>
+                        <div class="column">
+<span class="mime" v-text="folder.mime.Type"></span>
+              <span class="mime-sub">{{ folder.mime.Subtype }}</span>
+              <span class="mode">{{folder.permissions.Notation}}</span>
+              <span class="has-text-right" 
+              :class="folder.permissions.IsOwner ? 'is-user-group' : 'is-not-user-group'">
+                  {{ folder.owner.name }}
+              </span>
+              <span :class="folder.permissions.IsOwner ? 'is-user-group' : 'is-not-user-group'">
+                {{ folder.group.name }}
+            </span>
+              <span class="icons">
+                  <span class="navbar-item">
+                  <svg><use :xlink:href="'/entypo-icons.svg#' + (folder.permissions.Read ? 'icon-eye' : 'eye-with-line')"></use></svg>
+                  <svg><use :xlink:href="'/feather.svg#' + (folder.permissions.Write ? 'edit-3' : 'minus')"></use></svg>
+                  </span>
+              </span>
+, {{folder.permissions.Notation}}
+<span class="ts">{{ folder.created | timeformat }}</span>
+              <span class="ts">{{ folder.modified | timeformat }}</span>
+              <span class="ts" :title="folder.accessed">{{ folder.accessed | timeformat }}</span>
+                        </div>
+                    </div>
+              
+                
+                    <div class="notification is-danger" v-if="error">
+                        <button class="delete" @click="errorClear"></button>
+                        <strong>{{error.status}}: {{error.statusText}}</strong><br>
+                        <small style="white-space: pre;">{{error.data}}</small>
+                    </div>
                 </div>
-              </h3>
-            </div>
-          </div>
-        </section>
-      </template>
+            </section>
+        </template>
 
         <template #attached>
             <nav class="navbar attached">
@@ -155,21 +191,14 @@ export default {
                         <feather-icon name="more-horizontal"/>
                     </a>
                     <div class="navbar-dropdown is-boxed">
-                        <a class="navbar-item" @click="sorting=['']">
-                            Overview
-                        </a>
-                        <a class="navbar-item">
-                            Elements
-                        </a>
-                        <a class="navbar-item">
-                            Components
-                        </a>
-                        <hr class="navbar-divider">
-                        <div class="navbar-item">
-                            Version 0.7.5
-                        </div>
-                    </div>
+                        <a class="navbar-item" @click="sortedBy=['type', 'name']">type, name</a>
+                        <a class="navbar-item" @click="sortedBy=['modified']">mod</a>
+                        <a class="navbar-item" @click="sortedBy=['type', 'size']">size</a>
+                   </div>
                     
+                </div>
+                <div class="navbar-item">
+                    <input @change="newFolder" />
                 </div>
             </nav>
         </template>
@@ -196,7 +225,7 @@ export default {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="f in entries" :key="f.name">
+            <tr v-for="f in entries" :key="f.name" draggable="true">
               <td class="">
                 <feather-icon :sprite="f.type == 'D' ? 'entypo-icons' : 'feather'" :name="f.type == 'D' ? 'icon-folder' : 'file'"/>
               </td>
@@ -228,8 +257,6 @@ export default {
                             <svg><use xlink:href="/feather.svg#trash"></use></svg>
                             <span class="menu-entry">delete</span>
                         </a>
-                        <hr class="navbar-divider">
-                        <div class="navbar-item">Version 0.7.5</div>
                     </div>
                 </span>
               </td>
